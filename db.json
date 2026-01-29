@@ -1,0 +1,19 @@
+{
+  "login": {
+    "code": 10000,
+    "message": "登入成功",
+    "data": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY344SaOTAiLCJuYW1lIjoidXNlcm5hbWUiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE1MTYyMzkwMjJ9.Q8m12CvSuehoVyeF6mVs-nFkl6Y0j2kzvHonoJ8I-n8"
+  },
+  "userInfo": {
+    "code": 10000,
+    "message": "用戶資料獲取成功",
+    "data": {
+      "id": 1,
+      "role": "user",
+      "username": "user1",
+      "nickname": "用戶1",
+      "email": "",
+      "avatar": ""
+    }
+  }
+}
