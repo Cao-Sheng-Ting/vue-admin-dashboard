@@ -1,27 +1,44 @@
 import { createRouter, createWebHistory, type RouteRecordRaw, RouterView } from 'vue-router'
-import layout from '@/layouts/index.vue'
+import AuthLayout from '@/views/auth/AuthLayout.vue'
+import LoginForm from '@/views/auth/components/LoginForm.vue'
+import RegisterForm from '@/views/auth/components/RegisterForm.vue'
+import Layout from '@/layouts/index.vue'
 
 const auth: RouteRecordRaw[] = [
   {
-    path: '/login',
-    name: 'login',
-    component: () => import('@/views/auth/LoginView.vue'),
+    path: '/auth',
+    name: 'auth',
+    component: AuthLayout,
+    redirect: '/auth/login',
     meta: {
-      title: 'Login',
+      title: 'Auth',
       hidden: true,
       requiresAuth: false,
     },
+    children: [
+      {
+        path: 'login',
+        name: 'login',
+        component: LoginForm,
+        meta: {
+          title: 'Login',
+          hidden: true,
+          requiresAuth: false,
+        },
+      },
+      {
+        path: 'register',
+        name: 'register',
+        component: RegisterForm,
+        meta: {
+          title: 'Register',
+          hidden: true,
+          requiresAuth: false,
+        },
+      },
+    ],
   },
-  {
-    path: '/register',
-    name: 'register',
-    component: () => import('@/views/auth/RegisterView.vue'),
-    meta: {
-      title: 'Register',
-      hidden: true,
-      requiresAuth: false,
-    },
-  },
+
   {
     path: '/forgot-password',
     name: 'forgot-password',
@@ -100,7 +117,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/',
     name: 'home',
-    component: layout,
+    component: Layout,
     redirect: '/dashboard',
     meta: {
       title: 'Home',

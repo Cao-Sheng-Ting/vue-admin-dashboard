@@ -1,19 +1,11 @@
 <template>
   <el-container class="h-full">
-    <el-aside
-      :width="isCollapse ? '64px' : '240px'"
-      class="flex flex-col transition-[width] duration-300 ease-in-out overflow-hidden bg-blue-950 border-r border-gray-100"
-    >
+    <el-aside tag="nav" :width="isCollapse ? '64px' : '240px'"
+      class="flex flex-col transition-[width] duration-300 ease-in-out overflow-hidden bg-blue-950 border-r border-gray-100">
       <div class="logo-container flex h-20 items-center justify-center bg-slate-700">
         <h1 v-if="!isCollapse" class="whitespace-nowrap text-2xl text-gray-100">後台管理系統</h1>
       </div>
-      <el-menu
-        router
-        :collapse="isCollapse"
-        :collapse-transition="false"
-        background-color="#3341559"
-        text-color="#fff"
-      >
+      <el-menu router :collapse="isCollapse" :collapse-transition="false" background-color="#3341559" text-color="#fff">
         <template v-for="menu in menuList" :key="menu.name || menu.path">
           <el-sub-menu v-if="menu.children" :index="menu.name">
             <template #title>
@@ -22,12 +14,8 @@
               </el-icon>
               <span>{{ menu.meta?.title }}</span>
             </template>
-            <el-menu-item
-              v-for="item in menu.children"
-              :key="item.path"
-              :index="`/${menu.path}/${item.path}`"
-              class="bg-slate-800"
-            >
+            <el-menu-item v-for="item in menu.children" :key="item.path" :index="`/${menu.path}/${item.path}`"
+              class="bg-slate-800">
               <el-icon v-if="item.meta?.icon">
                 <Icon :icon="item.meta?.icon" />
               </el-icon>
@@ -44,12 +32,10 @@
       </el-menu>
     </el-aside>
     <el-container>
-      <el-header height="80px" class="flex items-center justify-between !pr-4 !pl-0 bg-gray-100">
+      <el-header tag="header" height="80px" class="flex items-center justify-between !pr-4 !pl-0 bg-gray-100">
         <div class="header-left flex flex-row h-full items-center">
-          <div
-            @click="isCollapse = !isCollapse"
-            class="h-full aspect-square flex items-center justify-center cursor-pointer hover:bg-black/10 transition-colors"
-          >
+          <div @click="isCollapse = !isCollapse"
+            class="h-full aspect-square flex items-center justify-center cursor-pointer hover:bg-black/10 transition-colors">
             <el-icon size="30" class="!text-zinc-700">
               <icon-tabler:layout-sidebar-left-expand v-if="isCollapse" />
               <icon-tabler:layout-sidebar-right-expand v-else />
@@ -60,11 +46,7 @@
             <el-breadcrumb-item :to="{ name: 'home' }">
               <span class="cursor-pointer">home</span>
             </el-breadcrumb-item>
-            <el-breadcrumb-item
-              v-for="item in breadcrumbs"
-              :key="item.path"
-              :to="{ path: item.path }"
-            >
+            <el-breadcrumb-item v-for="item in breadcrumbs" :key="item.path" :to="{ path: item.path }">
               <span>{{ item.meta?.title }}</span>
             </el-breadcrumb-item>
           </el-breadcrumb>
@@ -96,7 +78,7 @@
           <el-tag>Tag 1</el-tag>
         </el-scrollbar>
       </div>
-      <el-main class="h-[calc(100vh-80px] bg-gray-300"><router-view></router-view></el-main>
+      <el-main tag="main" class="h-[calc(100vh-80px] bg-gray-300"><router-view></router-view></el-main>
     </el-container>
   </el-container>
 </template>

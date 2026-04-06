@@ -21,7 +21,7 @@ export default defineConfig({
         ElementPlusResolver(),
         IconsResolver({
           prefix: 'Icon',
-          enabledCollections: ['ep', 'tabler', 'mdi'],
+          enabledCollections: ['ep', 'tabler', 'mdi', 'ph', 'ic'],
         }),
       ],
     }),

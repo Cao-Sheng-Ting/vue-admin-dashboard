@@ -1,19 +1,25 @@
 {
-  "login": {
-    "code": 10000,
-    "message": "登入成功",
-    "data": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY344SaOTAiLCJuYW1lIjoidXNlcm5hbWUiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE1MTYyMzkwMjJ9.Q8m12CvSuehoVyeF6mVs-nFkl6Y0j2kzvHonoJ8I-n8"
-  },
-  "userInfo": {
-    "code": 10000,
-    "message": "用戶資料獲取成功",
-    "data": {
-      "id": 1,
-      "role": "user",
-      "username": "user1",
-      "nickname": "用戶1",
-      "email": "",
-      "avatar": ""
+  "users": [
+    {
+      "email": "admin@example.com",
+      "password": "$2a$10$Oqu7pczHirL0ip/ck8Xlk.9qU6u0CqqApMEl0DpNssw1Gv.omwVT.",
+      "nickname": "面試官",
+      "role": "admin",
+      "id": 1
+    },
+    {
+      "email": "editor@example.com",
+      "password": "$2a$10$Yq81ptdiSObAKoZV5OWa9eZ5IiLBiahd71fGGOScSwcdOGxn0t0vO",
+      "nickname": "面試者",
+      "role": "editor",
+      "id": 2
+    },
+    {
+      "email": "Abc@test.com",
+      "password": "$2a$10$z8QAX14dT0/i8fxqJS3VWOeaIl1YiS9S4EcYopngo.aiP7r/.bya2",
+      "nickname": "測試",
+      "role": "admin",
+      "id": 3
     }
-  }
+  ]
 }

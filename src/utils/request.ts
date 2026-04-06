@@ -27,15 +27,7 @@ service.interceptors.request.use(
 
 service.interceptors.response.use(
   (res) => {
-    const { code, message, data: result } = res.data
-
-    if (code === 0) return result
-
-    ElMessage({
-      message: message || '服務異常',
-      type: 'error',
-    })
-    return Promise.reject(res.data)
+    return res.data
   },
   (err: AxiosError<APIResponse<unknown>>) => {
     if (err.response?.status === 401) {
@@ -43,7 +35,6 @@ service.interceptors.response.use(
     }
     ElMessage({
       message: err.response?.data?.message || '服務異常',
-      type: 'error',
     })
     return Promise.reject(err)
   },

@@ -7,6 +7,8 @@ import router from './router'
 
 import '@/styles/index.scss'
 
+import './firebase'
+
 const app = createApp(App)
 
 pinia.use(piniaPluginPersistedstate)
