@@ -6,17 +6,12 @@ import type {
   RegisterParams,
   UserItem,
 } from '@/types/user'
-import { db } from '@/firebase'
-import { ref as dbRef, push, set } from 'firebase/database'
-import { getAuth } from 'firebase/auth'
+import { db, auth } from '@/firebase'
+import { ref as dbRef, serverTimestamp, set } from 'firebase/database'
 import { createUserWithEmailAndPassword } from 'firebase/auth'
 
 export const userLoginAPI = (loginParams: LoginParams) => {
   return request.post<LoginResponse>('/login', loginParams)
-}
-
-export const getUserInfoAPI = () => {
-  return request.get<APIResponse<UserInfo>, UserInfo>('/userInfo')
 }
 
 // export const registerAPI = async (registerParams: RegisterParams) => {
@@ -34,5 +29,30 @@ export const getUserInfoAPI = () => {
 // }
 
 export const registerAPI = async (registerParams: RegisterParams) => {
-  await createUserWithEmailAndPassword()
+  try {
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      registerParams.email,
+      registerParams.password,
+    )
+
+    const uid = userCredential.user.uid
+    const userData = {
+      uid,
+      email: registerParams.email,
+      nickname: registerParams.nickname,
+      role: registerParams.role,
+      createdAt: serverTimestamp(),
+    }
+
+    await set(dbRef(db, `users/${uid}`), userData)
+    return userData
+  } catch (error) {
+    if (error instanceof Error && 'code' in error) {
+      if (error.code === 'auth/email-already-in-use') {
+        throw new Error('當前 Email 已註冊過！')
+      }
+    }
+    throw new Error('註冊失敗，請稍後再試')
+  }
 }

@@ -130,16 +130,14 @@ const register = async () => {
   void confirmPassword;
   void authCode;
 
+
   try {
-    await registerAPI(cleanData)
+    const res = await registerAPI(cleanData)
+    console.log(res)
     ElMessage.success('註冊成功')
   } catch (error) {
-    if (axios.isAxiosError(error)) {
-      ElMessage.error(error.response?.data?.message || '註冊失敗，請稍後再試')
-    } else {
-      console.log('發生其他錯誤：', error)
-      ElMessage.error('系統發生預期外的錯誤：' + error)
-    }
+    const err = error as Error
+    ElMessage.error(err.message)
   }
 }
 
