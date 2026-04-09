@@ -18,12 +18,11 @@ export interface LoginResponse {
 }
 
 export interface UserInfo {
-  id: number
-  role: UserRole
-  username: string
-  nickname: string
+  uid: string
   email: string
-  avatar: string
+  nickname: string
+  role: UserRole
+  avatar?: string
 }
 
 export type UserRole = 'admin' | 'editor' | 'user'
