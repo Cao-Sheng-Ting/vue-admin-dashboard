@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import axios from 'axios'
 import { ref, reactive, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import type { RegisterForm, RegisterParams, } from '@/types/user'
 import { roleOptions, QUICK_AUTH_CONFIG, type AgreementType } from '../types'
-import { registerAPI } from '@/services/userService'
+import { useUserStore } from '@/stores'
 
-
+const route = useRoute()
 const router = useRouter()
+const userStore = useUserStore()
 
 const ruleFormRef = ref()
 const ruleForm = ref<RegisterForm>({
@@ -130,11 +130,11 @@ const register = async () => {
   void confirmPassword;
   void authCode;
 
-
   try {
-    const res = await registerAPI(cleanData)
-    console.log(res)
+    await userStore.userRegister(cleanData)
+    const targetPath = route.query.redirect as string || '/'
     ElMessage.success('註冊成功')
+    router.push(targetPath)
   } catch (error) {
     const err = error as Error
     ElMessage.error(err.message)

@@ -1,20 +1,6 @@
-export interface APIResponse<T> {
-  code: number
-  message: string
-  data: T
-}
-
 export interface LoginParams {
   email: string
   password: string
-}
-
-export interface LoginResponse {
-  accessToken: string
-  user: {
-    email: string
-    id: number
-  }
 }
 
 export interface UserInfo {

@@ -3,6 +3,8 @@ import AuthLayout from '@/views/auth/AuthLayout.vue'
 import LoginForm from '@/views/auth/components/LoginForm.vue'
 import RegisterForm from '@/views/auth/components/RegisterForm.vue'
 import Layout from '@/layouts/index.vue'
+import { getCurrentUser } from '@/services/userService'
+import { el } from 'element-plus/es/locales.mjs'
 
 const auth: RouteRecordRaw[] = [
   {
@@ -198,5 +200,26 @@ const router = createRouter({
 //     return '/login'
 //   }
 // })
+
+router.beforeEach(async (to, from, next) => {
+  // 取得當前 firebase 的登入狀態
+  const currentUser = await getCurrentUser()
+
+  //檢查目標路徑中（包括父子層級）是否有任何需要身份驗證的
+  const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
+
+  // 未登入狀態且目標頁面需要權限
+  if (!currentUser && requiresAuth) {
+    next({
+      path: '/auth/login',
+      query: { redirect: to.fullPath },
+    })
+    // 前往登入頁面但已是登入狀態
+  } else if (to.path === '/auth/login' && currentUser) {
+    next('/')
+  } else {
+    next()
+  }
+})
 
 export default router

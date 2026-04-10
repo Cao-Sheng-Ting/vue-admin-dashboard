@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import axios from 'axios'
-import { userLoginAPI } from '@/services/userService'
+import { useRoute, useRouter } from 'vue-router'
+import { useUserStore } from '@/stores'
 import { ElMessage } from 'element-plus'
 import { ref, reactive } from 'vue'
-import { useRouter } from 'vue-router'
 
+const route = useRoute()
 const router = useRouter()
+const userStore = useUserStore()
 
 const ruleFormRef = ref()
 const ruleForm = ref({
@@ -30,15 +31,13 @@ const rules = reactive({
 const login = async () => {
   await ruleFormRef.value.validate()
   try {
-    await userLoginAPI(ruleForm.value)
+    await userStore.userLogin(ruleForm.value)
+    const targetPath = route.query.redirect as string || '/'
     ElMessage.success('登入成功')
-    router.push('/')
+    router.push(targetPath)
   } catch (error) {
-    if (axios.isAxiosError(error)) {
-      ElMessage.error('登入失敗，請檢查帳號密碼')
-    } else {
-      console.log('發生其他錯誤：', error)
-      ElMessage.error('系統發生預期外的錯誤：' + error)
+    if (error instanceof Error) {
+      ElMessage.error(error.message || '登入時發生錯誤')
     }
   }
 }
@@ -48,7 +47,7 @@ const demoAccount = async () => {
     email: 'admin@example.com',
     password: 'AAA12345',
   }
-  await new Promise((resolve) => setTimeout(resolve, 500))
+  await new Promise((resolve) => setTimeout(resolve, 200))
   await login()
 }
 </script>
@@ -66,8 +65,7 @@ const demoAccount = async () => {
       </el-input>
     </el-form-item>
     <el-form-item prop="password">
-      <el-input type="password" show-password size="large" placeholder="密碼輸入:AAA12345" v-model="ruleForm.password"
-        clearable>
+      <el-input type="password" show-password size="large" placeholder="密碼" v-model="ruleForm.password" clearable>
         <template #prefix>
           <icon-ph:lock-key />
         </template>

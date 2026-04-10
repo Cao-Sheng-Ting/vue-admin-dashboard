@@ -1,12 +1,11 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { userLoginAPI, registerAPI } from '@/services/userService'
+import { loginAPI, registerAPI } from '@/services/userService'
 import type { LoginParams, RegisterParams, UserInfo } from '@/types/user'
 
 export const useUserStore = defineStore(
   'user',
   () => {
-    const token = ref('')
     const userInfo = ref<UserInfo | null>(null)
 
     const userRegister = async (data: RegisterParams) => {
@@ -15,18 +14,21 @@ export const useUserStore = defineStore(
     }
 
     const userLogin = async (loginParams: LoginParams) => {
-      const res = await userLoginAPI(loginParams)
-      token.value = res.data.accessToken
+      const res = await loginAPI(loginParams)
+      userInfo.value = res
     }
 
     return {
-      token,
       userInfo,
       userRegister,
       userLogin,
     }
   },
   {
-    persist: true,
+    persist: {
+      key: 'vue-admin-user-info',
+      storage: localStorage,
+      pick: ['userInfo'],
+    },
   },
 )

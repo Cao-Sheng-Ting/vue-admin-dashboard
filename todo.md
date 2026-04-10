@@ -1,11 +1,11 @@
 #### 當前進度🚨🚨🚨
 
-- 1.註冊成功後將res整理後存到store
-- 2.跳轉到首頁
-- 3.pinia 持久化插件
-- 4.資料存進localstorage
-- 5.登入請求(一樣需要寫 3 4)
-- 6.route 全局守衛
+- [✅] 1.註冊成功後將res整理後存到store
+- [✅] 2.跳轉到首頁
+- [✅] 3.pinia 持久化插件
+- [✅] 4.資料存進localstorage
+- [✅] 5.登入請求(一樣需要寫 3 4)
+- [✅] 6.route 全局守衛
 
 ### 🌍 全局設定
 
@@ -21,6 +21,7 @@
 - [ ] [RegisterForm.vue]給註冊授權 Button 加上setTimeout 模擬網路延遲 和 Loading 效果 (轉圈圈)
 - [ ] [RegisterForm.vue]欄位加上icon
 - [ ] [RegisterForm.vue] 註冊成功後跳轉到登入頁，並把email填入欄位
+- [ ] [RegisterForm.vue] 給 input 加上 <template #prefix> 給前綴位置加上 icon
 
 ### 🏠 Layout
 
