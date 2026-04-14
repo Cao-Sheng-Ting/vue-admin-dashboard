@@ -9,5 +9,13 @@ body,
   margin: 0;
   padding: 0;
   scroll-behavior: smooth;
-  overflow: hidden;
+}
+
+.el-main {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  overflow-x: hidden;
+  overflow-y: auto;
 }

@@ -79,6 +79,7 @@
         </el-scrollbar>
       </div>
       <el-main tag="main" class="h-[calc(100vh-80px] bg-gray-300"><router-view></router-view></el-main>
+      <el-footer>這是footer</el-footer>
     </el-container>
   </el-container>
 </template>
@@ -135,7 +136,9 @@ const breadcrumbs = computed(() => {
 })
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@import '@/styles/index.scss';
+
 /* 移除 el-menu 預設的右邊框 */
 .el-aside {
   &::-webkit-scrollbar {

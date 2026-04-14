@@ -193,14 +193,6 @@ const router = createRouter({
  * @param to 導航目標
  */
 
-// router.beforeEach((to) => {
-//   const userStore = useUserStore()
-//   // 如果沒有 Token 且目標不是登入頁的話，強制跳轉到登入頁
-//   if (!userStore.token && to.path !== '/login') {
-//     return '/login'
-//   }
-// })
-
 router.beforeEach(async (to, from, next) => {
   // 取得當前 firebase 的登入狀態
   const currentUser = await getCurrentUser()

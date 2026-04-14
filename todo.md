@@ -16,6 +16,8 @@
 
 ### 🔐 登入模組 (Auth)
 
+- [ ] Google登入
+
 ### 🔐 註冊模組 (Auth)
 
 - [ ] [RegisterForm.vue]給註冊授權 Button 加上setTimeout 模擬網路延遲 和 Loading 效果 (轉圈圈)
@@ -26,6 +28,7 @@
 ### 🏠 Layout
 
 - [ ] [layouts/index.vue] 用遞歸寫sidebar
+- [ ] [layouts/index.vue] header-left 和 header-right 在視窗寬度小於多少時變成垂直排列
 
 ### 📦 專案管理 (Projects)
 
