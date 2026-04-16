@@ -142,6 +142,7 @@ const register = async () => {
 }
 
 </script>
+
 <template>
   <div class="register-content w-full max-w-[850px] mx-auto px-10 min-h-full h-auto">
     <!-- <el-page-header @back="router.back()"> -->
