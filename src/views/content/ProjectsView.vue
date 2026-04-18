@@ -2,19 +2,6 @@
 import ProjectsCard from './components/ProjectsCard.vue';
 import { projectList } from './data';
 
-const data = {
-  id: '1',
-  title: 'Vue 3 Admin Dashboard',
-  description: '基於 Vue 3 + TS + Element Plus 的後台管理系統，包含動態路由與權限控制。',
-  imageUrl: 'https://picsum.photos/seed/project1/600/400',
-  tags: ['Vue 3', 'TS', 'Pinia'],
-  status: 'ongoing',
-  progress: 85,
-  githubUrl: 'https://github.com/',
-  demoUrl: 'https://demo.com/',
-  createdAt: '2026-03-01',
-  detailContent: '這是我目前的主力作品，深度研究了封裝思維與組件通訊邏輯。',
-}
 </script>
 
 <template>

@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useUserStore } from '../stores/user'
+import { useUserStore } from '../stores/userStore'
 import type { RouteRecordRaw } from 'vue-router'
 import { Icon } from '@iconify/vue'
 

@@ -1,13 +1,16 @@
-#### 當前進度🚨🚨🚨
+#### 當前進度🚨🚨🚨✅
 
-- [✅] 1.註冊成功後將res整理後存到store
-- [✅] 2.跳轉到首頁
-- [✅] 3.pinia 持久化插件
-- [✅] 4.資料存進localstorage
-- [✅] 5.登入請求(一樣需要寫 3 4)
-- [✅] 6.route 全局守衛
+- [] 1.onMounted 將 data.ts資料放到store
+- [] 2.搜尋匡用 v-model 跟 ref 變量綁定
+- [] 3.computed 去監聽搜尋匡、status、tags，用.filter去跑整個放在store的資料，如果沒有進行任何篩選的話 return 原始資料
+- [] 4.補全防抖知識並給搜尋匡加上，
+- [] 5.了解v-model.lazy(失焦才觸發)、debounce 函式、lodash等等效能優化
+- [] 6.父組件 ProjectsView 傳參給子組件 ProjectsCard 改傳 computed return 結果
 
 ### 🌍 全局設定
+
+- [ ] [app.vue] 寫 onMounted 來監測每次重新整理時是否還是登入狀態
+- [ ] [src/components/common/GlobalLoading.vue] 寫全站讀取，每個頁面導入，用v-if判斷是否拿到資料，拿到前顯示讀取，除了要使用骨架屏的頁面
 
 ### 🚗 Route設定
 

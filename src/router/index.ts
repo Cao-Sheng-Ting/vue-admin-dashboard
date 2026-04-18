@@ -4,7 +4,6 @@ import LoginForm from '@/views/auth/components/LoginForm.vue'
 import RegisterForm from '@/views/auth/components/RegisterForm.vue'
 import Layout from '@/layouts/index.vue'
 import { getCurrentUser } from '@/services/userService'
-import { el } from 'element-plus/es/locales.mjs'
 
 const auth: RouteRecordRaw[] = [
   {
