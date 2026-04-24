@@ -1,11 +1,11 @@
 #### 當前進度🚨🚨🚨✅
 
-- [] 1.onMounted 將 data.ts資料放到store
+- [✅] 1.onMounted 將 data.ts資料放到store
 - [] 2.搜尋匡用 v-model 跟 ref 變量綁定
-- [] 3.computed 去監聽搜尋匡、status、tags，用.filter去跑整個放在store的資料，如果沒有進行任何篩選的話 return 原始資料
-- [] 4.補全防抖知識並給搜尋匡加上，
+- [✅] 3.computed 去監聽搜尋匡、status、tags，用.filter去跑整個放在store的資料，如果沒有進行任何篩選的話 return 原始資料
+- [✅] 4.補全防抖知識並給搜尋匡加上，
 - [] 5.了解v-model.lazy(失焦才觸發)、debounce 函式、lodash等等效能優化
-- [] 6.父組件 ProjectsView 傳參給子組件 ProjectsCard 改傳 computed return 結果
+- [✅] 6.父組件 ProjectsView 傳參給子組件 ProjectsCard 改傳 computed return 結果
 
 ### 🌍 全局設定
 
@@ -52,11 +52,14 @@
 - [ ] 🟠加分功能[UI] 骨架屏：在資料還沒載入前，顯示灰色的卡片輪廓
 - [ ] 🟠加分功能[UI] Hover 效果：滑鼠移過卡片時有陰影加深或微小的位移
 - [ ] 🟠加分功能[UI] 確認動畫、視窗：對卡片或全局操作時跳出確認視窗或動畫
+- [ ] 🟠加分功能[UI] 寫通用毛玻璃效果，讓輸入匡輸入時
 
 - [ ] 🟩有空再做[Logic] 排序功能：按創建日期或優先級排序等等...
 - [ ] 🟩有空再做[Logic] 篩選功能： 技術棧篩選、狀態篩選等等...
 - [ ] 🟩有空再做[Logic] 拖拽排序：拖拽改變位置，但要想好跟排序功能如何相容
 - [ ] 🟩有空再做[Logic] 全局操作：、批量編輯、刪除
+
+- [ ] 🟩有空再做[View] 新增一個tags管理頁面，使用者可以自己整理tags，可以增刪改查，旁邊有一區會有專案有用過但還沒整理的tags，可以拖拉整理
 
 ### 📊 數據看板 (Dashboard)
 

@@ -3,12 +3,8 @@ import { defineConfigWithVueTs, vueTsConfigs } from '@vue/eslint-config-typescri
 import pluginVue from 'eslint-plugin-vue'
 import skipFormatting from '@vue/eslint-config-prettier/skip-formatting'
 
-// To allow more languages other than `ts` in `.vue` files, uncomment the following lines:
-// import { configureVueProject } from '@vue/eslint-config-typescript'
-// configureVueProject({ scriptLangs: ['ts', 'tsx'] })
-// More info at https://github.com/vuejs/eslint-config-typescript/#advanced-setup
-
-export default defineConfigWithVueTs(
+// 1定義配置
+const config = defineConfigWithVueTs(
   {
     name: 'app/files-to-lint',
     files: ['**/*.{ts,mts,tsx,vue}'],
@@ -19,12 +15,23 @@ export default defineConfigWithVueTs(
   pluginVue.configs['flat/essential'],
   vueTsConfigs.recommended,
   skipFormatting,
+
   {
     name: 'app/custom-rules',
-    files: ['**/*.vue'],
+    files: ['**/*.{ts,mts,tsx,vue}'],
     rules: {
-      // 允許 index.vue 作為組件入口，不強制要求多單字命名
       'vue/multi-word-component-names': ['error', { ignores: ['index'] }],
+      '@typescript-eslint/no-explicit-any': [
+        'warn',
+        {
+          fixToUnknown: false,
+          ignoreRestArgs: true,
+        },
+      ],
     },
   },
 )
+
+// 使用 ReturnType 獲取該函數的回傳型別並導出
+// 既解決了 "Not portable" 報錯，又不需要手動維護不相容的型別
+export default config as ReturnType<typeof defineConfigWithVueTs>

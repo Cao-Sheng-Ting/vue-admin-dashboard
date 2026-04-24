@@ -1,10 +1,12 @@
+export type ProjectStatus = 'completed' | 'developing' | 'maintenance' | 'planning'
+
 export interface ProjectItem {
   id: string
   title: string
   description: string
   imageUrl: string
   tags: string[]
-  status: 'completed' | 'ongoing' | 'planned'
+  status: ProjectStatus
   progress: number
   githubUrl: string
   demoUrl: string
@@ -12,14 +14,14 @@ export interface ProjectItem {
   detailContent: string
 }
 
-export const projectList: ProjectItem[] = [
+export const projectsList: ProjectItem[] = [
   {
     id: '1',
     title: 'Vue 3 Admin Dashboard',
     description: '基於 Vue 3 + TS + Element Plus 的後台管理系統，包含動態路由與權限控制。',
     imageUrl: 'https://picsum.photos/seed/project1/600/400',
     tags: ['Vue 3', 'TS', 'Pinia'],
-    status: 'ongoing',
+    status: 'developing',
     progress: 85,
     githubUrl: 'https://github.com/',
     demoUrl: 'https://demo.com/',
@@ -45,7 +47,7 @@ export const projectList: ProjectItem[] = [
     description: '專為重量訓練設計的 Web App，記錄三項成績（深蹲、臥推、硬舉）。',
     imageUrl: 'https://picsum.photos/seed/gym/600/400',
     tags: ['Vue 3', 'Tailwind', 'Firebase'],
-    status: 'ongoing',
+    status: 'developing',
     progress: 40,
     githubUrl: 'https://github.com/',
     demoUrl: 'https://demo.com/',
@@ -58,7 +60,7 @@ export const projectList: ProjectItem[] = [
     description: '互動式吉他指板與樂理學習工具，協助練習金屬樂速彈音階。',
     imageUrl: 'https://picsum.photos/seed/music/600/400',
     tags: ['Vue 3', 'Canvas', 'Music'],
-    status: 'planned',
+    status: 'planning',
     progress: 10,
     githubUrl: '#',
     demoUrl: '#',
@@ -84,7 +86,7 @@ export const projectList: ProjectItem[] = [
     description: '配合 Netflix 影集練習英語聽寫的工具，紀錄重複練習次數。',
     imageUrl: 'https://picsum.photos/seed/english/600/400',
     tags: ['Local Storage', 'Auth'],
-    status: 'ongoing',
+    status: 'developing',
     progress: 60,
     githubUrl: '#',
     demoUrl: '#',

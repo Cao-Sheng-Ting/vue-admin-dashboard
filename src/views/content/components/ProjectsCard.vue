@@ -1,5 +1,9 @@
 <script setup lang="ts">
-defineProps(['data'])
+import { STATUS_MAP } from '@/constants/project';
+import type { ProjectItem } from '../data';
+
+defineProps<{ data: ProjectItem }>()
+
 
 const openLink = (url: string) => {
   if (url) window.open(url, '_blank')
@@ -8,11 +12,8 @@ const openLink = (url: string) => {
 
 <template>
   <div class="relative">
-    <el-tag class="absolute top-2 right-2 z-10" :type="data.status === 'completed' ? 'success' : 'warning'">{{
-      data.status
-        ===
-        'completed' ?
-        '已完成' : '開發中' }}</el-tag>
+    <el-tag class="absolute top-2 right-2 z-10" :type="STATUS_MAP[data.status].type">{{
+      STATUS_MAP[data.status].name }}</el-tag>
     <el-card shadow="hover" class="group">
       <template #header>
         <div class="card-header flex justify-center items-center font-bold text-xl line-clamp-2 min-h-[3.5rem]">

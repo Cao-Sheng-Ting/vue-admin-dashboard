@@ -1,10 +1,10 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { projectList } from '@/views/content/data'
+import { projectsList as initialProjects } from '@/views/content/data'
 
 export const useProjectStore = defineStore('project', () => {
   //原始資料
-  const projectsList = ref(projectList)
+  const projectsList = ref(initialProjects)
 
   //篩選狀態
   const searchQuery = ref('')
