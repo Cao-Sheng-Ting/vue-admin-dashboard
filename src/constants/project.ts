@@ -11,3 +11,25 @@ export const STATUS_MAP: Record<ProjectStatus, StatusConfig> = {
   maintenance: { name: '維護中', type: 'warning' },
   planning: { name: '規劃中', type: 'info' },
 }
+
+type TechCategory = 'frontend' | 'backend' | 'others'
+
+interface TechGroup {
+  label: string
+  tags: string[]
+}
+
+export const TECH_STACK_CONFIG: Record<TechCategory, TechGroup> = {
+  frontend: {
+    label: '前端技術',
+    tags: ['Vue 3', 'TypeScript', 'Element Plus', 'Tailwind CSS', 'Pinia'],
+  },
+  backend: {
+    label: '後端與部署',
+    tags: ['Node.js', 'Firebase', 'GitHub Copilot', 'Git', 'Docker'],
+  },
+  others: {
+    label: '其他',
+    tags: ['FL Studio', '100LS', 'English'],
+  },
+}
