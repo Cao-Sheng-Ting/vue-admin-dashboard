@@ -1,15 +1,16 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { projectsList as initialProjects } from '@/views/content/data'
+import type { ProjectStatus } from '@/views/content/data'
 
 export const useProjectStore = defineStore('project', () => {
   //原始資料
   const projectsList = ref(initialProjects)
 
   //篩選狀態
-  const searchQuery = ref('')
-  const tagsFilter = ref([])
-  const statusFilter = ref('all')
+  const searchQuery = ref<string>('')
+  const tagsFilter = ref<string[]>([])
+  const statusFilter = ref<ProjectStatus | 'all'>('all')
 
   /**
    * 結合搜尋匡輸入字串、技術標籤和專案狀態進行多層過濾

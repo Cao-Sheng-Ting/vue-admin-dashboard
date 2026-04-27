@@ -22,7 +22,7 @@ interface TechGroup {
 export const TECH_STACK_CONFIG: Record<TechCategory, TechGroup> = {
   frontend: {
     label: '前端技術',
-    tags: ['Vue 3', 'TypeScript', 'Element Plus', 'Tailwind CSS', 'Pinia'],
+    tags: ['Vue 3', 'TypeScript', 'Element Plus', 'Tailwind', 'Pinia'],
   },
   backend: {
     label: '後端與部署',

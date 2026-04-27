@@ -8,7 +8,32 @@ import { STATUS_MAP, TECH_STACK_CONFIG } from '@/constants/project';
 const projectStore = useProjectStore()
 const keyword = useDebounceSearch()
 
-const isTagFilterVisible = ref(false)
+const isTagFilterVisible = ref<boolean>(false)
+const checkedTags = ref<string[]>([])
+
+const toggleTag = (tag: string) => {
+  const index = checkedTags.value.indexOf(tag)
+  if (index > -1) {
+    checkedTags.value.splice(index, 1)
+  } else {
+    checkedTags.value.push(tag)
+  }
+}
+
+const handelDialogOpen = () => {
+  checkedTags.value = [...projectStore.tagsFilter]
+  isTagFilterVisible.value = true
+}
+
+const handelDialogClose = (isConfirm: boolean) => {
+  if (isConfirm) {
+    projectStore.tagsFilter = [...checkedTags.value]
+    isTagFilterVisible.value = false
+  } else {
+    isTagFilterVisible.value = false
+  }
+  console.log(projectStore.tagsFilter)
+}
 
 </script>
 
@@ -21,11 +46,16 @@ const isTagFilterVisible = ref(false)
           <el-option v-for="(config, key) in STATUS_MAP" :key="key" :label="config.name" :value="key"></el-option>
           <el-option label="全部" value="all"></el-option>
         </el-select>
-        <el-button @click="isTagFilterVisible = true">技術棧篩選</el-button>
+        <el-button @click="handelDialogOpen">技術棧篩選</el-button>
       </el-col>
       <el-col :span="6" class="flex justify-end">
         <el-button>新增</el-button>
         <el-button>編輯</el-button>
+      </el-col>
+    </el-row>
+    <el-row>
+      <el-col :span="24">
+        <el-tag closable v-for="tag in projectStore.tagsFilter" :key="tag">{{ tag }}</el-tag>
       </el-col>
     </el-row>
   </div>
@@ -44,15 +74,17 @@ const isTagFilterVisible = ref(false)
           <div class="tech-stack-label w-20 shrink-0 flex items-center whitespace-nowrap "><span>{{ item.label }}</span>
           </div>
           <div class="tech-tags flex flex-wrap gap-3">
-            <el-check-tag v-for="(tag, index) in item.tags" :key="index">{{ tag }}</el-check-tag>
+            <el-check-tag v-for="(tag, index) in item.tags" :key="index" :checked="checkedTags.includes(tag)"
+              @change="() => toggleTag(tag)">{{ tag
+              }}</el-check-tag>
           </div>
         </div>
       </el-card>
     </el-space>
     <template #footer>
       <div class="dialog-footer">
-        <el-button>取消</el-button>
-        <el-button>確定</el-button>
+        <el-button @click="handelDialogClose(false)">取消</el-button>
+        <el-button @click="handelDialogClose(true)">確定</el-button>
       </div>
     </template>
   </el-dialog>
