@@ -20,7 +20,7 @@ export const projectsList: ProjectItem[] = [
     title: 'Vue 3 Admin Dashboard',
     description: '基於 Vue 3 + TS + Element Plus 的後台管理系統，包含動態路由與權限控制。',
     imageUrl: 'https://picsum.photos/seed/project1/600/400',
-    tags: ['Vue 3', 'TS', 'Pinia'],
+    tags: ['Vue 3', 'TypeScript', 'Pinia'],
     status: 'developing',
     progress: 85,
     githubUrl: 'https://github.com/',

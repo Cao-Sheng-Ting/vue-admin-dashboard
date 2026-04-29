@@ -20,6 +20,10 @@ const toggleTag = (tag: string) => {
   }
 }
 
+const handleTagClose = (tag: string) => {
+  projectStore.tagsFilter = projectStore.tagsFilter.filter(t => t !== tag)
+}
+
 const handelDialogOpen = () => {
   checkedTags.value = [...projectStore.tagsFilter]
   isTagFilterVisible.value = true
@@ -38,26 +42,27 @@ const handelDialogClose = (isConfirm: boolean) => {
 </script>
 
 <template>
-  <div class="search-form-box bg-white p-4 mb-3 rounded">
-    <el-row justify="space-between" align="middle">
-      <el-col :span="12">
-        <el-input placeholder="搜尋項目" v-model="keyword"></el-input>
-        <el-select v-model="projectStore.statusFilter">
+  <div class="search-form-box flex flex-col flex-wrap bg-white p-4 mb-3 rounded">
+    <div class="flex flex-row mb-2 gap-4">
+      <div class="flex flex-1 flex-row gap-2">
+        <el-input placeholder="搜尋項目" v-model="keyword" class="max-w-md"></el-input>
+        <el-select v-model="projectStore.statusFilter" class="w-52">
+          <template #prefix>
+            <span>狀態:</span>
+          </template>
           <el-option v-for="(config, key) in STATUS_MAP" :key="key" :label="config.name" :value="key"></el-option>
           <el-option label="全部" value="all"></el-option>
         </el-select>
-        <el-button @click="handelDialogOpen">技術棧篩選</el-button>
-      </el-col>
-      <el-col :span="6" class="flex justify-end">
-        <el-button>新增</el-button>
-        <el-button>編輯</el-button>
-      </el-col>
-    </el-row>
-    <el-row>
-      <el-col :span="24">
-        <el-tag closable v-for="tag in projectStore.tagsFilter" :key="tag">{{ tag }}</el-tag>
-      </el-col>
-    </el-row>
+      </div>
+      <div class="flex flex-1 justify-end">
+        <el-button type="primary">新增</el-button>
+        <el-button type="info" plain>編輯</el-button>
+      </div>
+    </div>
+    <div class="tech-stack-filter flex gap-2 items-center">
+      <el-button @click="handelDialogOpen" type="success" plain>技術棧篩選</el-button>
+      <el-tag closable @close="handleTagClose(tag)" v-for="tag in projectStore.tagsFilter" :key="tag">{{ tag }}</el-tag>
+    </div>
   </div>
   <div class="main-box bg-white flex-1 rounded p-6 ">
     <el-row :gutter="20">
