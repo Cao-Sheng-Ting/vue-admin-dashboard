@@ -131,7 +131,7 @@ const breadcrumbs = computed(() => {
           <el-tag>Tag 1</el-tag>
         </el-scrollbar>
       </div>
-      <el-main tag="main" class="h-[calc(100vh-80px] bg-gray-300"><router-view></router-view></el-main>
+      <el-main tag="main" class="h-[calc(100vh-80px] bg-gray-200"><router-view></router-view></el-main>
       <el-footer>這是footer</el-footer>
     </el-container>
   </el-container>
