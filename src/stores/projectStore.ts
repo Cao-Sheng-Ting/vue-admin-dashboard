@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { projectsList as initialProjects } from '@/views/content/data'
-import type { ProjectStatus } from '@/views/content/data'
+import type { ProjectStatus } from '@/types/project'
 
 export const useProjectStore = defineStore('project', () => {
   //原始資料

@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@iconify/vue": "^5.0.0",
+    "@vueuse/core": "^14.2.1",
     "axios": "^1.13.2",
     "element-plus": "^2.11.8",
     "firebase": "^12.11.0",

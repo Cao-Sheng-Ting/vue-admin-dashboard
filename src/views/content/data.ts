@@ -1,18 +1,4 @@
-export type ProjectStatus = 'completed' | 'developing' | 'maintenance' | 'planning'
-
-export interface ProjectItem {
-  id: string
-  title: string
-  description: string
-  imageUrl: string
-  tags: string[]
-  status: ProjectStatus
-  progress: number
-  githubUrl: string
-  demoUrl: string
-  createdAt: string
-  detailContent: string
-}
+import type { ProjectItem } from '@/types/project'
 
 export const projectsList: ProjectItem[] = [
   {
@@ -111,6 +97,19 @@ export const projectsList: ProjectItem[] = [
     title: 'AI 寫程式助手整合',
     description: '探索 Cursor 與 OpenClaw 的工作流優化，提升前端開發效率。',
     imageUrl: 'https://picsum.photos/seed/ai/600/400',
+    tags: ['AI Tooling', 'Workflow'],
+    status: 'completed',
+    progress: 100,
+    githubUrl: '#',
+    demoUrl: '#',
+    createdAt: '2026-03-25',
+    detailContent: '紀錄如何利用 AI 輔助重構代碼。',
+  },
+  {
+    id: '9',
+    title: 'AI 寫程式助手整合',
+    description: '探索 Cursor 與 OpenClaw 的工作流優化，提升前端開發效率。',
+    imageUrl: '',
     tags: ['AI Tooling', 'Workflow'],
     status: 'completed',
     progress: 100,

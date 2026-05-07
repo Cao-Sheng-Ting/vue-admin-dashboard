@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { STATUS_MAP } from '@/constants/project';
-import type { ProjectItem } from '../data';
+import type { ProjectItem } from '@/types/project';
 
 defineProps<{
   data: ProjectItem,

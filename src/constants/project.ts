@@ -1,4 +1,4 @@
-import type { ProjectStatus } from '@/views/content/data'
+import type { ProjectStatus } from '@/types/project'
 
 export interface StatusConfig {
   name: string
