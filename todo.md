@@ -63,6 +63,7 @@
 - [ ] 🟩有空再做[ui] card 的 tags 只能顯示多少個(預計就佔兩排)，其他用...省略
 - [ ] 🟩有空再做[ui] tags 選擇頁面最多選20個，超過其他就disable
 - [ ] 🟩有空再做[ui] image 設置placeholder預設圖片
+- [ ] 🟩有空再做[logic] 給新增專案多一個草稿模式
 
 ### 📊 數據看板 (Dashboard)
 

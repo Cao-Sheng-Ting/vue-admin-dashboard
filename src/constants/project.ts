@@ -8,6 +8,7 @@ export interface StatusConfig {
 export const STATUS_MAP: Record<ProjectStatus, StatusConfig> = {
   completed: { name: '已完成', type: 'success' },
   developing: { name: '開發中', type: 'primary' },
+  testing: { name: '測試中', type: 'info' },
   maintenance: { name: '維護中', type: 'warning' },
   planning: { name: '規劃中', type: 'info' },
 }

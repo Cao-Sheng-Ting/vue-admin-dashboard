@@ -6,6 +6,7 @@ import ProjectTagDialog from './components/ProjectTagDialog.vue';
 import { useDebounceSearch } from '@/composables/useDebounce';
 import { useProjectStore } from '@/stores/projectStore';
 import ProjectStatusSelect from './components/ProjectStatusSelect.vue';
+import type { ProjectStatus } from '@/types/project';
 
 const projectStore = useProjectStore()
 const keyword = useDebounceSearch()
@@ -18,6 +19,7 @@ const projectCheckList = ref<number[]>([])
 const isDrawerVisible = ref<boolean>(false)
 
 const selectedTags = ref<string[]>([])
+const selectedStatus = ref<ProjectStatus | 'all'>('all')
 
 const handleEditAction = () => {
   isEditMode.value = !isEditMode.value
@@ -33,6 +35,10 @@ const handleTagsFilter = (tags: string[]) => {
   selectedTags.value = tags
   projectStore.tagsFilter = tags
 }
+
+watch(selectedStatus, (newVal) => {
+  projectStore.statusFilter = newVal
+})
 </script>
 
 <template>
@@ -40,14 +46,16 @@ const handleTagsFilter = (tags: string[]) => {
     <div class="flex flex-row gap-4">
       <div class="flex flex-1 flex-row gap-2 ">
         <el-input placeholder="搜尋項目" v-model="keyword" class="max-w-md"></el-input>
-        <ProjectStatusSelect></ProjectStatusSelect>
+        <ProjectStatusSelect v-model="selectedStatus">
+          <el-option label="全部" value="all"></el-option>
+        </ProjectStatusSelect>
         <el-button @click="isTagFilterVisible = true" type="success" plain class="w-22">技術棧篩選</el-button>
       </div>
     </div>
   </div>
   <div class="tech-stack-tags flex gap-2 items-center m-2">
     <el-tag closable @close="handleTagClose(tag)" v-for="tag in projectStore.tagsFilter" :key="tag">{{ tag
-    }}</el-tag>
+      }}</el-tag>
   </div>
   <div class="main-box bg-white flex-1 rounded p-6 ">
     <el-row class="mb-5">

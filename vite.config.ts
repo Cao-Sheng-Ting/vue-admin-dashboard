@@ -6,6 +6,7 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
+import ElementPlus from 'unplugin-element-plus/vite'
 // @ts-expect-error : unplugin-icons 模組缺少類型定義
 import Icons from 'unplugin-icons/vite'
 // @ts-expect-error : unplugin-icons 模組缺少類型定義
@@ -14,6 +15,7 @@ import IconsResolver from 'unplugin-icons/resolver'
 export default defineConfig({
   plugins: [
     vue(),
+    ElementPlus({}),
     vueDevTools(),
     AutoImport({
       imports: ['vue', 'vue-router', 'pinia'],

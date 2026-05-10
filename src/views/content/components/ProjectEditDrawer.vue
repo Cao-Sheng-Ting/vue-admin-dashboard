@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { useWindowSize } from '@vueuse/core'
-import type { ProjectForm } from '@/types/project'
+import type { ProjectStatus, ProjectForm } from '@/types/project'
 import ProjectTagDialog from '@/views/content/components/ProjectTagDialog.vue'
 import ProjectStatusSelect from './ProjectStatusSelect.vue'
+import { ElMessageBox } from 'element-plus'
 
 const isDrawerVisible = defineModel()
 
@@ -18,18 +19,19 @@ const handleTagClose = (tag: string) => {
 }
 
 const ruleFormRef = ref()
-const ruleForm = ref<ProjectForm>({
+const getInitialProject = (): ProjectForm => ({
   title: '',
   description: '',
   imageUrl: '',
   tags: [],
   status: '',
-  progress: null,
+  progress: 0,
   githubUrl: '',
   demoUrl: '',
   createdAt: '',
   detailContent: ''
 })
+const ruleForm = ref<ProjectForm>(getInitialProject())
 
 const rules = reactive({
   title: [
@@ -56,6 +58,62 @@ const rules = reactive({
   detailContent: [{ max: 3000, message: '專案詳情內容過長，須在 3000 字以內', trigger: 'blur' }]
 })
 
+const lastProgress = ref<number>(ruleForm.value.progress)
+
+const handleStatusLinkage = (val: number) => {
+  lastProgress.value = val
+}
+
+watch(() => ruleForm.value.status, (newVal, oldVal) => {
+  if (newVal === oldVal) return
+  if (newVal === 'completed') ruleForm.value.progress = 100
+  else if (oldVal === 'completed') ruleForm.value.progress = lastProgress.value
+})
+
+const handleReset = () => {
+  ElMessageBox.confirm(
+    '確定要重置表單嗎？',
+    {
+      confirmButtonText: '確定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }
+  )
+    .then(() => {
+      ruleForm.value = getInitialProject()
+      ElMessage({
+        type: 'success',
+        message: '重置成功'
+      })
+    })
+    .catch(() => { })
+}
+
+const handleSubmit = async () => {
+  await ruleFormRef.value.validate()
+}
+
+const handleClose = () => {
+  const currentData = JSON.stringify(ruleForm.value)
+  const initialData = JSON.stringify(getInitialProject())
+
+  if (currentData !== initialData) {
+    ElMessageBox.confirm(
+      '確定要捨棄目前的編輯內容嗎？',
+      {
+        confirmButtonText: '確定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+      .then(() => {
+        ruleForm.value = getInitialProject()
+        isDrawerVisible.value = false
+      })
+      .catch(() => { })
+  } else isDrawerVisible.value = false
+}
+
 const data = {
   title: 'Vue 3 Admin Dashboard',
   description: '基於 Vue 3 + TS + Element Plus 的後台管理系統，包含動態路由與權限控制。',
@@ -79,19 +137,19 @@ const responsiveSize = computed(() => {
 </script>
 
 <template>
-  <el-drawer v-model="isDrawerVisible" :show-close="true" :size="responsiveSize"
+  <el-drawer :before-close="handleClose" v-model="isDrawerVisible" :show-close="true" :size="responsiveSize"
     style="--el-drawer-bg-color: var(--el-fill-color-light);">
     <template #header>
       <h2 class="text-3xl text-slate-700 border-b-2 border-gray-100 pt-2 pb-4">新增專案</h2>
     </template>
-    <el-form ref="ruleFormRef" :model="ruleForm" :rule="rules">
-      <el-form-item>
+    <el-form ref="ruleFormRef" :model="ruleForm" :rules="rules">
+      <el-form-item prop="title">
         <el-input placeholder="標題" v-model="ruleForm.title" class="rounded-lg"></el-input>
       </el-form-item>
-      <el-form-item>
+      <el-form-item prop="description">
         <el-input placeholder="專案描述" v-model="ruleForm.description" type="textarea"></el-input>
       </el-form-item>
-      <el-form-item>
+      <el-form-item prop="tags">
         <div class="flex flex-col gap-4 items-start">
           <el-button @click="isTagSelectVisible = true" type="primary" plain>
             <icon-ic:round-plus />
@@ -99,39 +157,39 @@ const responsiveSize = computed(() => {
           </el-button>
           <div class="flex flex-row flex-wrap gap-2">
             <el-tag v-for="(tag, index) in selectedTags" :key="index" closable @close="handleTagClose(tag)">{{ tag
-            }}</el-tag>
+              }}</el-tag>
           </div>
         </div>
       </el-form-item>
-      <el-form-item>
-        <ProjectStatusSelect></ProjectStatusSelect>
+      <el-form-item prop="status">
+        <ProjectStatusSelect v-model="ruleForm.status"></ProjectStatusSelect>
       </el-form-item>
-      <el-form-item>
+      <el-form-item prop="progress">
         <div class="flex flex-col gap-1 w-full">
           <span class="text-gray-500 pl-2">專案完成進度(%):</span>
-          <el-slider show-input class="pl-3" v-model="ruleForm.progress"></el-slider>
+          <el-slider show-input class="pl-3" v-model="ruleForm.progress" @change="handleStatusLinkage"></el-slider>
         </div>
       </el-form-item>
-      <el-form-item>
+      <el-form-item prop="imageUrl">
         <el-input placeholder="圖片連結" v-model="ruleForm.imageUrl"></el-input>
       </el-form-item>
+      <el-form-item prop="githubUrl">
+        <el-input placeholder="GitHub 連結" v-model="ruleForm.githubUrl"></el-input>
+      </el-form-item>
+      <el-form-item prop="demoUrl">
+        <el-input placeholder="Demo 連結" v-model="ruleForm.demoUrl"></el-input>
+      </el-form-item>
+      <el-form-item prop="createdAt">
+        <el-date-picker placeholder="創建日期" v-model="ruleForm.createdAt"></el-date-picker>
+      </el-form-item>
+      <el-form-item prop="detailContent">
+        <el-input placeholder="專案詳情" v-model="ruleForm.detailContent" type="textarea"></el-input>
+      </el-form-item>
     </el-form>
-    <el-form-item>
-      <el-input placeholder="GitHub 連結" v-model="ruleForm.githubUrl"></el-input>
-    </el-form-item>
-    <el-form-item>
-      <el-input placeholder="Demo 連結" v-model="ruleForm.demoUrl"></el-input>
-    </el-form-item>
-    <el-form-item>
-      <el-date-picker placeholder="創建日期" v-model="ruleForm.createdAt"></el-date-picker>
-    </el-form-item>
-    <el-form-item>
-      <el-input placeholder="專案詳情" v-model="ruleForm.detailContent" type="textarea"></el-input>
-    </el-form-item>
     <template #footer>
       <div class="flex w-full justify-end gap-4">
-        <el-button size="large">重置</el-button>
-        <el-button type="primary" size="large">儲存</el-button>
+        <el-button size="large" @click="handleReset">重置</el-button>
+        <el-button type="primary" size="large" @click="handleSubmit">儲存</el-button>
       </div>
     </template>
   </el-drawer>
