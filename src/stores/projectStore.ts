@@ -26,10 +26,12 @@ export const useProjectStore = defineStore('project', () => {
         p.title.toLowerCase().includes(query) ||
         (p.description?.toLowerCase().includes(query) ?? false) ||
         p.tags.some((tag) => tag.toLowerCase().includes(query))
+
       //2. 技術標籤：須符合所有選中的標籤才可通過篩選
       const matchTags =
         !tagsFilter.value.length ||
         tagsFilter.value.every((selectedTag) => p.tags.includes(selectedTag))
+
       //3. 專案狀態： 需符合所選的專案狀態，未選擇狀態時預設通行
       const matchStatus = statusFilter.value === 'all' || p.status === statusFilter.value
 

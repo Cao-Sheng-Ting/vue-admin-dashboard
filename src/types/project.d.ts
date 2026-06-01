@@ -4,18 +4,14 @@ export interface ProjectItem {
   id: string
   title: string
   description: string
-  imageUrl: string
+  imageUrl?: string
   tags: string[]
   status: ProjectStatus
   progress: number
-  githubUrl: string
-  demoUrl: string
-  createdAt: string
-  detailContent: string
+  githubUrl?: string
+  demoUrl?: string
+  createdAt?: string | Date | null
+  detailContent?: string
 }
 
-export type ProjectForm = omit<
-  ProjectItem,
-  'id' | 'imageUrl' | 'githubUrl' | 'demoUrl' | 'createdAt' | 'detailContent'
-> &
-  Partial<pick<ProjectItem, 'imageUrl' | 'githubUrl' | 'demoUrl' | 'demoUrl' | 'detailContent'>>
+export type AddProjectForm = Omit<ProjectItem, 'id'>

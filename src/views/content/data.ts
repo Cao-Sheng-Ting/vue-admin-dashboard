@@ -21,7 +21,7 @@ export const projectsList: ProjectItem[] = [
     imageUrl: 'https://picsum.photos/seed/project2/600/400',
     tags: ['JavaScript', 'CSS3', 'Logic'],
     status: 'completed',
-    progress: 100,
+    progress: 95,
     githubUrl: 'https://github.com/',
     demoUrl: 'https://demo.com/',
     createdAt: '2025-11-20',

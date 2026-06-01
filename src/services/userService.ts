@@ -1,6 +1,6 @@
 import type { LoginParams, RegisterParams } from '@/types/user'
 import { db, auth } from '@/firebase'
-import { ref as dbRef, get, set, serverTimestamp } from 'firebase/database'
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore'
 import {
   createUserWithEmailAndPassword,
   onAuthStateChanged,
@@ -18,11 +18,13 @@ export const loginAPI = async (loginParams: LoginParams) => {
 
     const uid = userCredential.user.uid
 
-    const userRef = dbRef(db, `users/${uid}`)
-    const res = await get(userRef)
-    if (res.exists()) {
-      return res.val()
+    const userDocRef = doc(db, 'users', uid)
+    const userSnap = await getDoc(userDocRef)
+
+    if (!userSnap.exists()) {
+      throw new Error('此帳號驗證成功，但無法找到對應的用戶資料，請聯絡管理員')
     }
+    return userSnap.data()
   } catch (error) {
     if (error instanceof Error && 'code' in error) {
       switch (error.code) {
@@ -57,8 +59,9 @@ export const registerAPI = async (registerParams: RegisterParams) => {
       createdAt: serverTimestamp(),
     }
 
-    await set(dbRef(db, `users/${uid}`), userData)
-    return userData
+    const userDocRef = doc(db, 'users', uid)
+    await setDoc(userDocRef, userData)
+    return { ...userData }
   } catch (error) {
     if (error instanceof Error && 'code' in error) {
       if (error.code === 'auth/email-already-in-use') {

@@ -7,10 +7,24 @@
 - [] 5.了解v-model.lazy(失焦才觸發)、debounce 函式、lodash等等效能優化
 - [✅] 6.父組件 ProjectsView 傳參給子組件 ProjectsCard 改傳 computed return 結果
 
+----- 待筆記 nextTick, flush: 'post', resetFields()
+
 ### 🌍 全局設定
 
 - [ ] [app.vue] 寫 onMounted 來監測每次重新整理時是否還是登入狀態
 - [ ] [src/components/common/GlobalLoading.vue] 寫全站讀取，每個頁面導入，用v-if判斷是否拿到資料，拿到前顯示讀取，除了要使用骨架屏的頁面
+
+### 💡 提升專案等級
+
+-[auth] [] 動態路由權限（RBAC）」或「自定義 Hook (Composition API) 封裝邏輯」
+
+- [] []實作 RBAC
+
+- [] 封裝自定義 Hook
+
+- [] 單元測試
+
+-[] 全域的 catch 攔截器處理異常
 
 ### 🚗 Route設定
 
