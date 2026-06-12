@@ -21,7 +21,6 @@ export const getProjectsAPI = async (): Promise<ProjectItem[]> => {
     }))
     return projectsList
   } catch (error) {
-    console.error('獲取專案資料失敗', error)
     throw error
   }
 }
@@ -83,5 +82,25 @@ export const deleteProjectsBatchAPI = async (projectIds: string[]): Promise<stri
   } catch (error) {
     console.error('專案批量刪除失敗', error)
     throw error
+  }
+}
+
+export const addAll = async (data: AddProjectForm[]) => {
+  const all = writeBatch(db)
+
+  data.forEach((d) => {
+    const collRef = collection(db, 'projects')
+    const docRef = doc(collRef)
+    const projectWithId = {
+      id: docRef.id,
+      ...d,
+    }
+    all.set(docRef, projectWithId)
+  })
+  try {
+    await all.commit()
+    console.log('匯入成功')
+  } catch (error) {
+    console.log(error)
   }
 }

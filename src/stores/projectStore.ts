@@ -1,11 +1,13 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { projectsList as initialProjects } from '@/views/content/data'
-import type { ProjectStatus } from '@/types/project'
+import type { ProjectStatus, ProjectItem } from '@/types/project'
+import { getProjectsAPI } from '@/services/projectService'
+import { ElMessage } from 'element-plus'
 
 export const useProjectStore = defineStore('project', () => {
   //原始資料
-  const projectsList = ref(initialProjects)
+  const projectsList = ref<ProjectItem[]>([])
+  const isLoading = ref<boolean>(false)
 
   //篩選狀態
   const searchQuery = ref<string>('')
@@ -40,11 +42,25 @@ export const useProjectStore = defineStore('project', () => {
     })
   })
 
+  const fetchProjects = async () => {
+    try {
+      isLoading.value = true
+      projectsList.value = await getProjectsAPI()
+    } catch (error) {
+      ElMessage.error('載入專案失敗，請稍後再試')
+      throw error
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   return {
     projectsList,
+    isLoading,
     searchQuery,
     tagsFilter,
     statusFilter,
     filteredProjects,
+    fetchProjects,
   }
 })

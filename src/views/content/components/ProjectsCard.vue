@@ -9,6 +9,15 @@ defineProps<{
   isProjectEdit: boolean
 }>()
 
+const isHovering = ref<boolean>(false)
+const isMenuOpen = ref<boolean>(false)
+
+// 使用 computed 依賴屬性自動計算顯示狀態，避免手動操作狀態產生不一致
+const shouldShowMenu = computed(() => isHovering.value || isMenuOpen.value)
+
+const handleMenuVisible = (visible: boolean) => {
+  isMenuOpen.value = visible
+}
 
 const openLink = (url: string) => {
   if (url) window.open(url, '_blank')
@@ -16,15 +25,28 @@ const openLink = (url: string) => {
 </script>
 
 <template>
-  <div class="relative group cursor-pointer" @click="$emit('edit', data)">
+  <div @mouseenter="isHovering = true" @mouseleave="isHovering = false" class="relative group cursor-pointer"
+    @click="$emit('edit', data)">
     <el-checkbox v-show="isBatchEdit" size="large" :value="data.id" @click.stop
       class="project-checkbox absolute left-3 z-10"></el-checkbox>
     <el-tag class="absolute top-2 right-2 z-10" :type="STATUS_MAP[data.status].type">{{
       STATUS_MAP[data.status].name }}</el-tag>
+    <el-dropdown trigger="click" @visible-change="handleMenuVisible"
+      class="absolute top-8 right-3 z-10 text-2xl transition-opacity duration-200"
+      :class="{ 'opacity-100': shouldShowMenu, ' opacity-0': !shouldShowMenu }">
+      <span @click.stop>
+        <icon-ic:baseline-more-horiz />
+      </span>
+      <template #dropdown>
+        <el-dropdown-menu>
+          <el-dropdown-item>刪除</el-dropdown-item>
+        </el-dropdown-menu>
+      </template>
+    </el-dropdown>
     <el-card shadow="hover" class="flex flex-col">
       <template #header>
-        <div class="card-header flex justify-center items-center font-bold text-xl line-clamp-2 min-h-[3.5rem] mt-4 ">
-          <span>{{ data.title }}</span>
+        <div class="card-header w-full relative flex justify-center items-center min-h-[3.5rem] mt-4 ">
+          <span class="text-xl font-bold text-center break-words">{{ data.title }}</span>
         </div>
       </template>
       <div class="card-img aspect-video w-full overflow-hidden mb-2 ">

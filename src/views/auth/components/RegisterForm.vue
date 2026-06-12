@@ -123,7 +123,11 @@ const isSubmitDisabled = computed(() => {
 
 const register = async () => {
   if (isSubmitDisabled.value) return
-  await ruleFormRef.value.validate()
+  const isValid = await ruleFormRef.value.validate().catch(() => false)
+  if (isValid) {
+    console.warn('表單驗證未通過')
+    return
+  }
 
   // 解構排除僅前端校驗用的 confirmPassword 與 authCode，確保送往後端的資料純淨
   const { confirmPassword, authCode, ...cleanData }: RegisterParams & { confirmPassword: unknown, authCode: unknown } = ruleForm.value;

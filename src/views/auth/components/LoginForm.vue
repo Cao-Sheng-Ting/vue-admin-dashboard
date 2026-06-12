@@ -29,7 +29,12 @@ const rules = reactive({
 })
 
 const login = async () => {
-  await ruleFormRef.value.validate()
+  const isValid = await ruleFormRef.value.validate().catch(() => false)
+  if (isValid) {
+    console.warn('表單驗證未通過')
+    return
+  }
+
   try {
     await userStore.userLogin(ruleForm.value)
     const targetPath = route.query.redirect as string || '/'

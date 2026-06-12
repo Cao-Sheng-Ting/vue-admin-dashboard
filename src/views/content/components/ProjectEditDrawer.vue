@@ -4,6 +4,7 @@ import type { ProjectItem, AddProjectForm, ProjectStatus } from '@/types/project
 import ProjectTagDialog from '@/views/content/components/ProjectTagDialog.vue'
 import ProjectStatusSelect from './ProjectStatusSelect.vue'
 import { ElMessageBox, ElMessage } from 'element-plus'
+import { addProjectAPI, editProjectAPI } from '@/services/projectService.ts'
 
 // ============================================================================
 // Models (組件通訊區)
@@ -196,13 +197,53 @@ const handleClose = () => {
   }
 }
 
+const toAddApiPayload = (form: ProjectFormState): AddProjectForm => {
+  return {
+    ...form,
+    status: form.status as ProjectStatus
+  }
+}
+
+const toEditApiPayload = (form: ProjectFormState): ProjectItem => {
+  return {
+    ...form,
+    id: form.id!,
+    status: form.status as ProjectStatus
+  }
+}
+
+const emit = defineEmits(['addProject', 'editProject'])
+
+const handleAddProject = async (form: AddProjectForm) => {
+  const project = await addProjectAPI(form)
+  emit('addProject', project)
+  ElMessage.success('專案新增成功')
+}
+
+const handleEditProject = async (form: ProjectItem) => {
+  const project = await editProjectAPI(form)
+  emit('editProject', project)
+  ElMessage.success('專案更新成功')
+}
+
 const handleSubmit = async () => {
   if (!ruleFormRef.value) return
+  const isValid = await ruleFormRef.value.validate().catch(() => false)
+  if (!isValid) {
+    console.warn('表單驗證未通過')
+    return
+  }
   try {
-    await ruleFormRef.value.validate()
-    // TODO: 驗證通過，後續呼叫 API 送出資料
+    if (!isProjectEdit.value) {
+      await handleAddProject(toAddApiPayload(localForm.value))
+    } else {
+      await handleEditProject(toEditApiPayload(localForm.value))
+    }
+    isDrawerVisible.value = false
+    localForm.value = getInitialProject()
   } catch (error) {
-
+    console.error(isProjectEdit.value ? '更新專案錯誤' : '新增專案錯誤', error)
+    ElMessage.error(isProjectEdit.value ? '更新專案發生錯誤，請稍後再試' : '新增專案發生錯誤，請稍後再試')
   }
 }
 
@@ -249,7 +290,7 @@ const responsiveSize = computed(() => {
           <div class="flex flex-row flex-wrap gap-2">
             <el-tag v-for="(tag, index) in localForm.tags" :key="index" closable @close="handleTagClose(tag)">{{
               tag
-            }}</el-tag>
+              }}</el-tag>
           </div>
         </div>
       </el-form-item>

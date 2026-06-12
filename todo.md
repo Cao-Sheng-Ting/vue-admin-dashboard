@@ -9,6 +9,8 @@
 
 ----- 待筆記 nextTick, flush: 'post', resetFields()
 
+---- 為何從 Realtime Database 改用 fireStore
+
 ### 🌍 全局設定
 
 - [ ] [app.vue] 寫 onMounted 來監測每次重新整理時是否還是登入狀態

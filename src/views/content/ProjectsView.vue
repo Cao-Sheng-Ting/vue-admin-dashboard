@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import ProjectsCard from './components/ProjectsCard.vue';
-import ProjectEditDrawer from './components/ProjectEditDrawer.vue';
-import ProjectTagDialog from './components/ProjectTagDialog.vue';
-import { useDebounceSearch } from '@/composables/useDebounce';
-import { useProjectStore } from '@/stores/projectStore';
-import ProjectStatusSelect from './components/ProjectStatusSelect.vue';
-import type { ProjectStatus, ProjectItem } from '@/types/project';
+import { ref } from 'vue'
+import ProjectsCard from './components/ProjectsCard.vue'
+import ProjectEditDrawer from './components/ProjectEditDrawer.vue'
+import ProjectTagDialog from './components/ProjectTagDialog.vue'
+import { useDebounceSearch } from '@/composables/useDebounce'
+import { useProjectStore } from '@/stores/projectStore'
+import ProjectStatusSelect from './components/ProjectStatusSelect.vue'
+import type { ProjectStatus, ProjectItem } from '@/types/project'
 
 const projectStore = useProjectStore()
 
@@ -56,6 +56,15 @@ const handleTagsFilter = (tags: string[]) => {
 watch(selectedStatus, (newVal) => {
   projectStore.statusFilter = newVal
 })
+
+const isError = ref<boolean>(false)
+onMounted(() => {
+  try {
+    projectStore.fetchProjects()
+  } catch {
+    isError.value = true
+  }
+})
 </script>
 
 <template>
@@ -70,6 +79,7 @@ watch(selectedStatus, (newVal) => {
       </div>
     </div>
   </div>
+
   <div class="tech-stack-tags flex gap-2 items-center m-2">
     <el-tag closable @close="handleTagClose(tag)" v-for="tag in projectStore.tagsFilter" :key="tag">{{ tag
       }}</el-tag>
@@ -100,7 +110,44 @@ watch(selectedStatus, (newVal) => {
         </el-button>
       </el-col>
     </el-row>
-    <el-row :gutter="20">
+
+    <el-row :gutter="20" v-if="projectStore.isLoading">
+      <el-col :xs="24" :sm="12" :md="8" :lg="6" v-for="i in 4" :key="i" class="mb-5">
+        <el-skeleton animated>
+          <template #template>
+            <div class="border pt-7 pb-3 px-5 rounded-lg">
+              <div class="flex flex-col gap-3 items-center">
+                <el-skeleton-item variant="h2" style="width: 70%"></el-skeleton-item>
+                <el-skeleton-item variant="image" style="width: 100% ; height: 200px" />
+              </div>
+              <div class="pt-1">
+                <el-skeleton-item variant="text"></el-skeleton-item>
+                <div class="flex justify-evenly py-3">
+                  <el-skeleton-item variant="button"></el-skeleton-item>
+                  <el-skeleton-item variant="button"></el-skeleton-item>
+                </div>
+                <el-skeleton-item variant="text" style="width: 60%;"></el-skeleton-item>
+                <el-skeleton-item variant="text" class="mt-8"></el-skeleton-item>
+              </div>
+            </div>
+          </template>
+        </el-skeleton>
+      </el-col>
+    </el-row>
+
+    <div v-else-if="isError" class="flex flex-col h-full w-full items-center justify-center pb-32 gap-3">
+      <el-button size="large" class="border-none text-2xl">
+        <icon-tabler:refresh />
+      </el-button>
+      <div class="text-lg text-gray-600">重新整理</div>
+    </div>
+
+    <div v-else-if="projectStore.filteredProjects.length === 0"
+      class="flex w-full h-full items-center justify-center pb-32">
+      <el-empty description="專案目前沒有內容" />
+    </div>
+
+    <el-row :gutter="20" v-else>
       <el-col :xs="24" :sm="12" :md="8" :lg="6" v-for="item in projectStore.filteredProjects" :key="item.id"
         class="mb-5">
         <el-checkbox-group v-model="projectCheckList">
