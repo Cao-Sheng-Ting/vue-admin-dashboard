@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { useWindowSize } from '@vueuse/core'
-import type { ProjectItem, AddProjectForm, ProjectStatus } from '@/types/project'
+import type { ProjectItem, AddProjectData, ProjectStatus, EditProjectData } from '@/types/project'
 import ProjectTagDialog from '@/views/content/components/ProjectTagDialog.vue'
 import ProjectStatusSelect from './ProjectStatusSelect.vue'
 import { ElMessageBox, ElMessage } from 'element-plus'
 import { addProjectAPI, editProjectAPI } from '@/services/projectService.ts'
+import { formatDate } from '@/utils/date.ts'
 
 // ============================================================================
 // Models (組件通訊區)
@@ -46,7 +47,7 @@ const rules = reactive({
 // ============================================================================
 
 // 專案表單初始化狀態，status 暫時允許 string 以處理 UI 的空值狀態
-type InitialProject = Omit<AddProjectForm, 'status'> & { status: string }
+type InitialProject = Omit<AddProjectData, 'status'> & { status: string }
 
 // 表單的響應式狀態，合併了初始化狀態與增加編輯所需的 ID
 type ProjectFormState = InitialProject & Partial<Pick<ProjectItem, 'id'>>
@@ -60,7 +61,7 @@ const getInitialProject = (): InitialProject => ({
   progress: 0,
   githubUrl: '',
   demoUrl: '',
-  createdAt: null, // 日期組件清空時的 null 型態，避免髒檢查誤判
+  buildDate: null, // 日期組件清空時的 null 型態，避免髒檢查誤判
   detailContent: ''
 })
 const localForm = ref<ProjectFormState>(getInitialProject())
@@ -80,8 +81,15 @@ const formKey = ref<number>(0)
 //監聽外部傳入的專案資料在編輯模式下以進行同步
 watch(cardData, (newVal) => {
   if (newVal && isProjectEdit.value) {
-    localForm.value = structuredClone(toRaw(newVal))
-    console.log(localForm.value)
+    const rawData = toRaw(newVal)
+
+    localForm.value = {
+      ...rawData,
+      createdAt: newVal.createdAt ? formatDate(newVal.createdAt) : null,
+      updatedAt: newVal.updatedAt ? formatDate(newVal.updatedAt) : null,
+      buildDate: newVal.buildDate ? formatDate(newVal.buildDate) : null,
+      tags: newVal.tags ? [...rawData.tags] : []
+    }
     //將進度暫存與資料同步綁在同一微任務節點，防禦連續點擊不同卡片時，isDrawerVisible 監聽器觸發順序不確定導致的時序競態
     lastProgress.value = localForm.value.progress
   }
@@ -129,35 +137,56 @@ const handleReset = () => {
       cancelButtonText: '取消',
       type: 'warning'
     }
-  )
-    .then(async () => {
-      try {
-        if (!isProjectEdit.value) {
-          localForm.value = getInitialProject()
+  ).then(async () => {
+    try {
+      if (!isProjectEdit.value) {
+        localForm.value = getInitialProject()
+      } else {
+        if (cardData.value) {
+          localForm.value = structuredClone(toRaw(cardData.value))
         } else {
-          if (cardData.value) {
-            localForm.value = structuredClone(toRaw(cardData.value))
-          } else {
-            console.warn('編輯模式下找不到原始資料，使用初始化資料替代')
-            localForm.value = getInitialProject()
-          }
+          console.warn('編輯模式下找不到原始資料，使用初始化資料替代')
+          localForm.value = getInitialProject()
         }
-        // 強制觸發 舊表單 Unmount / 新表單 Mount
-        // 達到零副作用重置 UI 臨時狀態(驗證紅字)
-        formKey.value++
-        ElMessage.success('重置成功')
-      } catch (error) {
-        console.error('重置表單發生錯誤:', error)
-        ElMessage.error('重置失敗，請稍後再試')
       }
-    })
+      // 強制觸發 舊表單 Unmount / 新表單 Mount
+      // 達到零副作用重置 UI 臨時狀態(驗證紅字)
+      formKey.value++
+      ElMessage.success('重置成功')
+    } catch (error) {
+      console.error('重置表單發生錯誤:', error)
+      ElMessage.error('重置失敗，請稍後再試')
+    }
+  }
+  )
 }
 
-// --- 表單關閉與重置 ---
+// --- 表單操作 ---
+
+const getEditableData = (data: ProjectItem | ProjectFormState | null): InitialProject => {
+  if (!data) return getInitialProject()
+  const { id: _id, createdAt: _createdAt, updatedAt: _updatedAt, ...rest } = data
+
+  return {
+    ...rest,
+    buildDate: formatDate(data.buildDate)
+  }
+}
+
+//髒檢查邏輯
+const isDirty = computed(() => {
+  const currentData = getEditableData(localForm.value)
+  const baseData = getEditableData(cardData.value)
+
+  if (!isProjectEdit.value) {
+    return JSON.stringify(currentData) !== JSON.stringify(getInitialProject())
+  } else {
+    return JSON.stringify(currentData) !== JSON.stringify(baseData)
+  }
+})
+
+
 const handleClose = () => {
-  const currentData = JSON.stringify(localForm.value)
-  const initialData = JSON.stringify(getInitialProject())
-  const baseData = JSON.stringify(toRaw(cardData.value))
 
   //封裝重複的關閉重置邏輯
   const closeDrawerAndReset = () => {
@@ -166,63 +195,47 @@ const handleClose = () => {
     isDrawerVisible.value = false
   }
 
-  //髒檢查機制
-  if (!isProjectEdit.value) {
-    if (currentData !== initialData) {
-      ElMessageBox.confirm(
-        '確定要捨棄目前的編輯內容嗎？',
-        {
-          confirmButtonText: '確定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }
-      )
-        .then(() => { closeDrawerAndReset() }).catch(() => { })
-    } else {
-      closeDrawerAndReset()
-    }
+  if (isDirty.value) {
+    ElMessageBox.confirm(
+      '確定要捨棄目前修改的內容嗎？',
+      {
+        confirmButtonText: '確定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+      .then(() => { closeDrawerAndReset() }).catch(() => { })
   } else {
-    if (currentData !== baseData) {
-      ElMessageBox.confirm(
-        '確定要捨棄目前修改的內容嗎？',
-        {
-          confirmButtonText: '確定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }
-      ).then(() => { closeDrawerAndReset() }).catch(() => { })
-    } else {
-      closeDrawerAndReset()
-    }
+    closeDrawerAndReset()
   }
 }
 
-const toAddApiPayload = (form: ProjectFormState): AddProjectForm => {
+const toAddApiPayload = (form: ProjectFormState): AddProjectData => {
   return {
     ...form,
     status: form.status as ProjectStatus
   }
 }
 
-const toEditApiPayload = (form: ProjectFormState): ProjectItem => {
+const toEditApiPayload = (form: ProjectFormState): EditProjectData => {
   return {
     ...form,
     id: form.id!,
-    status: form.status as ProjectStatus
+    status: form.status as ProjectStatus,
   }
 }
 
-const emit = defineEmits(['addProject', 'editProject'])
+const emit = defineEmits(['project-added', 'project-updated'])
 
-const handleAddProject = async (form: AddProjectForm) => {
+const handleAddProject = async (form: AddProjectData) => {
   const project = await addProjectAPI(form)
-  emit('addProject', project)
+  emit('project-added', project)
   ElMessage.success('專案新增成功')
 }
 
 const handleEditProject = async (form: ProjectItem) => {
   const project = await editProjectAPI(form)
-  emit('editProject', project)
+  emit('project-updated', project)
   ElMessage.success('專案更新成功')
 }
 
@@ -241,6 +254,7 @@ const handleSubmit = async () => {
     }
     isDrawerVisible.value = false
     localForm.value = getInitialProject()
+    cardData.value = null
   } catch (error) {
     console.error(isProjectEdit.value ? '更新專案錯誤' : '新增專案錯誤', error)
     ElMessage.error(isProjectEdit.value ? '更新專案發生錯誤，請稍後再試' : '新增專案發生錯誤，請稍後再試')
@@ -319,8 +333,8 @@ const responsiveSize = computed(() => {
         <el-input placeholder="Demo 連結" v-model="localForm.demoUrl"></el-input>
       </el-form-item>
 
-      <el-form-item prop="createdAt">
-        <el-date-picker placeholder="創建日期" v-model="localForm.createdAt"></el-date-picker>
+      <el-form-item prop="buildDate">
+        <el-date-picker placeholder="創建日期" v-model="localForm.buildDate"></el-date-picker>
       </el-form-item>
 
       <el-form-item prop="detailContent">
@@ -332,7 +346,7 @@ const responsiveSize = computed(() => {
     <template #footer>
       <div class="flex w-full justify-end gap-4">
         <el-button size="large" @click="handleReset">重置</el-button>
-        <el-button type="primary" size="large" @click="handleSubmit">儲存</el-button>
+        <el-button :disabled="!isDirty" type="primary" size="large" @click="handleSubmit">儲存</el-button>
       </div>
     </template>
   </el-drawer>

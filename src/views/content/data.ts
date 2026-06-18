@@ -1,6 +1,6 @@
-import type { AddProjectForm } from '@/types/project'
+import type { AddProjectData } from '@/types/project'
 
-export const projectsList: AddProjectForm[] = [
+export const projectsList: AddProjectData[] = [
   {
     title: 'Vue 3 Admin Dashboard',
     description: '基於 Vue 3 + TS + Element Plus 的後台管理系統，包含動態路由與權限控制。',
@@ -10,7 +10,7 @@ export const projectsList: AddProjectForm[] = [
     progress: 85,
     githubUrl: 'https://github.com/',
     demoUrl: 'https://demo.com/',
-    createdAt: '2026-03-01',
+    buildDate: '2026-03-01',
     detailContent: '這是我目前的主力作品，深度研究了封裝思維與組件通訊邏輯。',
   },
   {
@@ -22,7 +22,7 @@ export const projectsList: AddProjectForm[] = [
     progress: 95,
     githubUrl: 'https://github.com/',
     demoUrl: 'https://demo.com/',
-    createdAt: '2025-11-20',
+    buildDate: '2025-11-20',
     detailContent: '這是轉職初期用來打穩 JS 基礎的小作品。',
   },
   {
@@ -34,7 +34,7 @@ export const projectsList: AddProjectForm[] = [
     progress: 40,
     githubUrl: 'https://github.com/',
     demoUrl: 'https://demo.com/',
-    createdAt: '2026-04-05',
+    buildDate: '2026-04-05',
     detailContent: '結合自身健身習慣開發，目前正在實作 ECharts 圖表分析。',
   },
   {
@@ -46,7 +46,7 @@ export const projectsList: AddProjectForm[] = [
     progress: 10,
     githubUrl: '#',
     demoUrl: '#',
-    createdAt: '2026-04-10',
+    buildDate: '2026-04-10',
     detailContent: '計畫將樂理邏輯程式化，方便練習不同調性的轉位。',
   },
   {
@@ -58,7 +58,7 @@ export const projectsList: AddProjectForm[] = [
     progress: 100,
     githubUrl: 'https://github.com/',
     demoUrl: 'https://demo.com/',
-    createdAt: '2026-02-15',
+    buildDate: '2026-02-15',
     detailContent: '練習如何優雅地處理 API 請求與錯誤攔截。',
   },
   {
@@ -70,7 +70,7 @@ export const projectsList: AddProjectForm[] = [
     progress: 60,
     githubUrl: '#',
     demoUrl: '#',
-    createdAt: '2026-01-20',
+    buildDate: '2026-01-20',
     detailContent: '實作紀錄功能，確保能符合 100LS 的練習週期。',
   },
   {
@@ -82,7 +82,7 @@ export const projectsList: AddProjectForm[] = [
     progress: 100,
     githubUrl: '#',
     demoUrl: '#',
-    createdAt: '2025-12-10',
+    buildDate: '2025-12-10',
     detailContent: '練習圖片上傳與 Firebase 資料結構設計。',
   },
   {
@@ -94,7 +94,7 @@ export const projectsList: AddProjectForm[] = [
     progress: 100,
     githubUrl: '#',
     demoUrl: '#',
-    createdAt: '2026-03-25',
+    buildDate: '2026-03-25',
     detailContent: '紀錄如何利用 AI 輔助重構代碼。',
   },
   {
@@ -106,7 +106,7 @@ export const projectsList: AddProjectForm[] = [
     progress: 100,
     githubUrl: '#',
     demoUrl: '#',
-    createdAt: '2026-03-25',
+    buildDate: '2026-03-25',
     detailContent: '紀錄如何利用 AI 輔助重構代碼。',
   },
 ]

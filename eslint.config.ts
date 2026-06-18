@@ -28,6 +28,15 @@ const config = defineConfigWithVueTs(
           ignoreRestArgs: true,
         },
       ],
+      // 新增規則：允許底線開頭的變數不被檢查 (用於解構時忽略不需要的欄位)
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
     },
   },
 )

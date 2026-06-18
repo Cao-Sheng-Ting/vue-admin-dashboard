@@ -1,11 +1,11 @@
 #### 當前進度🚨🚨🚨✅
 
-- [✅] 1.onMounted 將 data.ts資料放到store
-- [] 2.搜尋匡用 v-model 跟 ref 變量綁定
-- [✅] 3.computed 去監聽搜尋匡、status、tags，用.filter去跑整個放在store的資料，如果沒有進行任何篩選的話 return 原始資料
-- [✅] 4.補全防抖知識並給搜尋匡加上，
-- [] 5.了解v-model.lazy(失焦才觸發)、debounce 函式、lodash等等效能優化
-- [✅] 6.父組件 ProjectsView 傳參給子組件 ProjectsCard 改傳 computed return 結果
+- [✅] 1.解決沒修改時，關閉drawer也會詢問是否捨棄修改，目前找到問題出在<el-date-picker>
+- [✅] 2. 讀取 buildDate 後 頁面的 el-date-picker 顯示不了
+- [✅] 3. 編輯儲存完 再次點擊編輯表單會全部空白 關閉後再點擊一次 表單是舊資料沒有更新 要等頁面更新後才可以
+- [✅] 4.更新後的卡片在刷新頁面後順序會跑到前面
+- [✅] 5.新增後的卡片不能點進去編輯，要刷新頁面後才可以
+- [✅] 6.原本空格的表單編輯時內容會變成#
 
 ----- 待筆記 nextTick, flush: 'post', resetFields()
 
@@ -27,6 +27,8 @@
 - [] 單元測試
 
 -[] 全域的 catch 攔截器處理異常
+
+- [] store 使用 action
 
 ### 🚗 Route設定
 
@@ -98,3 +100,21 @@
 - [ ] [UI] 實作 `SettingsView.vue` 白天黑夜色調切換
 
 ### 👮🏻‍♀️users 用戶設定
+
+utils/ date.ts:
+// src/utils/date.ts
+import { Timestamp } from 'firebase/firestore';
+
+export const formatDate = (timestamp: any): string => {
+if (!timestamp || typeof timestamp.toDate !== 'function') {
+return '無日期';
+}
+
+const date = timestamp.toDate();
+
+return date.toLocaleDateString('zh-TW', {
+year: 'numeric',
+month: '2-digit',
+day: '2-digit'
+});
+};

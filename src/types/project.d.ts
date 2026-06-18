@@ -1,3 +1,5 @@
+import { Timestamp } from 'firebase/firestore'
+
 export type ProjectStatus = 'completed' | 'developing' | 'testing' | 'maintenance' | 'planning'
 
 export interface ProjectItem {
@@ -10,8 +12,12 @@ export interface ProjectItem {
   progress: number
   githubUrl?: string
   demoUrl?: string
-  createdAt?: string | Date | null
+  buildDate?: string | Date | null
+  createdAt: Timestamp
+  updatedAt: Timestamp
   detailContent?: string
 }
 
-export type AddProjectForm = Omit<ProjectItem, 'id'>
+export type AddProjectData = Omit<ProjectItem, 'id', 'createdAt', 'updatedAt'>
+
+export type EditProjectData = Omit<ProjectItem, 'createdAt', 'updatedAt'>

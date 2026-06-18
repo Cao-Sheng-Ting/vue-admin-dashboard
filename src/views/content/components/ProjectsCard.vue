@@ -1,6 +1,9 @@
 <script setup lang="ts">
-import { STATUS_MAP } from '@/constants/project';
-import type { ProjectItem } from '@/types/project';
+import { STATUS_MAP } from '@/constants/project'
+import type { ProjectItem } from '@/types/project'
+import { deleteProjectAPI } from '@/services/projectService'
+import { useProjectStore } from '@/stores/projectStore';
+import { ElMessage, ElMessageBox } from 'element-plus'
 
 
 defineProps<{
@@ -8,6 +11,8 @@ defineProps<{
   isBatchEdit: boolean
   isProjectEdit: boolean
 }>()
+
+const projectStore = useProjectStore()
 
 const isHovering = ref<boolean>(false)
 const isMenuOpen = ref<boolean>(false)
@@ -21,6 +26,28 @@ const handleMenuVisible = (visible: boolean) => {
 
 const openLink = (url: string) => {
   if (url) window.open(url, '_blank')
+}
+
+const handleDelete = async (id: string) => {
+  try {
+    await ElMessageBox.confirm(
+      '確定要刪除這個專案嗎？',
+      {
+        confirmButtonText: '確定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+    await deleteProjectAPI(id)
+    const index = projectStore.projectsList.findIndex(p => p.id === id)
+    if (index !== -1) {
+      projectStore.projectsList.splice(index, 1)
+    }
+    ElMessage.success('專案刪除成功')
+  } catch (error) {
+    if (error === 'cancel') return
+    console.log(error)
+    ElMessage.error('刪除失敗，請稍候再試')
+  }
 }
 </script>
 
@@ -39,7 +66,7 @@ const openLink = (url: string) => {
       </span>
       <template #dropdown>
         <el-dropdown-menu>
-          <el-dropdown-item>刪除</el-dropdown-item>
+          <el-dropdown-item @click="handleDelete(data.id)">刪除專案</el-dropdown-item>
         </el-dropdown-menu>
       </template>
     </el-dropdown>
@@ -50,8 +77,14 @@ const openLink = (url: string) => {
         </div>
       </template>
       <div class="card-img aspect-video w-full overflow-hidden mb-2 ">
-        <img :src="data.imageUrl" :alt="data.title"
+        <el-image :src="data.imageUrl" :alt="data.title"
           class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
+          <template #error>
+            <div class="image-slot flex justify-center items-center w-full h-full text-slate-300">
+              <icon-mdi:picture-360-outline class="text-5xl" />
+            </div>
+          </template>
+        </el-image>
       </div>
       <div class="card-content">
         <p class="text-sm text-gray-500 line-clamp-2 min-h-[2.5rem] mb-6">{{ data.description }}</p>

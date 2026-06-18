@@ -7,6 +7,11 @@ import { useDebounceSearch } from '@/composables/useDebounce'
 import { useProjectStore } from '@/stores/projectStore'
 import ProjectStatusSelect from './components/ProjectStatusSelect.vue'
 import type { ProjectStatus, ProjectItem } from '@/types/project'
+import { getProjectsAPI } from '@/services/projectService.ts'
+import { ElMessageBox } from 'element-plus'
+import { deleteProjectsBatchAPI } from '@/services/projectService.ts'
+
+
 
 const projectStore = useProjectStore()
 
@@ -16,34 +21,6 @@ const isTagFilterVisible = ref<boolean>(false)
 const selectedTags = ref<string[]>([])
 const selectedStatus = ref<ProjectStatus | 'all'>('all')
 
-//  --- 批量操作 ---
-const isBatchEdit = ref<boolean>(false)
-const projectCheckList = ref<number[]>([])
-
-// --- 專案編輯 (Drawer) ---
-const isDrawerVisible = ref<boolean>(false)
-const isProjectEdit = ref<boolean>(false)
-const editCardData = ref<ProjectItem | null>(null)
-
-const handleAddProject = () => {
-  isProjectEdit.value = false
-  editCardData.value = null
-  isDrawerVisible.value = true
-}
-
-const handleProjectEdit = (card: ProjectItem) => {
-  isProjectEdit.value = true
-  editCardData.value = card
-  isDrawerVisible.value = true
-}
-
-
-const handleEditAction = () => {
-  isBatchEdit.value = !isBatchEdit.value
-}
-// const handleBatchDelete = () => {
-
-// }
 const handleTagClose = (tag: string) => {
   projectStore.tagsFilter = projectStore.tagsFilter.filter(t => t !== tag)
 }
@@ -52,6 +29,75 @@ const handleTagsFilter = (tags: string[]) => {
   selectedTags.value = tags
   projectStore.tagsFilter = tags
 }
+
+//  --- 批量操作 ---
+const isBatchEdit = ref<boolean>(false)
+const projectCheckList = ref<string[]>([])
+
+// --- 專案 Drawer 彈出  ---
+const isDrawerVisible = ref<boolean>(false)
+const isProjectEdit = ref<boolean>(false)
+const editCardData = ref<ProjectItem | null>(null)
+
+const openAddDrawer = () => {
+  isProjectEdit.value = false
+  editCardData.value = null
+  isDrawerVisible.value = true
+}
+
+const openEditDrawer = (card: ProjectItem) => {
+  isProjectEdit.value = true
+  editCardData.value = card
+  isDrawerVisible.value = true
+}
+
+// --- 專案 Drawer   ---
+
+const handleAddProject = (project: ProjectItem) => {
+  projectStore.projectsList.unshift(project)
+}
+
+const handleUpdateProject = async (project: ProjectItem) => {
+  const index = projectStore.projectsList.findIndex(p => p.id === project.id)
+
+  if (index !== -1) {
+    projectStore.projectsList[index] = project
+  } else {
+    projectStore.projectsList = await getProjectsAPI()
+  }
+  console.log('更新後的資料', project)
+}
+
+// --- 專案刪除  ---
+const handleEditAction = () => {
+  isBatchEdit.value = !isBatchEdit.value
+  if (!isBatchEdit.value) projectCheckList.value = []
+}
+
+const handleBatchDelete = async (list: string[]) => {
+  console.log(projectCheckList.value)
+  try {
+    await ElMessageBox.confirm('確定刪除所選的專案嗎？',
+      {
+        confirmButtonText: '確定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+    await deleteProjectsBatchAPI(list)
+    ElMessage.success('專案刪除成功')
+    const remainingProjects = projectStore.projectsList.filter((p) => {
+      return !projectCheckList.value.includes(p.id)
+    })
+    projectStore.projectsList = remainingProjects
+    projectCheckList.value = []
+  } catch (error) {
+    if (error === 'cancel') return
+    console.log(error)
+    ElMessage.error('刪除失敗，請稍候再試')
+  }
+}
+
 
 watch(selectedStatus, (newVal) => {
   projectStore.statusFilter = newVal
@@ -82,12 +128,12 @@ onMounted(() => {
 
   <div class="tech-stack-tags flex gap-2 items-center m-2">
     <el-tag closable @close="handleTagClose(tag)" v-for="tag in projectStore.tagsFilter" :key="tag">{{ tag
-      }}</el-tag>
+    }}</el-tag>
   </div>
   <div class="main-box bg-white flex-1 rounded p-6 ">
     <el-row class="mb-5">
       <el-col :span="16">
-        <el-button @click="handleAddProject" type="primary" plain>
+        <el-button @click="openAddDrawer" type="primary" plain>
           <div class="flex items-center gap-1">
             <icon-ph:plus-circle />
             <span>新增</span>
@@ -100,9 +146,11 @@ onMounted(() => {
             <span>{{ isBatchEdit ? '取消' : '編輯' }}</span>
           </div>
         </el-button>
+        <!-- <el-button @click="all">一鍵匯入</el-button> -->
       </el-col>
       <el-col :span="8" class="flex justify-end">
-        <el-button type="danger" v-if="isBatchEdit" :disabled="projectCheckList.length === 0 ? true : false">
+        <el-button type="danger" v-if="isBatchEdit" :disabled="projectCheckList.length === 0 ? true : false"
+          @click="handleBatchDelete(projectCheckList)">
           <div class="flex items-center gap-1">
             <icon-ic:outline-edit-note />
             <span>刪除</span>
@@ -152,7 +200,8 @@ onMounted(() => {
         class="mb-5">
         <el-checkbox-group v-model="projectCheckList">
           <ProjectsCard :data="item" :is-batch-edit="isBatchEdit" :is-project-edit="isProjectEdit"
-            @edit="handleProjectEdit"></ProjectsCard>
+            @edit="openEditDrawer">
+          </ProjectsCard>
         </el-checkbox-group>
       </el-col>
     </el-row>
@@ -160,7 +209,7 @@ onMounted(() => {
   <ProjectTagDialog v-model="isTagFilterVisible" :initial-tags="selectedTags" @confirm="handleTagsFilter">
   </ProjectTagDialog>
   <ProjectEditDrawer v-model:visible="isDrawerVisible" v-model:edit-mode="isProjectEdit"
-    v-model:card-data="editCardData">
+    v-model:card-data="editCardData" @project-added="handleAddProject" @project-updated="handleUpdateProject">
   </ProjectEditDrawer>
 </template>
 
