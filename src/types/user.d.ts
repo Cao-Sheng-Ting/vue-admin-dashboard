@@ -1,3 +1,5 @@
+import { Timestamp } from 'firebase/firestore'
+
 export interface LoginParams {
   email: string
   password: string
@@ -9,6 +11,7 @@ export interface UserInfo {
   nickname: string
   role: UserRole
   avatar?: string
+  createdAt: Timestamp
 }
 
 export type UserRole = 'admin' | 'editor' | 'user'

@@ -1,14 +1,29 @@
-import type { LoginParams, RegisterParams } from '@/types/user'
+import type { LoginParams, RegisterParams, UserInfo } from '@/types/user'
 import { db, auth } from '@/firebase'
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore'
+import { doc, getDoc, setDoc, serverTimestamp, type DocumentData } from 'firebase/firestore'
 import {
   createUserWithEmailAndPassword,
   onAuthStateChanged,
   signInWithEmailAndPassword,
+  signOut,
   type User,
 } from 'firebase/auth'
+import { ElMessage } from 'element-plus'
 
-export const loginAPI = async (loginParams: LoginParams) => {
+const transformUser = (data: DocumentData): UserInfo => {
+  if (!data['uid'] || !data['email']) {
+    throw new Error('用戶資料格式錯誤：缺燒必要欄位')
+  }
+  return {
+    uid: data['uid'],
+    email: data['email'],
+    nickname: data['nickname'],
+    role: data['role'],
+    createdAt: data['createdAt'],
+  }
+}
+
+export const loginAPI = async (loginParams: LoginParams): Promise<UserInfo> => {
   try {
     const userCredential = await signInWithEmailAndPassword(
       auth,
@@ -24,7 +39,8 @@ export const loginAPI = async (loginParams: LoginParams) => {
     if (!userSnap.exists()) {
       throw new Error('此帳號驗證成功，但無法找到對應的用戶資料，請聯絡管理員')
     }
-    return userSnap.data()
+    console.log('返回值：', userSnap.data())
+    return transformUser(userSnap.data())
   } catch (error) {
     if (error instanceof Error && 'code' in error) {
       switch (error.code) {
@@ -39,10 +55,11 @@ export const loginAPI = async (loginParams: LoginParams) => {
           throw new Error('登入時發生意外錯誤，請稍後再試')
       }
     }
+    throw error
   }
 }
 
-export const registerAPI = async (registerParams: RegisterParams) => {
+export const registerAPI = async (registerParams: RegisterParams): Promise<UserInfo> => {
   try {
     const userCredential = await createUserWithEmailAndPassword(
       auth,
@@ -61,7 +78,7 @@ export const registerAPI = async (registerParams: RegisterParams) => {
 
     const userDocRef = doc(db, 'users', uid)
     await setDoc(userDocRef, userData)
-    return { ...userData }
+    return { ...userData } as UserInfo
   } catch (error) {
     if (error instanceof Error && 'code' in error) {
       if (error.code === 'auth/email-already-in-use') {
@@ -69,6 +86,17 @@ export const registerAPI = async (registerParams: RegisterParams) => {
       }
     }
     throw new Error('註冊失敗，請稍後再試')
+  }
+}
+
+export const logoutAPI = async () => {
+  try {
+    await signOut(auth)
+    // 登出成功後，將你的 userInfo 清除或重導向到登入頁
+    ElMessage.success('登出成功')
+  } catch (error) {
+    ElMessage.error('登出失敗，請稍後再試')
+    console.error('登出失敗:', error)
   }
 }
 
