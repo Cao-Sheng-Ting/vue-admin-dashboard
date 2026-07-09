@@ -4,7 +4,7 @@ import type { ProjectStatus, ProjectItem } from '@/types/project'
 import { getProjectsAPI } from '@/services/projectService'
 import { ElMessage } from 'element-plus'
 
-export const useProjectStore = defineStore('project', () => {
+export const useProjectStore = defineStore('projects', () => {
   //原始資料
   const projectsList = ref<ProjectItem[]>([])
   const isLoading = ref<boolean>(false)
