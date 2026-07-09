@@ -30,7 +30,7 @@ const rules = reactive({
 
 const login = async () => {
   const isValid = await ruleFormRef.value.validate().catch(() => false)
-  if (isValid) {
+  if (!isValid) {
     console.warn('表單驗證未通過')
     return
   }

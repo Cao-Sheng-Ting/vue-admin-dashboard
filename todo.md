@@ -26,9 +26,13 @@
 
 - [] 單元測試
 
--[] 全域的 catch 攔截器處理異常
+- [] 全域的 catch 攔截器處理異常
 
 - [] store 使用 action
+
+- [] 從後端拿到的資料目前先以 as 來斷言為定義的型態，可再用 zod 優化
+
+- [] 目前 skills 只有 default 有存 order ， 之後可優化存個人 order
 
 ### 🚗 Route設定
 

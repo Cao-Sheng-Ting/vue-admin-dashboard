@@ -107,6 +107,7 @@ declare module 'vue' {
     'IconPh:keyReturnFill': typeof import('~icons/ph/key-return-fill')['default']
     'IconPh:lockKey': typeof import('~icons/ph/lock-key')['default']
     'IconPh:plusCircle': typeof import('~icons/ph/plus-circle')['default']
+    'IconPh:plusCircleBold': typeof import('~icons/ph/plus-circle-bold')['default']
     'IconPh:userCircle': typeof import('~icons/ph/user-circle')['default']
     IconSupport: typeof import('./src/components/icons/IconSupport.vue')['default']
     'IconTabler:home': typeof import('~icons/tabler/home')['default']

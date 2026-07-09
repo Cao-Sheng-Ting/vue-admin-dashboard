@@ -186,7 +186,7 @@ const isDirty = computed(() => {
 })
 
 
-const handleClose = () => {
+const handleDrawerClose = () => {
 
   //封裝重複的關閉重置邏輯
   const closeDrawerAndReset = () => {
@@ -276,7 +276,7 @@ const responsiveSize = computed(() => {
 </script>
 
 <template>
-  <el-drawer :before-close="handleClose" v-model="isDrawerVisible" :show-close="true" :size="responsiveSize"
+  <el-drawer :before-close="handleDrawerClose" v-model="isDrawerVisible" :show-close="true" :size="responsiveSize"
     style="--el-drawer-bg-color: var(--el-fill-color-light);">
 
     <template #header>
@@ -304,7 +304,7 @@ const responsiveSize = computed(() => {
           <div class="flex flex-row flex-wrap gap-2">
             <el-tag v-for="(tag, index) in localForm.tags" :key="index" closable @close="handleTagClose(tag)">{{
               tag
-              }}</el-tag>
+            }}</el-tag>
           </div>
         </div>
       </el-form-item>

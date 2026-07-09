@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { TECH_STACK_CONFIG } from '@/constants/project';
+import { useSkillsStore } from '@/stores/skillStore';
 
 const props = defineProps<{ 'initialTags': string[] }>()
 
+const skillStore = useSkillsStore()
 
 const checkedTags = ref<string[]>([])
 const isVisible = defineModel()
@@ -38,7 +39,7 @@ watch(isVisible, (newVal) => {
 <template>
   <el-dialog v-model="isVisible" title="技術棧篩選" width="500">
     <el-space direction="vertical" fill>
-      <el-card v-for="item in TECH_STACK_CONFIG" :key="item.label">
+      <el-card v-for="item in skillStore.TECH_STACK_CONFIG" :key="item.label">
         <div class="flex">
           <div class="tech-stack-label w-20 shrink-0 flex items-center whitespace-nowrap "><span>{{ item.label }}</span>
           </div>

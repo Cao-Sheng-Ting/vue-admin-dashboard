@@ -48,6 +48,13 @@ const breadcrumbs = computed(() => {
     (item) => item.meta?.title && item.name !== 'home' && item.name !== 'dashboard',
   )
 })
+
+const userStore = useUserStore()
+
+const logout = async () => {
+  await userStore.userLogout()
+  router.push('/auth/login')
+}
 </script>
 
 <template>
@@ -120,6 +127,7 @@ const breadcrumbs = computed(() => {
               <el-dropdown-menu>
                 <el-dropdown-item>偏好設定</el-dropdown-item>
                 <el-dropdown-item>登入</el-dropdown-item>
+                <el-dropdown-item @click="logout">登出</el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
