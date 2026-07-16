@@ -11,13 +11,11 @@ export const useUserStore = defineStore(
     const userRegister = async (data: RegisterParams) => {
       const res = await registerAPI(data)
       userInfo.value = res
-      console.log('註冊資料', res)
     }
 
     const userLogin = async (loginParams: LoginParams) => {
       const res = await loginAPI(loginParams)
       userInfo.value = res
-      console.log('登入資料', res)
     }
 
     const userLogout = async () => {

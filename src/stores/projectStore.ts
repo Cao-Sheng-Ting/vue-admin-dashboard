@@ -8,12 +8,14 @@ export const useProjectStore = defineStore('projects', () => {
   //原始資料
   const projectsList = ref<ProjectItem[]>([])
   const isLoading = ref<boolean>(false)
+  const isError = ref<boolean>(false)
 
   //篩選狀態
   const searchQuery = ref<string>('')
   const tagsFilter = ref<string[]>([])
   const statusFilter = ref<ProjectStatus | 'all'>('all')
 
+  //篩選後結果
   /**
    * 結合搜尋匡輸入字串、技術標籤和專案狀態進行多層過濾
    * 使用 computed 確保資料連動與緩存
@@ -41,14 +43,18 @@ export const useProjectStore = defineStore('projects', () => {
       return matchSearch && matchTags && matchStatus
     })
   })
+  const isEmpty = computed(() => filteredProjects.value.length === 0)
 
   const fetchProjects = async () => {
+    isLoading.value = true
+    isError.value = false
     try {
-      isLoading.value = true
       projectsList.value = await getProjectsAPI()
+      console.log('isError', isError.value)
     } catch (error) {
+      isError.value = true
       ElMessage.error('載入專案失敗，請稍後再試')
-      throw error
+      console.error(error)
     } finally {
       isLoading.value = false
     }
@@ -57,6 +63,8 @@ export const useProjectStore = defineStore('projects', () => {
   return {
     projectsList,
     isLoading,
+    isError,
+    isEmpty,
     searchQuery,
     tagsFilter,
     statusFilter,

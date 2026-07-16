@@ -1,5 +1,5 @@
 import { db } from '@/firebase'
-import { doc, getDoc, setDoc } from 'firebase/firestore'
+import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'
 import type { SkillsData, SkillsGroup } from '@/types/skill'
 
 export const getDefaultSkillsAPI = async (): Promise<SkillsData> => {
@@ -26,7 +26,7 @@ export const getUserSkillsAPI = async (uid: string): Promise<SkillsGroup | null>
 
     const userData = user.data()
     if (userData && userData.skills) {
-      return userData as SkillsGroup
+      return userData.skills as SkillsGroup
     }
 
     return null
@@ -39,7 +39,9 @@ export const getUserSkillsAPI = async (uid: string): Promise<SkillsGroup | null>
 export const editUserSkillsAPI = async (data: SkillsGroup, uid: string) => {
   try {
     const skillRef = doc(db, 'users', uid)
-    await setDoc(skillRef, data)
+    await updateDoc(skillRef, {
+      skills: data,
+    })
     return data
   } catch (error) {
     console.log('更新技能標籤失敗', error)

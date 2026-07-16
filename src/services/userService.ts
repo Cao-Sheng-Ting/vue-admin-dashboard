@@ -1,4 +1,5 @@
 import type { LoginParams, RegisterParams, UserInfo } from '@/types/user'
+import type { SkillsGroup } from '@/types/skill'
 import { db, auth } from '@/firebase'
 import { doc, getDoc, setDoc, serverTimestamp, type DocumentData } from 'firebase/firestore'
 import {
@@ -11,8 +12,8 @@ import {
 import { ElMessage } from 'element-plus'
 
 const transformUser = (data: DocumentData): UserInfo => {
-  if (!data['uid'] || !data['email']) {
-    throw new Error('用戶資料格式錯誤：缺燒必要欄位')
+  if (!data['uid'] || !data['email'] || !data['nickname'] || !data['role'] || !data['createdAt']) {
+    throw new Error('用戶資料格式錯誤：缺少必要欄位')
   }
   return {
     uid: data['uid'],
@@ -74,17 +75,25 @@ export const registerAPI = async (registerParams: RegisterParams): Promise<UserI
       nickname: registerParams.nickname,
       role: registerParams.role,
       createdAt: serverTimestamp(),
+      skills: {} as SkillsGroup,
     }
 
     const userDocRef = doc(db, 'users', uid)
     await setDoc(userDocRef, userData)
-    return { ...userData } as UserInfo
+
+    const userSnap = await getDoc(userDocRef)
+    const data = userSnap.data()
+    if (!data) {
+      throw new Error('註冊寫入後讀取失敗，請稍後再試')
+    }
+    return transformUser(data)
   } catch (error) {
     if (error instanceof Error && 'code' in error) {
       if (error.code === 'auth/email-already-in-use') {
         throw new Error('當前 Email 已註冊過！')
       }
     }
+    console.error(error)
     throw new Error('註冊失敗，請稍後再試')
   }
 }

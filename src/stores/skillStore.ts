@@ -10,6 +10,7 @@ export const useSkillsStore = defineStore('skills', () => {
   const userSkills = ref<SkillsGroup | null>(null)
   const skillOrder = ref<SkillsData['order'] | null>(null)
   const isLoading = ref<boolean>(false)
+  const isError = ref<boolean>(true)
   /**
    * 結合共用標籤庫和個人標籤庫，並加入 removable 供給頁面使用
    * 使用 computed 確保資料連動與緩存
@@ -57,16 +58,17 @@ export const useSkillsStore = defineStore('skills', () => {
 
   const fetchSkills = async (uid: string) => {
     isLoading.value = true
-
+    // isError.value = false
     try {
       const defaults = await getDefaultSkillsAPI()
-
       defaultSkills.value = defaults.skills
-      userSkills.value = await getUserSkillsAPI(uid)
       skillOrder.value = defaults.order
+
+      userSkills.value = await getUserSkillsAPI(uid)
     } catch (error) {
+      isError.value = true
       ElMessage.error('載入標籤庫失敗，請稍後再試')
-      throw error
+      console.log(error)
     } finally {
       isLoading.value = false
     }
@@ -94,6 +96,8 @@ export const useSkillsStore = defineStore('skills', () => {
     TECH_STACK_CONFIG,
     defaultSkills,
     userSkills,
+    isLoading,
+    isError,
     mergedSkillGroups,
     fetchSkills,
   }
