@@ -1,4 +1,5 @@
 import type { AddProjectData } from '@/types/project'
+import type { SkillsData } from '@/types/skill'
 
 export const projectsList: AddProjectData[] = [
   {
@@ -110,3 +111,21 @@ export const projectsList: AddProjectData[] = [
     detailContent: '紀錄如何利用 AI 輔助重構代碼。',
   },
 ]
+
+export const TECH_STACK_CONFIG: SkillsData = {
+  skills: {
+    frontend: {
+      label: '前端技術',
+      tags: ['Vue 3', 'TypeScript', 'Element Plus', 'Tailwind', 'Pinia'],
+    },
+    backend: {
+      label: '後端與部署',
+      tags: ['Node.js', 'Firebase', 'GitHub Copilot', 'Git', 'Docker'],
+    },
+    others: {
+      label: '其他',
+      tags: ['FL Studio', '100LS', 'English'],
+    },
+  },
+  order: ['frontend', 'backend', 'others'],
+}

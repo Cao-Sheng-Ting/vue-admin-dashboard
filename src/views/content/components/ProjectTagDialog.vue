@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { useSkillsStore } from '@/stores/skillStore';
+import { useSkillStore } from '@/stores/skillStore';
 
 const props = defineProps<{ 'initialTags': string[] }>()
 
-const skillStore = useSkillsStore()
+const skillStore = useSkillStore()
 
 const checkedTags = ref<string[]>([])
 const isVisible = defineModel()
@@ -39,13 +39,13 @@ watch(isVisible, (newVal) => {
 <template>
   <el-dialog v-model="isVisible" title="技術棧篩選" width="500">
     <el-space direction="vertical" fill>
-      <el-card v-for="item in skillStore.TECH_STACK_CONFIG" :key="item.label">
+      <el-card v-for="item in skillStore.mergedSkillGroups" :key="item.label">
         <div class="flex">
           <div class="tech-stack-label w-20 shrink-0 flex items-center whitespace-nowrap "><span>{{ item.label }}</span>
           </div>
           <div class="tech-tags flex flex-wrap gap-3">
-            <el-check-tag v-for="(tag, index) in item.tags" :key="index" :checked="checkedTags.includes(tag)"
-              @change="() => toggleTag(tag)">{{ tag
+            <el-check-tag v-for="(tag, index) in item.tags" :key="index" :checked="checkedTags.includes(tag.name)"
+              @change="() => toggleTag(tag.name)">{{ tag.name
               }}</el-check-tag>
           </div>
         </div>

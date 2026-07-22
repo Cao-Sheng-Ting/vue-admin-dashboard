@@ -48,7 +48,7 @@ export const addProjectAPI = async (projectData: AddProjectData): Promise<Projec
       updatedAt: Timestamp.now(),
     }
   } catch (error) {
-    console.error('新增專案失敗:', error)
+    console.error('新增專案失敗：', error)
     throw error
   }
 }

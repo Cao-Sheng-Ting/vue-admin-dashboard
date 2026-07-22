@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useProjectStore } from '@/stores/projectStore'
 
 withDefaults(defineProps<{
   isError: boolean
@@ -11,16 +10,15 @@ withDefaults(defineProps<{
 }
 )
 
-const projectStore = useProjectStore()
+const emit = defineEmits<{
+  retry: []
+}>()
 
-const loadData = async () => {
-  await projectStore.fetchProjects()
-}
 
 </script>
 <template>
   <div v-if="isError" class="flex flex-col h-full w-full items-center justify-center gap-3">
-    <el-button size="large" @click="loadData" class="border-none text-2xl">
+    <el-button size="large" @click="emit('retry')" class="border-none text-2xl">
       <icon-tabler:refresh />
     </el-button>
     <div class="text-lg text-gray-600">{{ errorDescription ?? '重新整理' }}</div>

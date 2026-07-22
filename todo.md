@@ -36,6 +36,8 @@
 
 - [] Skills 頁面 儲存鍵 添加 dirty state ， 和 離開頁面警告未儲存
 
+- [] projects experiences 顯示建立者名稱
+
 ### 🚗 Route設定
 
 - [ ] 跳轉後加上 Loading 效果 (轉圈圈)
@@ -95,7 +97,10 @@
 
 ### 📊 經歷 (Experience)
 
-- [ ] [UI] 實作 `ExperienceView,vue` 可拉動的時間軸
+- [ ] 🟠加分功能 [UI] 實作 `ExperienceView.vue` 可拉動的時間軸
+- [ ] 🟠加分功能 [UI] 時間段會依年資響應寬度
+- [ ] 🟠加分功能 [CRUD] 時間線可以增刪改查，當前先固定兩條時間線
+- [ ] 🟠加分功能 [UI] 時間線可以增刪改查後，點擊時間線不再跳 dialog或 drawer 編輯， 而是跳轉到子頁面
 
 ### 🛠️ 技能管理 (Skills)
 

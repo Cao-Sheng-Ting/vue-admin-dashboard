@@ -47,7 +47,7 @@ export const useProjectStore = defineStore('projects', () => {
 
   const fetchProjects = async () => {
     isLoading.value = true
-    isError.value = false
+    isError.value = false //每次獲取時重置錯誤狀態，避免頁面卡在失敗畫面
     try {
       projectsList.value = await getProjectsAPI()
       console.log('isError', isError.value)

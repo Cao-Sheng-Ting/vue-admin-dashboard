@@ -18,6 +18,6 @@ export interface ProjectItem {
   detailContent?: string
 }
 
-export type AddProjectData = Omit<ProjectItem, 'id', 'createdAt', 'updatedAt'>
+export type AddProjectData = Omit<ProjectItem, 'id'>
 
-export type EditProjectData = Omit<ProjectItem, 'createdAt', 'updatedAt'>
+export type EditProjectData = Omit<ProjectItem, 'createdAt'>
