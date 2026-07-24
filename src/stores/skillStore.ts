@@ -3,6 +3,9 @@ import type { SkillsData, SkillsGroup, MergedGroup } from '@/types/skill'
 import { ref } from 'vue'
 import { getDefaultSkillsAPI, getUserSkillsAPI } from '@/services/skillService'
 import { ElMessage } from 'element-plus'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 export const useSkillStore = defineStore('skills', () => {
   //原始資料
@@ -69,7 +72,7 @@ export const useSkillStore = defineStore('skills', () => {
    */
   const fetchSkills = async (uid: string | undefined) => {
     if (!uid) {
-      isError.value = true
+      router.push('/auth/login')
       return
     }
 

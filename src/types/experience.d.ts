@@ -1,7 +1,7 @@
 import type { UserInfo } from '@/types/user'
 import { Timestamp } from 'firebase/firestore'
 
-type UserMemberInfo = Pick<UserInfo, 'uid' | 'nickname'>
+type UserMemberInfo = { uid: UserInfo['uid']; nickname: UserInfo['nickname'] }
 
 export interface TimeLineItem {
   id: string
@@ -23,4 +23,6 @@ export interface Experience {
   item: TimeLineItem[]
 }
 
-export type AddExperienceData = Omit<Experience, 'id'>
+// export type ExperienceMap = Record<string, Experience>
+
+export type AddExperienceData = Omit<Experience, 'id', 'createdAt', 'updatedAt'>

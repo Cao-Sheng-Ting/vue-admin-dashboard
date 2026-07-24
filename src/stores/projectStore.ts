@@ -50,10 +50,9 @@ export const useProjectStore = defineStore('projects', () => {
     isError.value = false //每次獲取時重置錯誤狀態，避免頁面卡在失敗畫面
     try {
       projectsList.value = await getProjectsAPI()
-      console.log('isError', isError.value)
     } catch (error) {
       isError.value = true
-      ElMessage.error('載入專案失敗，請稍後再試')
+      ElMessage.error('載入專案資料失敗，請稍後再試')
       console.error(error)
     } finally {
       isLoading.value = false
