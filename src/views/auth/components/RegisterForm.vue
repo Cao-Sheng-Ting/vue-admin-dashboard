@@ -19,7 +19,7 @@ const ruleForm = ref<RegisterForm>({
   role: 'user',
 })
 
-const validateConfirmPassword = function (rule: unknown, value: string, callback: (error?: Error) => void) {
+const validateConfirmPassword = (rule: unknown, value: string, callback: (error?: Error) => void) => {
   if (value !== ruleForm.value.password) {
     callback(new Error('兩次輸入的密碼不一致！'))
   } else {
@@ -27,7 +27,7 @@ const validateConfirmPassword = function (rule: unknown, value: string, callback
   }
 }
 
-const validateAuthCode = function (rule: unknown, value: string, callback: (error?: Error) => void) {
+const validateAuthCode = (rule: unknown, value: string, callback: (error?: Error) => void) => {
   const isValid = Object.values(QUICK_AUTH_CONFIG).map((i) => i.code).includes(value)
   if (isValid || value == '') {
     callback()
@@ -36,9 +36,8 @@ const validateAuthCode = function (rule: unknown, value: string, callback: (erro
   }
 }
 
-//TODO: []
 // 處理管理員/編輯者快速填入授權碼邏輯，並根據權限連動禁用不符的角色選項
-const handleQuickAuth = function (roleType: 'admin' | 'editor') {
+const handleQuickAuth = (roleType: 'admin' | 'editor') => {
   const config = QUICK_AUTH_CONFIG[roleType]
   if (!config) return
 

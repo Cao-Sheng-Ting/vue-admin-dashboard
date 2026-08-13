@@ -1,9 +1,13 @@
 #### 當前進度🚨🚨🚨✅
 
-- [] 1.每一個分類裡的 tag 只能出現一次，但不同分類的可以(頁面 add 檢查)
-- [] 2.每一個分類裡的 tag 只能出現一次，但不同分類的可以(api 傳送前檢查)
-- [] 3.儲存鍵與未儲存提醒
-- [] 4.tags filter dialog 同步顯示
+- [] 1. 先完成新增時間段
+  - [] (1) 新增和編輯都要使用同一個 edit API，所以都需要整筆的 Experience 資料，看是否需要變量存當前時間線的 id
+
+  -[](2) 先完成新增的 submit，整理好整筆 experience 並把新的時間段 push 到 item 裡
+
+- [] 2. 資料暫存賦值(localForm)，看currenTimelineItem是要存id還是
+- [] 3.validate 驗證
+- [] 4.
 - [] 5.
 - [] 6.
 
@@ -37,6 +41,8 @@
 - [] Skills 頁面 儲存鍵 添加 dirty state ， 和 離開頁面警告未儲存
 
 - [] projects experiences 顯示建立者名稱
+
+- [] experiences 的時間段加上與 project 連動， 決定以 experiences 的 skills 非空白時詢問是否疊加 project的 skills， 空白的話就直接將 project 的 skills 帶入， project 那邊不受 experience 的 skills 影響， 後續兩邊可以獨立發展
 
 ### 🚗 Route設定
 
@@ -79,6 +85,7 @@
 - [ ] 🟠加分功能[UI] Hover 效果：滑鼠移過卡片時有陰影加深或微小的位移
 - [ ] 🟠加分功能[UI] 確認動畫、視窗：對卡片或全局操作時跳出確認視窗或動畫
 - [ ] 🟠加分功能[UI] 寫通用毛玻璃效果，讓輸入匡輸入時
+- [ ] 🟠加分功能[Logic] ProjectEditDrawer.vue watch 中 賦值 localForm 應改成 structuredClone + 手動覆蓋Timestamp類型 更加安全
 
 - [ ] 🟩有空再做[Logic] 排序功能：按創建日期或優先級排序等等...
 - [ ] 🟩有空再做[Logic] 篩選功能： 技術棧篩選、狀態篩選等等...

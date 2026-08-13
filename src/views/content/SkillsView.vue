@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useSkillStore } from '@/stores/skillStore'
 import { useUserStore } from '@/stores'
-import { onMounted } from 'vue'
 import type { MergedGroup } from '@/types/skill'
 import BaseButton from '@/components/BaseButton.vue'
 import { editUserSkillsAPI } from '@/services/skillService'
@@ -115,10 +114,6 @@ const handleSubmit = async () => {
     ElMessage.error('發生預期外的錯誤，請重新整理頁面')
   }
 }
-
-onMounted(async () => {
-  await skillStore.fetchSkills(userStore.userInfo?.uid)
-})
 </script>
 <template>
 

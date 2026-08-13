@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import ProjectsCard from './components/ProjectsCard.vue'
 import ProjectEditDrawer from './components/ProjectEditDrawer.vue'
-import ProjectTagDialog from './components/ProjectTagDialog.vue'
+import SkillTagDialog from './components/SkillTagDialog.vue'
 import { useDebounceSearch } from '@/composables/useDebounce'
 import { useProjectStore } from '@/stores/projectStore'
 import ProjectStatusSelect from './components/ProjectStatusSelect.vue'
@@ -23,6 +23,7 @@ const selectedStatus = ref<ProjectStatus | 'all'>('all')
 
 const handleTagClose = (tag: string) => {
   projectStore.tagsFilter = projectStore.tagsFilter.filter(t => t !== tag)
+  selectedTags.value = projectStore.tagsFilter
 }
 
 const handleTagsFilter = (tags: string[]) => {
@@ -106,17 +107,21 @@ watch(selectedStatus, (newVal) => {
 
 onMounted(async () => {
   await projectStore.fetchProjects()
+  selectedTags.value = projectStore.tagsFilter
+  selectedStatus.value = projectStore.statusFilter
 })
 </script>
 
 <template>
   <div class="search-form-box flex flex-col flex-wrap bg-white p-4 rounded min-w-96">
-    <div class="flex flex-row gap-4">
+    <div class="flex flex-row gap-4 justify-between">
       <div class="flex flex-1 flex-row gap-2 ">
         <el-input placeholder="搜尋項目" v-model="keyword" class="max-w-md"></el-input>
         <ProjectStatusSelect v-model="selectedStatus">
           <el-option label="全部" value="all"></el-option>
         </ProjectStatusSelect>
+      </div>
+      <div>
         <el-button @click="isTagFilterVisible = true" type="success" plain class="w-22">技術棧篩選</el-button>
       </div>
     </div>
@@ -202,8 +207,8 @@ onMounted(async () => {
       </el-row>
     </div>
   </div>
-  <ProjectTagDialog v-model="isTagFilterVisible" :initial-tags="selectedTags" @confirm="handleTagsFilter">
-  </ProjectTagDialog>
+  <SkillTagDialog v-model="isTagFilterVisible" :initial-tags="selectedTags" @confirm="handleTagsFilter">
+  </SkillTagDialog>
   <ProjectEditDrawer v-model:visible="isDrawerVisible" v-model:edit-mode="isProjectEdit"
     v-model:card-data="editCardData" @project-added="handleAddProject" @project-updated="handleUpdateProject">
   </ProjectEditDrawer>

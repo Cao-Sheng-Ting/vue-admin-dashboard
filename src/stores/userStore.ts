@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { loginAPI, registerAPI, logoutAPI } from '@/services/userService'
 import type { LoginParams, RegisterParams, UserInfo } from '@/types/user'
+import { useSkillStore } from './skillStore'
 
 export const useUserStore = defineStore(
   'user',
@@ -16,6 +17,8 @@ export const useUserStore = defineStore(
     const userLogin = async (loginParams: LoginParams) => {
       const res = await loginAPI(loginParams)
       userInfo.value = res
+      const skillStore = useSkillStore()
+      await skillStore.fetchSkills(res.uid)
     }
 
     const userLogout = async () => {

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useWindowSize } from '@vueuse/core'
 import type { ProjectItem, AddProjectData, ProjectStatus, EditProjectData } from '@/types/project'
-import ProjectTagDialog from '@/views/content/components/ProjectTagDialog.vue'
+import SkillTagField from './SkillTagField.vue'
 import ProjectStatusSelect from './ProjectStatusSelect.vue'
 import { ElMessageBox, ElMessage } from 'element-plus'
 import { addProjectAPI, editProjectAPI } from '@/services/projectService.ts'
@@ -28,7 +28,7 @@ const rules = reactive({
     { max: 100, message: '專案描述須在 100 字以內', trigger: 'blur' }
   ],
   imageUrl: [{ type: 'url', message: '請輸入有效的網址 (需包含 http:// 或 https://)', trigger: 'blur' }],
-  tags: [
+  skillTags: [
     { type: 'array', required: true, message: '至少選擇一個專案使用的技術', trigger: 'change' },
     { type: 'array', max: 20, message: '選擇使用技術上限為 20 個', trigger: 'change' }
   ],
@@ -49,14 +49,11 @@ const rules = reactive({
 // 專案表單初始化狀態，status 暫時允許 string 以處理 UI 的空值狀態
 type InitialProject = Omit<AddProjectData, 'status'> & { status: string }
 
-// 表單的響應式狀態，合併了初始化狀態與增加編輯所需的 ID
-type ProjectFormState = InitialProject & Partial<Pick<ProjectItem, 'id'>>
-
 const getInitialProject = (): InitialProject => ({
   title: '',
   description: '',
   imageUrl: '',
-  tags: [],
+  skillTags: [],
   status: '',
   progress: 0,
   githubUrl: '',
@@ -64,12 +61,14 @@ const getInitialProject = (): InitialProject => ({
   buildDate: null, // 日期組件清空時的 null 型態，避免髒檢查誤判
   detailContent: ''
 })
+
+// 表單的響應式狀態，合併了初始化狀態與增加編輯所需的 ID
+type ProjectFormState = InitialProject & Partial<Pick<ProjectItem, 'id'>>
+
 const localForm = ref<ProjectFormState>(getInitialProject())
 
 // 狀態連動的歷史進度暫存變數
 const lastProgress = ref<number>(localForm.value.progress)
-
-const isTagSelectVisible = ref<boolean>(false)
 
 // 用於強制重新渲染表單的唯一識別 Key
 const formKey = ref<number>(0)
@@ -81,14 +80,14 @@ const formKey = ref<number>(0)
 //監聽外部傳入的專案資料在編輯模式下以進行同步
 watch(cardData, (newVal) => {
   if (newVal && isProjectEdit.value) {
+
     const rawData = toRaw(newVal)
+    const { createdAt: _createdAt, updatedAt: _updatedAt, ...restData } = rawData
 
     localForm.value = {
-      ...rawData,
-      createdAt: newVal.createdAt ? formatDate(newVal.createdAt) : null,
-      updatedAt: newVal.updatedAt ? formatDate(newVal.updatedAt) : null,
+      ...restData,
       buildDate: newVal.buildDate ? formatDate(newVal.buildDate) : null,
-      tags: newVal.tags ? [...rawData.tags] : []
+      skillTags: newVal.skillTags ? [...rawData.skillTags] : []
     }
     //將進度暫存與資料同步綁在同一微任務節點，防禦連續點擊不同卡片時，isDrawerVisible 監聽器觸發順序不確定導致的時序競態
     lastProgress.value = localForm.value.progress
@@ -110,13 +109,6 @@ watch(isDrawerVisible, async (newVal) => {
 // ============================================================================
 // Methods / Event Handlers (事件處理函式)
 // ============================================================================
-const handleTagsSelect = (tags: string[]) => {
-  localForm.value.tags = tags
-}
-
-const handleTagClose = (tag: string) => {
-  localForm.value.tags = localForm.value.tags.filter((t: string) => t !== tag)
-}
 
 // 業務連動：收動切換狀態時觸發進度調整
 const handleStatusChange = (newStatus: ProjectStatus) => {
@@ -162,11 +154,9 @@ const handleReset = () => {
 }
 
 // --- 表單操作 ---
-
 const getEditableData = (data: ProjectItem | ProjectFormState | null): InitialProject => {
   if (!data) return getInitialProject()
-  const { id: _id, createdAt: _createdAt, updatedAt: _updatedAt, ...rest } = data
-
+  const { id: _id, createdAt: _createdAt, updatedAt: _updatedAt, ...rest } = ('createdAt' in data ? data : { ...data, createdAt: undefined, updatedAt: undefined })
   return {
     ...rest,
     buildDate: formatDate(data.buildDate)
@@ -210,14 +200,14 @@ const handleDrawerClose = () => {
   }
 }
 
-const toAddApiPayload = (form: ProjectFormState): AddProjectData => {
+const toAddAPIPayload = (form: ProjectFormState): AddProjectData => {
   return {
     ...form,
     status: form.status as ProjectStatus
   }
 }
 
-const toEditApiPayload = (form: ProjectFormState): EditProjectData => {
+const toEditAPIPayload = (form: ProjectFormState): EditProjectData => {
   return {
     ...form,
     id: form.id!,
@@ -233,7 +223,7 @@ const handleAddProject = async (form: AddProjectData) => {
   ElMessage.success('專案新增成功')
 }
 
-const handleEditProject = async (form: ProjectItem) => {
+const handleEditProject = async (form: EditProjectData) => {
   const project = await editProjectAPI(form)
   emit('project-updated', project)
   ElMessage.success('專案更新成功')
@@ -241,6 +231,7 @@ const handleEditProject = async (form: ProjectItem) => {
 
 const handleSubmit = async () => {
   if (!ruleFormRef.value) return
+
   const isValid = await ruleFormRef.value.validate().catch(() => false)
   if (!isValid) {
     console.warn('表單驗證未通過')
@@ -248,9 +239,9 @@ const handleSubmit = async () => {
   }
   try {
     if (!isProjectEdit.value) {
-      await handleAddProject(toAddApiPayload(localForm.value))
+      await handleAddProject(toAddAPIPayload(localForm.value))
     } else {
-      await handleEditProject(toEditApiPayload(localForm.value))
+      await handleEditProject(toEditAPIPayload(localForm.value))
     }
     isDrawerVisible.value = false
     localForm.value = getInitialProject()
@@ -295,18 +286,8 @@ const responsiveSize = computed(() => {
       </el-form-item>
 
       <!-- 技術標籤選擇與展示區 -->
-      <el-form-item prop="tags">
-        <div class="flex flex-col gap-4 items-start">
-          <el-button @click="isTagSelectVisible = true" type="primary" plain>
-            <icon-ic:round-plus />
-            <span>選擇使用技術</span>
-          </el-button>
-          <div class="flex flex-row flex-wrap gap-2">
-            <el-tag v-for="(tag, index) in localForm.tags" :key="index" closable @close="handleTagClose(tag)">{{
-              tag
-            }}</el-tag>
-          </div>
-        </div>
+      <el-form-item prop="skillTags">
+        <SkillTagField v-model="localForm.skillTags"></SkillTagField>
       </el-form-item>
 
       <!-- 狀態與進度連動區 -->
@@ -351,9 +332,6 @@ const responsiveSize = computed(() => {
     </template>
   </el-drawer>
 
-  <!-- 外部彈窗 -->
-  <ProjectTagDialog v-model="isTagSelectVisible" :initial-tags="localForm.tags" @confirm="handleTagsSelect">
-  </ProjectTagDialog>
 </template>
 
 <style scoped>

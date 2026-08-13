@@ -11,6 +11,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    AddButton: typeof import('./src/components/AddButton.vue')['default']
     BaseButton: typeof import('./src/components/BaseButton.vue')['default']
     BaseErrorState: typeof import('./src/components/BaseErrorState.vue')['default']
     ElAside: typeof import('element-plus/es')['ElAside']
@@ -49,6 +50,7 @@ declare module 'vue' {
     ElMenuItem: typeof import('element-plus/es')['ElMenuItem']
     ElOption: typeof import('element-plus/es')['ElOption']
     ElPageHeader: typeof import('element-plus/es')['ElPageHeader']
+    ElPopover: typeof import('element-plus/es')['ElPopover']
     ElProgress: typeof import('element-plus/es')['ElProgress']
     ElRadioButton: typeof import('element-plus/es')['ElRadioButton']
     ElRadioGrop: typeof import('element-plus/es')['ElRadioGrop']
