@@ -7,7 +7,7 @@ export interface ProjectItem {
   title: string
   description: string
   imageUrl?: string
-  tags: string[]
+  skillTags: string[]
   status: ProjectStatus
   progress: number
   githubUrl?: string
@@ -18,6 +18,6 @@ export interface ProjectItem {
   detailContent?: string
 }
 
-export type AddProjectData = Omit<ProjectItem, 'id'>
+export type AddProjectData = Omit<ProjectItem, 'id' | 'createdAt' | 'updatedAt'>
 
-export type EditProjectData = Omit<ProjectItem, 'createdAt'>
+export type EditProjectData = Omit<ProjectItem, 'createdAt', 'updatedAt'>

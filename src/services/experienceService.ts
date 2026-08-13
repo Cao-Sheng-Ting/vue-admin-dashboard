@@ -1,5 +1,5 @@
 import { db } from '@/firebase'
-import type { Experience, AddExperienceData } from '@/types/experience'
+import type { TimelineItem, Experience, AddExperienceData } from '@/types/experience'
 import {
   collection,
   query,
@@ -27,17 +27,21 @@ export const getExperiencesAPI = async (): Promise<Experience[]> => {
   }
 }
 
-export const editExperienceAPI = async (experienceData: Experience): Promise<Experience> => {
+export const updateExperienceAPI = async (
+  experienceId: Experience['id'],
+  timelineItems: TimelineItem[],
+): Promise<{ items: TimelineItem[]; updatedAt: Timestamp }> => {
   try {
-    const { id, createdAt: _createdAt, ...data } = experienceData
-    const experiencePayload = { ...data, updatedAt: serverTimestamp() }
+    const experiencePayload = { items: timelineItems, updatedAt: serverTimestamp() }
 
-    const experienceRef = doc(db, 'experiences', id)
+    const experienceRef = doc(db, 'experiences', experienceId)
     await updateDoc(experienceRef, experiencePayload)
 
-    return { ...experienceData, updatedAt: Timestamp.now() }
+    return {
+      items: timelineItems,
+      updatedAt: Timestamp.now(),
+    }
   } catch (error) {
-    console.error('經歷內容更新失敗：', error)
     throw error
   }
 }
