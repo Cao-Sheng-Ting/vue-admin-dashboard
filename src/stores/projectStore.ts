@@ -29,7 +29,7 @@ export const useProjectStore = defineStore('projects', () => {
         !query ||
         p.title.toLowerCase().includes(query) ||
         (p.description?.toLowerCase().includes(query) ?? false) ||
-        p.tags.some((tag) => tag.toLowerCase().includes(query))
+        p.skillTags.some((tag) => tag.toLowerCase().includes(query))
 
       //2. 技術標籤：須符合所有選中的標籤才可通過篩選
       const matchTags =

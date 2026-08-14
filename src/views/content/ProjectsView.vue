@@ -50,6 +50,7 @@ const openEditDrawer = (card: ProjectItem) => {
   isProjectEdit.value = true
   editCardData.value = card
   isDrawerVisible.value = true
+  console.log(card)
 }
 
 // --- 專案 Drawer   ---
@@ -129,7 +130,7 @@ onMounted(async () => {
 
   <div class="tech-stack-tags flex gap-2 items-center m-2">
     <el-tag closable @close="handleTagClose(tag)" v-for="tag in projectStore.tagsFilter" :key="tag">{{ tag
-    }}</el-tag>
+      }}</el-tag>
   </div>
   <div class="main-box bg-white flex-1 rounded p-6 ">
 

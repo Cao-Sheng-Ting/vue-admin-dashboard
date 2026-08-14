@@ -105,6 +105,8 @@ declare module 'vue' {
     IconLineMdLightbulb: typeof import('~icons/line-md/lightbulb')['default']
     IconLineMdPersonSearchTwotone: typeof import('~icons/line-md/person-search-twotone')['default']
     IconLineMdWatchTwotoneLoop: typeof import('~icons/line-md/watch-twotone-loop')['default']
+    'IconMaterialSymbols:delete': typeof import('~icons/material-symbols/delete')['default']
+    'IconMaterialSymbols:deleteOutline': typeof import('~icons/material-symbols/delete-outline')['default']
     'IconMdi:home': typeof import('~icons/mdi/home')['default']
     'IconMdi:picture360Outline': typeof import('~icons/mdi/picture360-outline')['default']
     'IconPh:keyReturn': typeof import('~icons/ph/key-return')['default']

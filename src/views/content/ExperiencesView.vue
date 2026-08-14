@@ -4,6 +4,7 @@ import type { Experience, TimelineItem, AddTimelineItemData, AddExperienceData }
 import SkillTagField from './components/SkillTagField.vue'
 import { addExperienceAPI, updateExperienceAPI } from '@/services/experienceService.ts'
 import { sortOrders } from 'element-plus/es/components/table-v2/src/constants.mjs'
+import { ElMessageBox } from 'element-plus'
 // import { useUserStore } from '@/stores/userStore.ts'
 
 // const userStore = useUserStore(0)
@@ -180,6 +181,41 @@ const addHighlight = () => {
   }
 }
 
+
+const handleDelete = async (timeline: Experience, id: TimelineItem['id']) => {
+  if (!experienceStore.timelineMap) {
+    ElMessage.error('找不到要刪除的項目，請重新整理後再試')
+    return
+  }
+  try {
+    await ElMessageBox.confirm('確定刪除當前項目嗎？',
+      {
+        confirmButtonText: '確定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+
+    const index = timeline.items.findIndex(item => item.id === id)
+    if (index === -1) {
+      ElMessage.error('找不到要刪除的項目，請重新整理後再試')
+      return
+    }
+    currentTimeline.value = timeline
+    currentTimeline.value.items.splice(index, 1)
+
+    const result = await updateExperienceAPI(timeline.id, timeline.items)
+    const targetExperience = experienceStore.timelineMap.find(item => item.id === timeline.id)
+    if (targetExperience) targetExperience.items = result.items
+
+    ElMessage.success('刪除成功')
+  } catch (error) {
+    if (error === 'cancel') return
+
+    console.error(error)
+    ElMessage.error('刪除失敗，請稍候再試')
+  }
+}
+
 const handleRest = () => {
   currentTimeline.value = null
   currentTimelineItem.value = null
@@ -258,7 +294,10 @@ onMounted(async () => {
 
                 <div class="popover-top flex flex-row justify-between items-center pb-2">
                   <h4 class="text-xl">{{ item.title }}</h4>
-                  <el-button @click="openEditDialog(timeline, item)" plain type="primary">編輯</el-button>
+                  <div>
+                    <el-button @click="openEditDialog(timeline, item)" plain type="primary">編輯</el-button>
+                    <el-button @click="handleDelete(timeline, item.id)" type="danger" plain>刪除</el-button>
+                  </div>
                 </div>
 
                 <p v-if="item.organization"><span class="font-semibold">服務單位：</span> <span>{{ item.organization

@@ -171,6 +171,8 @@ const isDirty = computed(() => {
   if (!isProjectEdit.value) {
     return JSON.stringify(currentData) !== JSON.stringify(getInitialProject())
   } else {
+    console.log('表單內容', JSON.stringify(currentData))
+    console.log('原始內容', JSON.stringify(baseData))
     return JSON.stringify(currentData) !== JSON.stringify(baseData)
   }
 })

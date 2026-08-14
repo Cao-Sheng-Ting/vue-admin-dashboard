@@ -45,7 +45,7 @@ const handleDelete = async (id: string) => {
     ElMessage.success('專案刪除成功')
   } catch (error) {
     if (error === 'cancel') return
-    console.log(error)
+    console.error(error)
     ElMessage.error('刪除失敗，請稍候再試')
   }
 }
@@ -66,7 +66,10 @@ const handleDelete = async (id: string) => {
       </span>
       <template #dropdown>
         <el-dropdown-menu>
-          <el-dropdown-item @click="handleDelete(data.id)">刪除專案</el-dropdown-item>
+          <el-dropdown-item @click="handleDelete(data.id)">
+            <icon-material-symbols:delete class="text-lg" />
+            <span>刪除專案</span>
+          </el-dropdown-item>
         </el-dropdown-menu>
       </template>
     </el-dropdown>
@@ -96,7 +99,7 @@ const handleDelete = async (id: string) => {
       <template #footer>
         <div class="flex flex-col">
           <div class="tags flex flex-wrap gap-2 mb-5 min-h-16">
-            <el-tag v-for="item in data.tags" :key="item">{{ item }}</el-tag>
+            <el-tag v-for="item in data.skillTags" :key="item">{{ item }}</el-tag>
           </div>
           <div class="progress text-center font-semibold text-gray-500">
             <div>開發進度</div>
