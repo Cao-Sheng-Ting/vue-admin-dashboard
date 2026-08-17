@@ -2,9 +2,9 @@
 import { useExperienceStore } from '@/stores/experienceStore'
 import type { Experience, TimelineItem, AddTimelineItemData, AddExperienceData } from '@/types/experience.js'
 import SkillTagField from './components/SkillTagField.vue'
-import { addExperienceAPI, updateExperienceAPI } from '@/services/experienceService.ts'
-import { sortOrders } from 'element-plus/es/components/table-v2/src/constants.mjs'
+import { updateExperienceAPI } from '@/services/experienceService.ts'
 import { ElMessageBox } from 'element-plus'
+import BaseErrorState from '@/components/BaseErrorState.vue'
 // import { useUserStore } from '@/stores/userStore.ts'
 
 // const userStore = useUserStore(0)
@@ -273,8 +273,29 @@ onMounted(async () => {
 </script>
 <template>
   <div class="main-box bg-white flex-1 rounded p-6 flex flex-col">
-    <!-- <el-button @click="addExperience">新增</el-button> -->
-    <div class="flex flex-col gap-2">
+
+    <div v-if="experienceStore.isLoading" class="flex flex-col gap-2">
+      <el-card v-for="item in 2" :key="item">
+        <el-skeleton animated>
+          <template #template>
+            <div class="flex flex-row flex-wrap gap-4">
+              <div v-for="item in 3" :key="item" class="flex items-center">
+                <el-skeleton-item variant="button" style="width:75px"></el-skeleton-item>
+                <el-skeleton-item style="width: 60px; height: 6px;"></el-skeleton-item>
+              </div>
+            </div>
+          </template>
+        </el-skeleton>
+      </el-card>
+    </div>
+
+    <BaseErrorState v-else-if="experienceStore.isError || experienceStore.isEmpty" :is-error="experienceStore.isError"
+      :is-empty="experienceStore.isEmpty" error-description="載入時間線失敗，請重新整理" empty-description="經歷目前沒有內容"
+      @retry="experienceStore.fetchExperiences" class="w-full">
+    </BaseErrorState>
+
+
+    <div v-else class="flex flex-col gap-2">
       <el-card v-for="timeline in experienceStore.timelineMap" :key="timeline.id">
         <div class="flex flex-row flex-wrap items-center gap-y-3">
           <div class="timeline-name text-l p-3 rounded  text-white font-bold" :class="getThemeClass(timeline.type).bg">
@@ -301,7 +322,7 @@ onMounted(async () => {
                 </div>
 
                 <p v-if="item.organization"><span class="font-semibold">服務單位：</span> <span>{{ item.organization
-                }}</span></p>
+                    }}</span></p>
                 <p><span class="font-semibold">使用技術：</span> <span>{{ item.skillTags.join(', ') }}</span></p>
                 <p v-if="timeline.type === 'career'"><span class="font-semibold">經歷時長：</span> <span>{{
                   formatDuration(item.durationYears,
