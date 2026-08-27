@@ -20,7 +20,6 @@ export const useExperienceStore = defineStore('experiences', () => {
       console.error(error)
     } finally {
       isLoading.value = false
-      console.log('錯誤狀態：', isError.value)
     }
   }
 

@@ -1,6 +1,6 @@
 import { db } from '@/firebase'
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'
-import type { SkillsData, SkillsGroup } from '@/types/skill'
+import type { SkillsData, SkillsGroupMap } from '@/types/skill'
 
 /**
  * 取得共用標籤庫（所有使用者共享的預設分類和標籤）
@@ -25,7 +25,7 @@ export const getDefaultSkillsAPI = async (): Promise<SkillsData> => {
  * 取得使用者個人標籤庫
  * 回傳 null 代表「使用者存在但尚未新增任何個人化標籤」，屬於正常情況非錯誤
  */
-export const getUserSkillsAPI = async (uid: string): Promise<SkillsGroup | null> => {
+export const getUserSkillsAPI = async (uid: string): Promise<SkillsGroupMap | null> => {
   try {
     const usersRef = doc(db, 'users', uid)
     const user = await getDoc(usersRef)
@@ -34,7 +34,7 @@ export const getUserSkillsAPI = async (uid: string): Promise<SkillsGroup | null>
 
     const userData = user.data()
     if (userData && userData.skills) {
-      return userData.skills as SkillsGroup
+      return userData.skills as SkillsGroupMap
     }
 
     return null
@@ -44,7 +44,10 @@ export const getUserSkillsAPI = async (uid: string): Promise<SkillsGroup | null>
   }
 }
 
-export const editUserSkillsAPI = async (data: SkillsGroup, uid: string): Promise<SkillsGroup> => {
+export const editUserSkillsAPI = async (
+  data: SkillsGroupMap,
+  uid: string,
+): Promise<SkillsGroupMap> => {
   try {
     const skillRef = doc(db, 'users', uid)
     await updateDoc(skillRef, {

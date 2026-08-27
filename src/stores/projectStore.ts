@@ -34,7 +34,7 @@ export const useProjectStore = defineStore('projects', () => {
       //2. 技術標籤：須符合所有選中的標籤才可通過篩選
       const matchTags =
         !tagsFilter.value.length ||
-        tagsFilter.value.every((selectedTag) => p.tags.includes(selectedTag))
+        tagsFilter.value.every((selectedTag) => p.skillTags.includes(selectedTag))
 
       //3. 專案狀態： 需符合所選的專案狀態，未選擇狀態時預設通行
       const matchStatus = statusFilter.value === 'all' || p.status === statusFilter.value

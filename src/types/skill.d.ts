@@ -3,11 +3,11 @@ export interface TechGroup {
   tags: string[]
 }
 
-// Firestore 存的原始結構：key 為分類名稱（如 fronted/backend）
-export type SkillsGroup = Record<string, TechGroup>
+// Firestore 存的原始結構：key 為分類名稱（如 frontend/backend）
+export type SkillsGroupMap = Record<string, TechGroup>
 
 export interface SkillsData {
-  skills: SkillsGroup
+  skills: SkillsGroupMap
   order: string[] // 分類顯示順序，因物件 key 順序不可靠，須額外指定
 }
 

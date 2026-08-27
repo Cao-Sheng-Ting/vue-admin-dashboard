@@ -1,5 +1,5 @@
 import type { LoginParams, RegisterParams, UserInfo } from '@/types/user'
-import type { SkillsGroup } from '@/types/skill'
+import type { SkillsGroupMap } from '@/types/skill'
 import { db, auth } from '@/firebase'
 import { doc, getDoc, setDoc, serverTimestamp, type DocumentData } from 'firebase/firestore'
 import {
@@ -75,7 +75,7 @@ export const registerAPI = async (registerParams: RegisterParams): Promise<UserI
       nickname: registerParams.nickname,
       role: registerParams.role,
       createdAt: serverTimestamp(),
-      skills: {} as SkillsGroup,
+      skills: {} as SkillsGroupMap,
     }
 
     const userDocRef = doc(db, 'users', uid)
