@@ -3,6 +3,8 @@ import { useSkillStore } from '@/stores/skillStore'
 import { countSkillTags } from '@/utils/skill'
 import { formatCareerDuration } from '@/utils/date'
 import { useExperienceStore } from '@/stores/experienceStore'
+import { calcPercentage, getTopOccurrences } from '@/utils/stats'
+import type { ProjectStatus } from '@/types/project'
 
 export const useDashboardStats = () => {
   const projectStore = useProjectStore()
@@ -26,7 +28,7 @@ export const useDashboardStats = () => {
     return formatCareerDuration(totalDurationYears, totalDurationMonths)
   })
 
-  const statsMap = computed(() => ({
+  const cardStatsMap = computed(() => ({
     totalProjects: projectStore.projectsList.length || 0,
     completedProjects:
       projectStore.projectsList.filter((p) => p.status === 'completed').length || 0,
@@ -38,5 +40,25 @@ export const useDashboardStats = () => {
     careerDuration: careerDurationStates.value,
   }))
 
-  return statsMap
+  const chartStatsMap = computed(() => {
+    const statuses: ProjectStatus[] = []
+    const skillTags: string[] = []
+
+    projectStore.projectsList.forEach((p) => {
+      statuses.push(p.status)
+      skillTags.push(...p.skillTags)
+    })
+
+    const projectStatuses = {
+      label: '專案狀態',
+      statuses: calcPercentage(statuses),
+    }
+    const projectSkills = {
+      label: '使用技能',
+      skills: getTopOccurrences(skillTags).map(([name, count]) => ({ name, count })),
+    }
+    return { projectStatuses, projectSkills }
+  })
+
+  return { cardStatsMap, chartStatsMap }
 }

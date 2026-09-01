@@ -5,6 +5,7 @@ import { useUserStore } from '@/stores'
 import { useProjectStore } from '@/stores/projectStore'
 import { useSkillStore } from '@/stores/skillStore'
 import { useExperienceStore } from '@/stores/experienceStore'
+import { calcProjectStatusStats } from '@/utils/stats'
 
 const userStore = useUserStore()
 const projectStore = useProjectStore()
@@ -12,17 +13,20 @@ const skillStore = useSkillStore()
 const experienceStore = useExperienceStore()
 
 
-const statsMap = useDashboardStats()
+const cardStatsMap = useDashboardStats()
 
 const dashboardCards = computed(() => {
   return DASHBOARD_CARDS_CONFIG.map(card => ({
     ...card,
     items: card.items.map(item => ({
       ...item,
-      value: statsMap.value[item.key]
+      value: cardStatsMap.value[item.key]
     }))
   }))
 })
+
+calcProjectStatusStats(['completed', 'completed', 'testing', 'maintenance', 'planning', 'planning', 'planning'])
+
 
 onMounted(async () => {
   await projectStore.fetchProjects()
