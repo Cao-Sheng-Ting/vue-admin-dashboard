@@ -9,20 +9,31 @@ export const countOccurrences = (arr: string[]) => {
   return countMap
 }
 
-export const calcPercentage = (arr: string[]) => {
-  const map = countOccurrences(arr)
-
-  return Object.entries(map).map(([status, count]) => ({
-    status,
-    total: count,
-    percentage: ((count / arr.length) * 100).toFixed(2),
-  }))
-}
-
-export const getTopOccurrences = (arr: string[], limit: number = 5) => {
-  const map = countOccurrences(arr)
-
+export const getTopOccurrences = (map: Record<string, number>, limit: number = 5) => {
   return Object.entries(map)
     .sort((a, b) => b[1] - a[1])
     .slice(0, limit)
+}
+
+export const calcPercentageByTotal = (map: Record<string, number>) => {
+  const totalCount = Object.values(map).reduce((sum, val) => sum + val, 0)
+
+  return Object.entries(map).map(([name, count]) => ({
+    name,
+    total: count,
+    percentage: ((count / totalCount) * 100).toFixed(2),
+  }))
+}
+
+export const calcPercentageByMax = (entries: [string, number][]) => {
+  const [firstEntry] = entries
+
+  if (!firstEntry) return []
+  const maxCount = firstEntry[1]
+
+  return entries.map(([name, count]) => ({
+    name,
+    total: count,
+    percentage: ((count / maxCount) * 100).toFixed(2),
+  }))
 }

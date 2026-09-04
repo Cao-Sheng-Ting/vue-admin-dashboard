@@ -3,7 +3,12 @@ import { useSkillStore } from '@/stores/skillStore'
 import { countSkillTags } from '@/utils/skill'
 import { formatCareerDuration } from '@/utils/date'
 import { useExperienceStore } from '@/stores/experienceStore'
-import { calcPercentage, getTopOccurrences } from '@/utils/stats'
+import {
+  countOccurrences,
+  getTopOccurrences,
+  calcPercentageByTotal,
+  calcPercentageByMax,
+} from '@/utils/stats'
 import type { ProjectStatus } from '@/types/project'
 
 export const useDashboardStats = () => {
@@ -49,15 +54,15 @@ export const useDashboardStats = () => {
       skillTags.push(...p.skillTags)
     })
 
-    const projectStatuses = {
-      label: '專案狀態',
-      statuses: calcPercentage(statuses),
-    }
-    const projectSkills = {
-      label: '使用技能',
-      skills: getTopOccurrences(skillTags).map(([name, count]) => ({ name, count })),
-    }
-    return { projectStatuses, projectSkills }
+    const statusMap = countOccurrences(statuses)
+
+    const skillMap = countOccurrences(skillTags)
+    const Top5Skills = getTopOccurrences(skillMap)
+
+    const statusStats = calcPercentageByTotal(statusMap)
+    const skillStats = calcPercentageByMax(Top5Skills)
+
+    return { statusStats, skillStats }
   })
 
   return { cardStatsMap, chartStatsMap }
