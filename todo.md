@@ -119,20 +119,6 @@
 
 ### 👮🏻‍♀️users 用戶設定
 
-utils/ date.ts:
-// src/utils/date.ts
-import { Timestamp } from 'firebase/firestore';
-
-export const formatDate = (timestamp: any): string => {
-if (!timestamp || typeof timestamp.toDate !== 'function') {
-return '無日期';
-}
-
-const date = timestamp.toDate();
-
-return date.toLocaleDateString('zh-TW', {
-year: 'numeric',
-month: '2-digit',
-day: '2-digit'
-});
-};
+admin2 : admin2@gmail.com / Abc22345
+editor1 : editor1@gmail.com / Edi12345
+user1 : user1@gmail.com / Uu123456

@@ -1,5 +1,6 @@
 import type { LoginParams, RegisterParams, UserInfo } from '@/types/user'
 import type { SkillsGroupMap } from '@/types/skill'
+import type { UserInfo } from '@/types/user'
 import { db, auth } from '@/firebase'
 import { doc, getDoc, setDoc, serverTimestamp, type DocumentData } from 'firebase/firestore'
 import {
@@ -125,3 +126,10 @@ export const getCurrentUser = () => {
     )
   })
 }
+
+// export const getAllUserAPI = async() :Promise<UserInf[]>=>{
+// try {
+//   const usersQuery = query(collection(db, 'users'))
+// }
+
+// }

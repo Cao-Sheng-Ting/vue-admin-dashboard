@@ -2,7 +2,9 @@
 import { ref, reactive, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import type { RegisterForm, RegisterParams, } from '@/types/user'
-import { roleOptions, QUICK_AUTH_CONFIG, type AgreementType } from '../types'
+import { ROLE_OPTIONS, QUICK_AUTH_CONFIG } from '@/constants/auth'
+import type { AgreementType } from '../types'
+import type { UserRole } from '@/types/user'
 import { useUserStore } from '@/stores'
 
 const route = useRoute()
@@ -36,6 +38,14 @@ const validateAuthCode = (rule: unknown, value: string, callback: (error?: Error
   }
 }
 
+const authorizedRoles = ref<UserRole[]>(['user'])
+const roleOptions = computed(() =>
+  ROLE_OPTIONS.map((option) => ({
+    ...option,
+    disabled: !authorizedRoles.value.includes(option.role)
+  }))
+)
+
 // 處理管理員/編輯者快速填入授權碼邏輯，並根據權限連動禁用不符的角色選項
 const handleQuickAuth = (roleType: 'admin' | 'editor') => {
   const config = QUICK_AUTH_CONFIG[roleType]
@@ -44,10 +54,8 @@ const handleQuickAuth = (roleType: 'admin' | 'editor') => {
   const { role, code, allowed } = config
   ruleForm.value.role = role
   ruleForm.value.authCode = code
+  authorizedRoles.value = allowed
 
-  roleOptions.value.forEach((option) => {
-    option.disabled = !allowed.includes(option.role)
-  })
   ruleFormRef.value?.validateField('authCode')
   ElMessage.success(`[${role === 'admin' ? '最高權限' : '編輯權限'}] 授權成功`)
 }
@@ -122,6 +130,14 @@ const isSubmitDisabled = computed(() => {
 
 const register = async () => {
   if (isSubmitDisabled.value) return
+
+  if (ruleForm.value.role !== 'user') {
+    const expectedConfig = QUICK_AUTH_CONFIG[ruleForm.value.role]
+    if (!expectedConfig || ruleForm.value.authCode! == expectedConfig.code) {
+      ElMessage.error('角色與授權碼不匹配，請重新授權')
+    }
+  }
+
   const isValid = await ruleFormRef.value.validate().catch(() => false)
   if (!isValid) {
     console.warn('表單驗證未通過')
@@ -244,7 +260,7 @@ const register = async () => {
           </section>
           <section>
             <h4 class="font-bold mb-1 border-l-4 border-green-500 pl-2">三、 權限分配與行為準則</h4>
-            <p>系統依據角色（如 Admin, Editor, Viewer）授予不同權限。使用者承諾僅在授權範圍內操作，嚴禁利用任何技術手段（如 SQL
+            <p>系統依據角色（如 Admin, Editor, User）授予不同權限。使用者承諾僅在授權範圍內操作，嚴禁利用任何技術手段（如 SQL
               Injection、XSS、爬蟲攻擊、暴力破解）越權訪問非公開之敏感數據。任何惡意探測系統漏洞之行為，本平台保有法律追訴權。</p>
           </section>
           <section>
