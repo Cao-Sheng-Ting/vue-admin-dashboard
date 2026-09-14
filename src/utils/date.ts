@@ -15,6 +15,20 @@ export const formatDate = (
   return isNaN(date.getTime()) ? null : date
 }
 
+export const formatDateDisplay = (
+  d: Timestamp | Date | string | number | null | undefined,
+): string => {
+  const date = formatDate(d)
+
+  if (!date) return ''
+
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+
+  return `${year}-${month}-${day}`
+}
+
 export const formatCareerDuration = (y: number, m: number): string => {
   const totalYears = y + Math.floor(m / 12)
   const totalMonths = m % 12

@@ -3,11 +3,13 @@ import { ref } from 'vue'
 import { loginAPI, registerAPI, logoutAPI } from '@/services/userService'
 import type { LoginParams, RegisterParams, UserInfo } from '@/types/user'
 import { useSkillStore } from './skillStore'
+import { getAllUsersAPI } from '@/services/userService'
 
 export const useUserStore = defineStore(
   'user',
   () => {
     const userInfo = ref<UserInfo | null>(null)
+    const userList = ref<UserInfo[]>([])
 
     const userRegister = async (data: RegisterParams) => {
       const res = await registerAPI(data)
@@ -25,11 +27,17 @@ export const useUserStore = defineStore(
       await logoutAPI()
       userInfo.value = null
     }
+
+    const fetchAllUsers = async () => {
+      userList.value = await getAllUsersAPI()
+    }
     return {
       userInfo,
+      userList,
       userRegister,
       userLogin,
       userLogout,
+      fetchAllUsers,
     }
   },
   {

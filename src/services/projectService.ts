@@ -20,10 +20,12 @@ export const getProjectsAPI = async (): Promise<ProjectItem[]> => {
 
     const projectsList: ProjectItem[] = snapshot.docs.map((doc) => ({
       id: doc.id,
+      //優化： 寫一個 transform 函式取代斷言
       ...(doc.data() as Omit<ProjectItem, 'id'>),
     }))
     return projectsList
   } catch (error) {
+    //優化： 需整理後再拋出錯誤
     throw error
   }
 }

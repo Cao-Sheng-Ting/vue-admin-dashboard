@@ -66,8 +66,12 @@
 
 - [ ] [layouts/index.vue] 用遞歸寫sidebar
 - [ ] [layouts/index.vue] header-left 和 header-right 在視窗寬度小於多少時變成垂直排列
+- [ ] 路徑顯示需修改
 
 ### 📦 專案管理 (Projects)
+
+- [ ] 23行 優化
+- [ ] 28行 優化
 
 - [ ] ❤️‍🔥必要功能[UI] 響應式佈局：卡片在寬螢幕應該是 4 欄，平板 2 欄，手機 1 欄
 - [ ] ❤️‍🔥必要功能[UI] 實作 `ProjectsView.vue`，展示作品，用卡片展示
@@ -117,7 +121,9 @@
 
 - [ ] [UI] 實作 `SettingsView.vue` 白天黑夜色調切換
 
-### 👮🏻‍♀️users 用戶設定
+### 👮🏻‍♀️user list 用戶設定
+
+- [ ] 做 權限 和 註冊時間 的排序
 
 admin2 : admin2@gmail.com / Abc22345
 editor1 : editor1@gmail.com / Edi12345

@@ -98,7 +98,6 @@ const usersChildren: RouteRecordRaw[] = [
       icon: 'tabler:users',
       requiresAuth: true,
       keepAlive: true,
-      roles: ['admin'],
     },
   },
   {
@@ -109,7 +108,6 @@ const usersChildren: RouteRecordRaw[] = [
       title: 'Settings',
       icon: 'ic:outline-settings',
       requiresAuth: true,
-      roles: ['admin'],
     },
   },
 ]
@@ -157,7 +155,6 @@ const routes: RouteRecordRaw[] = [
           title: 'Users',
           icon: 'tabler:user',
           requiresAuth: true,
-          roles: ['admin'],
           keepAlive: true,
         },
         children: [...usersChildren],

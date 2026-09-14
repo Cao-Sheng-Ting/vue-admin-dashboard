@@ -28,3 +28,5 @@ export const QUICK_AUTH_CONFIG: Partial<Record<UserRole, AuthConfigItem>> = {
     allowed: ['editor', 'user'],
   },
 }
+
+export const USER_SORT_ORDER: UserRole[] = ['admin', 'editor', 'user']

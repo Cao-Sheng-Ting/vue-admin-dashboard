@@ -1,7 +1,7 @@
-import type { LoginParams, RegisterParams, UserInfo } from '@/types/user'
+import type { LoginParams, RegisterParams, UserInfo, UserRole } from '@/types/user'
 import type { SkillsGroupMap } from '@/types/skill'
-import type { UserInfo } from '@/types/user'
 import { db, auth } from '@/firebase'
+import { collection, getDocs, updateDoc } from 'firebase/firestore'
 import { doc, getDoc, setDoc, serverTimestamp, type DocumentData } from 'firebase/firestore'
 import {
   createUserWithEmailAndPassword,
@@ -127,9 +127,24 @@ export const getCurrentUser = () => {
   })
 }
 
-// export const getAllUserAPI = async() :Promise<UserInf[]>=>{
-// try {
-//   const usersQuery = query(collection(db, 'users'))
-// }
+export const getAllUsersAPI = async (): Promise<UserInfo[]> => {
+  try {
+    const usersCollectionRef = collection(db, 'users')
+    const snapshot = await getDocs(usersCollectionRef)
 
-// }
+    return snapshot.docs.map((doc) => transformUser(doc.data()))
+  } catch (error) {
+    console.error('取得使用者名單失敗:', error)
+    throw new Error('取得使用者名單失敗，請稍後再試')
+  }
+}
+
+export const changeUserRoleAPI = async (uid: string, newRole: UserRole): Promise<void> => {
+  try {
+    const userRef = doc(db, 'users', uid)
+    await updateDoc(userRef, { role: newRole })
+  } catch (error) {
+    console.error('更新權限失敗：', error)
+    throw new Error('更新權限失敗，請稍後再試')
+  }
+}
