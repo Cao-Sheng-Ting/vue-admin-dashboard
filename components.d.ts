@@ -89,6 +89,9 @@ declare module 'vue' {
     'IconIc:outlineEditNote': typeof import('~icons/ic/outline-edit-note')['default']
     'IconIc:roundCancelPresentation': typeof import('~icons/ic/round-cancel-presentation')['default']
     'IconIc:roundPlus': typeof import('~icons/ic/round-plus')['default']
+    'IconLineMd:loadingAltLoop': typeof import('~icons/line-md/loading-alt-loop')['default']
+    'IconLineMd:loadingLoop': typeof import('~icons/line-md/loading-loop')['default']
+    'IconLineMd:loadingTwotoneLoop': typeof import('~icons/line-md/loading-twotone-loop')['default']
     'IconLineMd:speedTwotoneLoop': typeof import('~icons/line-md/speed-twotone-loop')['default']
     'IconLineMd:watchTwotoneLoop': typeof import('~icons/line-md/watch-twotone-loop')['default']
     IconLineMdAccount: typeof import('~icons/line-md/account')['default']
@@ -130,5 +133,8 @@ declare module 'vue' {
     RouterView: typeof import('vue-router')['RouterView']
     TheWelcome: typeof import('./src/components/TheWelcome.vue')['default']
     WelcomeItem: typeof import('./src/components/WelcomeItem.vue')['default']
+  }
+  export interface GlobalDirectives {
+    vLoading: typeof import('element-plus/es')['ElLoadingDirective']
   }
 }

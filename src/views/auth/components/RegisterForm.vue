@@ -242,8 +242,8 @@ const register = async () => {
       </el-row>
     </el-form>
     <div class="register-button py-3 text-center">
-      <el-button :disabled="isSubmitDisabled" round @click="register" type="success" size='large'
-        class="w-36">註冊</el-button>
+      <el-button :loading="userStore.isLoading.register" :disabled="isSubmitDisabled" round @click="register"
+        type="success" size='large' class="w-36">註冊</el-button>
     </div>
 
     <el-dialog v-model="agreementStatus.service.visible" title="使用者服務協議" width="600px" class="relative">

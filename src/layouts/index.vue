@@ -126,8 +126,16 @@ const logout = async () => {
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item>偏好設定</el-dropdown-item>
-                <el-dropdown-item>登入</el-dropdown-item>
-                <el-dropdown-item @click="logout">登出</el-dropdown-item>
+                <el-dropdown-item v-if="!userStore.userInfo">登入</el-dropdown-item>
+                <el-dropdown-item>
+                  <el-button link @click="logout">
+                    <span v-if="!userStore.isLoading.logout">登出</span>
+                    <span v-else class="flex flex-row gap-1 items-center">
+                      <span>登出中</span>
+                      <icon-line-md:loading-twotone-loop />
+                    </span>
+                  </el-button>
+                </el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>

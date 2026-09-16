@@ -78,7 +78,8 @@ const demoAccount = async () => {
     </el-form-item>
     <el-form-item>
       <div class="login-button w-full flex justify-between">
-        <el-button round size="large" color="#009688" class="w-36" @click="login">登入</el-button>
+        <el-button round size="large" color="#009688" :loading="userStore.isLoading.login" class="w-36"
+          @click="login">登入</el-button>
         <el-button round size="large" class="w-36" @click="router.push({ name: 'register' })">註冊</el-button>
       </div>
     </el-form-item>
