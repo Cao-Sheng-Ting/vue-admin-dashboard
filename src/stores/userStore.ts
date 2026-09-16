@@ -10,30 +10,67 @@ export const useUserStore = defineStore(
   () => {
     const userInfo = ref<UserInfo | null>(null)
     const userList = ref<UserInfo[]>([])
+    const isLoading = reactive({
+      register: false,
+      login: false,
+      logout: false,
+      userList: false,
+    })
+    const isUserListError = ref<boolean>(false)
+    const userListErrorMessage = ref<string>('')
 
     const userRegister = async (data: RegisterParams) => {
-      const res = await registerAPI(data)
-      userInfo.value = res
+      isLoading.register = true
+      try {
+        const res = await registerAPI(data)
+        userInfo.value = res
+      } finally {
+        isLoading.register = false
+      }
     }
 
     const userLogin = async (loginParams: LoginParams) => {
-      const res = await loginAPI(loginParams)
-      userInfo.value = res
-      const skillStore = useSkillStore()
-      await skillStore.fetchSkills(res.uid)
+      isLoading.login = true
+      try {
+        const res = await loginAPI(loginParams)
+        userInfo.value = res
+        const skillStore = useSkillStore()
+        await skillStore.fetchSkills(res.uid)
+      } finally {
+        isLoading.login = false
+      }
     }
 
     const userLogout = async () => {
-      await logoutAPI()
-      userInfo.value = null
+      isLoading.logout = true
+      try {
+        await logoutAPI()
+        userInfo.value = null
+      } finally {
+        isLoading.logout = false
+      }
     }
 
     const fetchAllUsers = async () => {
-      userList.value = await getAllUsersAPI()
+      isLoading.userList = true
+      isUserListError.value = false
+
+      try {
+        userList.value = await getAllUsersAPI()
+      } catch (error) {
+        isUserListError.value = true
+        userListErrorMessage.value =
+          error instanceof Error && error.message ? error.message : '使用者名單載入失敗，請重新整理'
+      } finally {
+        isLoading.userList = false
+      }
     }
     return {
       userInfo,
       userList,
+      isLoading,
+      isUserListError,
+      userListErrorMessage,
       userRegister,
       userLogin,
       userLogout,
