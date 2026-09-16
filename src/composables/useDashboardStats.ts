@@ -1,8 +1,9 @@
+import { useUserStore } from '@/stores'
 import { useProjectStore } from '@/stores/projectStore'
 import { useSkillStore } from '@/stores/skillStore'
+import { useExperienceStore } from '@/stores/experienceStore'
 import { countSkillTags } from '@/utils/skill'
 import { formatCareerDuration } from '@/utils/date'
-import { useExperienceStore } from '@/stores/experienceStore'
 import {
   countOccurrences,
   getTopOccurrences,
@@ -12,6 +13,7 @@ import {
 import type { ProjectStatus } from '@/types/project'
 
 export const useDashboardStats = () => {
+  const userStore = useUserStore()
   const projectStore = useProjectStore()
   const skillStore = useSkillStore()
   const experienceStore = useExperienceStore()
@@ -65,5 +67,21 @@ export const useDashboardStats = () => {
     return { statusStats, skillStats }
   })
 
-  return { cardStatsMap, chartStatsMap }
+  const isLoading = computed(
+    () => projectStore.isLoading || skillStore.isLoading || experienceStore.isLoading,
+  )
+
+  const isError = computed(
+    () => projectStore.isError || skillStore.isError || experienceStore.isError,
+  )
+
+  const fetchAll = async () => {
+    await Promise.all([
+      projectStore.fetchProjects(),
+      skillStore.fetchSkills(userStore.userInfo?.uid),
+      experienceStore.fetchExperiences(),
+    ])
+  }
+
+  return { cardStatsMap, chartStatsMap, isLoading, isError, fetchAll }
 }
