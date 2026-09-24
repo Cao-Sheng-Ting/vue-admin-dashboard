@@ -68,6 +68,7 @@ declare module 'vue' {
     'ElTabler:settingsFilled': typeof import('element-plus/es')['ElTabler:settingsFilled']
     ElTag: typeof import('element-plus/es')['ElTag']
     HelloWorld: typeof import('./src/components/HelloWorld.vue')['default']
+    'IconCharm:pencil': typeof import('~icons/charm/pencil')['default']
     IconCommunity: typeof import('./src/components/icons/IconCommunity.vue')['default']
     IconDocumentation: typeof import('./src/components/icons/IconDocumentation.vue')['default']
     IconEcosystem: typeof import('./src/components/icons/IconEcosystem.vue')['default']

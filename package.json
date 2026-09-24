@@ -31,6 +31,7 @@
     "vue3-lottie": "^3.3.1"
   },
   "devDependencies": {
+    "@iconify-json/charm": "^1.2.3",
     "@iconify-json/ep": "^1.2.3",
     "@iconify-json/ic": "^1.2.4",
     "@iconify-json/line-md": "^1.2.13",
