@@ -12,9 +12,17 @@ export const getDefaultSkillsAPI = async (): Promise<SkillsData> => {
     const defaultSkills = await getDoc(skillsRef)
 
     if (!defaultSkills.exists()) {
-      throw new Error('找不到共用標籤庫')
+      return {
+        order: [],
+        skills: {},
+      }
     }
-    return defaultSkills.data() as SkillsData
+
+    const data = defaultSkills.data() as SkillsData
+    return {
+      order: data.order?.length ? data.order : Object.keys(data.skills ?? {}),
+      skills: data.skills ?? {},
+    }
   } catch (error) {
     console.error('獲取共用標籤庫失敗', error)
     throw error
@@ -44,27 +52,22 @@ export const getUserSkillsAPI = async (uid: string): Promise<SkillsGroupMap | nu
   }
 }
 
-export const editUserSkillsAPI = async (
-  data: SkillsGroupMap,
-  uid: string,
-): Promise<SkillsGroupMap> => {
+export const editUserSkillsAPI = async (data: SkillsGroupMap, uid: string): Promise<void> => {
   try {
     const skillRef = doc(db, 'users', uid)
     await updateDoc(skillRef, {
       skills: data,
     })
-    return data
   } catch (error) {
     console.error('更新技能標籤失敗', error)
     throw error
   }
 }
 
-export const editDefaultSkillsAPI = async (data: SkillsData): Promise<SkillsData> => {
+export const editDefaultSkillsAPI = async (data: SkillsData): Promise<void> => {
   try {
     const skillRef = doc(db, 'skills', 'default')
     await setDoc(skillRef, data)
-    return data
   } catch (error) {
     console.error('更新技能標籤失敗', error)
     throw error

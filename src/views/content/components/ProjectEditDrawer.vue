@@ -10,8 +10,10 @@ import { formatDate } from '@/utils/date.ts'
 // ============================================================================
 // Models (組件通訊區)
 // ============================================================================
+// 優化： 可以 defineProps 接收data就好
 const cardData = defineModel<ProjectItem | null>('card-data', { required: true })
 const isDrawerVisible = defineModel<boolean>('visible', { default: false })
+//優化： isProjectEdit 只有讀取，應改為 defineProps
 const isProjectEdit = defineModel<boolean>('edit-mode', { default: false })
 
 // ============================================================================
@@ -129,6 +131,7 @@ const handleReset = () => {
       cancelButtonText: '取消',
       type: 'warning'
     }
+    //優化： 統一不使用.then寫法
   ).then(async () => {
     try {
       if (!isProjectEdit.value) {
@@ -219,12 +222,14 @@ const toEditAPIPayload = (form: ProjectFormState): EditProjectData => {
 
 const emit = defineEmits(['project-added', 'project-updated'])
 
+// 優化： 這裡 emit 通知父組件更新 store, 可以改成在這裡(子組件)完成更新就好
 const handleAddProject = async (form: AddProjectData) => {
   const project = await addProjectAPI(form)
   emit('project-added', project)
   ElMessage.success('專案新增成功')
 }
 
+// 優化： 同上，這裡 emit 通知父組件更新 store, 可以改成在這裡(子組件)完成更新就好
 const handleEditProject = async (form: EditProjectData) => {
   const project = await editProjectAPI(form)
   emit('project-updated', project)
