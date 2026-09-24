@@ -34,6 +34,7 @@ export const useUserStore = defineStore(
       try {
         const res = await loginAPI(loginParams)
         userInfo.value = res
+        //優化： 不該講其他 store 的 fetch 寫在這裡，後續應該各個頁面所需要 fetch 的資料都寫在頁面的 onMounted 裡
         const skillStore = useSkillStore()
         await skillStore.fetchSkills(res.uid)
       } finally {

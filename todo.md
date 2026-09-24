@@ -106,6 +106,10 @@
 
 - [ ] [UI] 實作 `DashboardView.vue`
 
+### 🎮 技能 (skill)
+
+- [ ] 🟠加分功能 儲存鍵透過髒檢查來判斷disable
+
 ### 📊 經歷 (Experience)
 
 - [ ] 🟠加分功能 [UI] 實作 `ExperienceView.vue` 可拉動的時間軸
