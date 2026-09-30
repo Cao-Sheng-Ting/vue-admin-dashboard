@@ -58,10 +58,9 @@ export const useUserStore = defineStore(
 
       try {
         userList.value = await getAllUsersAPI()
-      } catch (error) {
+      } catch {
         isUserListError.value = true
-        userListErrorMessage.value =
-          error instanceof Error && error.message ? error.message : '使用者名單載入失敗，請重新整理'
+        userListErrorMessage.value = '使用者名單載入失敗，請重新整理'
       } finally {
         isLoading.userList = false
       }

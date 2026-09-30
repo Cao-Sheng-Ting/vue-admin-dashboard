@@ -5,6 +5,7 @@ import { editUserSkillsAPI, editDefaultSkillsAPI } from '@/services/skillService
 import { useUserStore } from '@/stores'
 import { useSkillStore } from '@/stores/skillStore'
 import { ElMessageBox } from 'element-plus'
+import BaseErrorState from '@/components/BaseErrorState.vue'
 
 const userStore = useUserStore()
 const skillStore = useSkillStore()
@@ -347,42 +348,76 @@ const handlePersonalSubmit = async (uid: string) => {
 
 <template>
 
-  <div class="action-bar flex justify-between pb-3 px-1">
-    <BaseButton @click="toggleEditMode" type="info" :plain="isEditMode ? false : true" :disabled="isEditDisabled">
-      <icon-ic:round-cancel-presentation v-if="isEditMode" />
-      <icon-ic:outline-edit-note v-else />
-      <span>{{ isEditMode ? '取消' : '編輯' }}</span>
-    </BaseButton>
-    <el-button type="primary" @click="handleSubmit">儲存</el-button>
+  <div v-if="skillStore.isLoading">
+    <div>
+      <el-skeleton animated>
+        <template #template>
+          <div class="flex justify-between pb-3 px-1">
+            <el-skeleton-item variant="button" v-for="item in 2" :key="item"
+              style="width: 80px; height: 30px"></el-skeleton-item>
+          </div>
+        </template>
+      </el-skeleton>
+    </div>
+    <el-space direction="vertical" fill class="w-full">
+      <el-card v-for="item in 4" :key="item" class="h-">
+        <el-skeleton animated>
+          <template #template>
+            <div class="flex flex-row items-center">
+              <el-skeleton-item variant="h3" style="width: 65px"></el-skeleton-item>
+              <div class="flex items-center gap-3 pl-8">
+                <el-skeleton-item variant="text" style="width: 55px" v-for="item in 4" :key="item"></el-skeleton-item>
+                <el-skeleton-item variant="circle" style="width: 20px; height: 20px"></el-skeleton-item>
+              </div>
+            </div>
+          </template>
+        </el-skeleton>
+      </el-card>
+    </el-space>
   </div>
 
-  <el-space direction="vertical" fill class="w-full">
-    <el-card v-for="(group, key) in props.skillGroups" :key="key">
-      <div class="flex flex-row justify-between items-center">
-        <div class="flex gap-3">
-          <div class="tech-stack-label w-24 shrink-0 flex items-center whitespace-nowrap ">
-            <span class="font-bold text-sky-800">{{ group.label }}</span>
-            <!-- 優化： icon 加上 hover 後放大的效果 -->
-            <span v-if="props.skillGroupType === 'public' && isEditMode" @click="openGroupDialog(group, key)"
-              class="text-sm cursor-pointer"><icon-charm:pencil /></span>
+  <BaseErrorState v-else-if="skillStore.isError" :is-error="true" :error-description="skillStore.errorMessage"
+    @retry="skillStore.fetchSkills(userStore.userInfo?.uid)">
+  </BaseErrorState>
+
+
+  <div v-else>
+    <div class="action-bar flex justify-between pb-3 px-1">
+      <BaseButton @click="toggleEditMode" type="info" :plain="isEditMode ? false : true" :disabled="isEditDisabled">
+        <icon-ic:round-cancel-presentation v-if="isEditMode" />
+        <icon-ic:outline-edit-note v-else />
+        <span>{{ isEditMode ? '取消' : '編輯' }}</span>
+      </BaseButton>
+      <el-button type="primary" @click="handleSubmit">儲存</el-button>
+    </div>
+    <el-space direction="vertical" fill class="w-full">
+      <el-card v-for="(group, key) in props.skillGroups" :key="key">
+        <div class="flex flex-row justify-between items-center">
+          <div class="flex gap-3">
+            <div class="tech-stack-label w-24 shrink-0 flex items-center whitespace-nowrap ">
+              <span class="font-bold text-sky-800">{{ group.label }}</span>
+              <!-- 優化： icon 加上 hover 後放大的效果 -->
+              <span v-if="props.skillGroupType === 'public' && isEditMode" @click="openGroupDialog(group, key)"
+                class="text-sm cursor-pointer"><icon-charm:pencil /></span>
+            </div>
+            <div class="tech-tags flex flex-wrap gap-3 items-center">
+              <el-tag v-for="(tag, index) in group.tags" :key="index"
+                :closable="isEditMode && tag.type === skillGroupType" @close="handleTagClose(key, tag.name)">{{ tag.name
+                }}</el-tag>
+              <icon-ph:plus-circle v-if="!isEditMode" @click="openAddTagDialog(key)" class="cursor-pointer" />
+            </div>
           </div>
-          <div class="tech-tags flex flex-wrap gap-3 items-center">
-            <el-tag v-for="(tag, index) in group.tags" :key="index"
-              :closable="isEditMode && tag.type === skillGroupType" @close="handleTagClose(key, tag.name)">{{ tag.name
-              }}</el-tag>
-            <icon-ph:plus-circle v-if="!isEditMode" @click="openAddTagDialog(key)" class="cursor-pointer" />
+          <!-- 優化： 點擊後 icon 變色 -->
+          <div v-if="props.skillGroupType === 'public' && isEditMode" @click="handelGroupDelete(key)"
+            class=" cursor-pointer"><icon-material-symbols:delete />
           </div>
         </div>
-        <!-- 優化： 點擊後 icon 變色 -->
-        <div v-if="props.skillGroupType === 'public' && isEditMode" @click="handelGroupDelete(key)"
-          class=" cursor-pointer"><icon-material-symbols:delete />
-        </div>
-      </div>
-    </el-card>
-    <el-button v-if="props.skillGroupType === 'public'" @click="openGroupDialog" class="text-xl p-5 mt-3">
-      <icon-ph:plus-circle />
-    </el-button>
-  </el-space>
+      </el-card>
+      <el-button v-if="props.skillGroupType === 'public'" @click="openGroupDialog" class="text-xl p-5 mt-3">
+        <icon-ph:plus-circle />
+      </el-button>
+    </el-space>
+  </div>
 
   <el-dialog v-model="isAddTagDialogVisible" title="新增技術標籤 " top="30vh" :before-close="closeAddTagDialog">
     <el-input v-model="newTagName" placeholder="技術名稱"></el-input>

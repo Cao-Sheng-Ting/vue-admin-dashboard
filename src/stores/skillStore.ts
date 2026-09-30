@@ -2,7 +2,6 @@ import { defineStore } from 'pinia'
 import type { SkillsData, SkillsGroupMap, DisplayGroup, Tag } from '@/types/skill'
 import { ref } from 'vue'
 import { getDefaultSkillsAPI, getUserSkillsAPI } from '@/services/skillService'
-import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
 
 export const useSkillStore = defineStore('skills', () => {
@@ -15,6 +14,7 @@ export const useSkillStore = defineStore('skills', () => {
   const skillOrder = ref<SkillsData['order'] | null>(null)
   const isLoading = ref<boolean>(false)
   const isError = ref<boolean>(false)
+  const errorMessage = ref<string>('')
 
   /**
    * 共用標籤庫加入 type 供給頁面使用
@@ -105,10 +105,9 @@ export const useSkillStore = defineStore('skills', () => {
       defaultSkills.value = defaults.skills
       skillOrder.value = defaults.order
       userSkills.value = await getUserSkillsAPI(uid)
-    } catch (error) {
+    } catch {
       isError.value = true
-      ElMessage.error('載入標籤庫失敗，請稍後再試')
-      console.log(error)
+      errorMessage.value = '標籤庫載入失敗，請重新整理'
     } finally {
       isLoading.value = false
     }
@@ -120,6 +119,7 @@ export const useSkillStore = defineStore('skills', () => {
     skillOrder,
     isLoading,
     isError,
+    errorMessage,
     publicSkillGroups,
     mergedSkillGroups,
     fetchSkills,

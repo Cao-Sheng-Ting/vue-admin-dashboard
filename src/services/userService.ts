@@ -135,16 +135,30 @@ export const getAllUsersAPI = async (): Promise<UserInfo[]> => {
     return snapshot.docs.map((doc) => transformUser(doc.data()))
   } catch (error) {
     console.error('取得使用者名單失敗:', error)
-    throw new Error('取得使用者名單失敗，請稍後再試')
+    throw error
   }
 }
 
-export const changeUserRoleAPI = async (uid: string, newRole: UserRole): Promise<void> => {
+export const changeUserRoleAPI = async (uid: UserInfo['uid'], newRole: UserRole): Promise<void> => {
   try {
     const userRef = doc(db, 'users', uid)
     await updateDoc(userRef, { role: newRole })
   } catch (error) {
     console.error('更新權限失敗：', error)
+    //優化： api 不做新的 Error，應該直接throw
     throw new Error('更新權限失敗，請稍後再試')
+  }
+}
+
+export const updateUserNicknameAPI = async (
+  uid: UserInfo['uid'],
+  newName: UserInfo['nickname'],
+) => {
+  try {
+    const userRef = doc(db, 'users', uid)
+    await updateDoc(userRef, { nickname: newName })
+  } catch (error) {
+    console.error('更新用戶名稱失敗：', error)
+    throw error
   }
 }

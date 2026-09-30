@@ -21,10 +21,10 @@ const emit = defineEmits<{
     <el-button size="large" @click="emit('retry')" class="border-none text-2xl">
       <icon-tabler:refresh />
     </el-button>
-    <div class="text-lg text-gray-600">{{ errorDescription ?? '重新整理' }}</div>
+    <div class="text-lg text-gray-600">{{ errorDescription || '重新整理' }}</div>
   </div>
 
   <div v-else-if="isEmpty" class="flex w-full h-full items-center justify-center pb-32">
-    <el-empty :description="emptyDescription ?? '目前沒有內容'" />
+    <el-empty :description="emptyDescription || '目前沒有內容'" />
   </div>
 </template>
