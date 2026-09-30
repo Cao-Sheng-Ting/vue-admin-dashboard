@@ -112,7 +112,7 @@ const logout = async () => {
         </div>
         <div class="header-right flex flex-row items-center justify-center gap-3">
           <el-input placeholder="請輸入關鍵字" class="w-60"></el-input>
-          <el-avatar class="shrink-0">
+          <el-avatar class="shrink-0 cursor-pointer" @click="router.push('/profile')">
             <el-icon>
               <icon-tabler:user-filled />
             </el-icon>
@@ -141,11 +141,12 @@ const logout = async () => {
           </el-dropdown>
         </div>
       </el-header>
-      <div class="tags-view-container h-10 bg-gray-100 border-y border-gray-200">
+      <!-- 未來考慮加上分頁功能 -->
+      <!-- <div class="tags-view-container h-10 bg-gray-100 border-y border-gray-200">
         <el-scrollbar>
           <el-tag>Tag 1</el-tag>
         </el-scrollbar>
-      </div>
+      </div> -->
       <el-main tag="main" class="h-[calc(100vh-80px] bg-gray-200"><router-view></router-view></el-main>
       <el-footer>這是footer</el-footer>
     </el-container>

@@ -1,7 +1,9 @@
 import { Timestamp } from 'firebase/firestore'
 
+type SerializedTimestamp = { seconds: number; nanoseconds: number }
+
 export const formatDate = (
-  d: Timestamp | Date | string | number | null | undefined,
+  d: Timestamp | Date | string | number | SerializedTimestamp | null | undefined,
 ): Date | null => {
   if (!d) return null
 
@@ -9,6 +11,10 @@ export const formatDate = (
 
   if (d instanceof Timestamp) {
     return d.toDate()
+  }
+
+  if (typeof d === 'object' && 'seconds' in d) {
+    return new Date(d.seconds * 1000)
   }
 
   const date = new Date(d as string | number)

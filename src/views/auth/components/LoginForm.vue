@@ -13,6 +13,7 @@ const ruleForm = ref({
   email: '',
   password: '',
 })
+
 const rules = reactive({
   email: [
     { required: true, message: '請輸入email', trigger: 'blur' },
