@@ -60,7 +60,10 @@ const demoAccount = async () => {
 
 <template>
   <div class="login-logo">
-    <h2 class="text-5xl mb-11">後台管理系統</h2>
+    <h2 class="text-3xl font-bold text-blue-900 mb-11">Admin Dashboard
+      <br>
+      後台管理系統
+    </h2>
   </div>
   <el-form ref="ruleFormRef" :model="ruleForm" :rules="rules">
     <el-form-item prop="email">
@@ -79,7 +82,7 @@ const demoAccount = async () => {
     </el-form-item>
     <el-form-item>
       <div class="login-button w-full flex justify-between">
-        <el-button round size="large" color="#009688" :loading="userStore.isLoading.login" class="w-36"
+        <el-button round size="large" type="primary" :loading="userStore.isLoading.login" class="w-36"
           @click="login">登入</el-button>
         <el-button round size="large" class="w-36" @click="router.push({ name: 'register' })">註冊</el-button>
       </div>
