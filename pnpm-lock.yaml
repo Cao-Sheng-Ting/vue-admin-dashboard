@@ -11,6 +11,9 @@ importers:
       '@iconify/vue':
         specifier: ^5.0.0
         version: 5.0.0(vue@3.5.25(typescript@5.9.3))
+      '@lottiefiles/dotlottie-vue':
+        specifier: ^0.11.27
+        version: 0.11.27(vue@3.5.25(typescript@5.9.3))
       '@vueuse/core':
         specifier: ^14.2.1
         version: 14.2.1(vue@3.5.25(typescript@5.9.3))
@@ -42,6 +45,12 @@ importers:
         specifier: ^3.3.1
         version: 3.3.1(vue@3.5.25(typescript@5.9.3))
     devDependencies:
+      '@iconify-json/akar-icons':
+        specifier: ^1.2.7
+        version: 1.2.7
+      '@iconify-json/bi':
+        specifier: ^1.2.7
+        version: 1.2.7
       '@iconify-json/charm':
         specifier: ^1.2.3
         version: 1.2.3
@@ -60,6 +69,9 @@ importers:
       '@iconify-json/mdi':
         specifier: ^1.2.3
         version: 1.2.3
+      '@iconify-json/oi':
+        specifier: ^1.2.1
+        version: 1.2.1
       '@iconify-json/ph':
         specifier: ^1.2.2
         version: 1.2.2
@@ -741,6 +753,12 @@ packages:
     resolution: {integrity: sha512-bV0Tgo9K4hfPCek+aMAn81RppFKv2ySDQeMoSZuvTASywNTnVJCArCZE2FWqpvIatKu7VMRLWlR1EazvVhDyhQ==}
     engines: {node: '>=18.18'}
 
+  '@iconify-json/akar-icons@1.2.7':
+    resolution: {integrity: sha512-cw44dCnZgGhm6Tywxm0WALAnDB9AyGkDk7kiLMo2B/Ayt7duZu/uyrsqb55weWUN8Ge2sQAOl8MRtT6bFcLzPg==}
+
+  '@iconify-json/bi@1.2.7':
+    resolution: {integrity: sha512-IPz8WNxmLkH1I9msl+0Q4OnmjjvP4uU0Z61a4i4sqonB6vKSbMGUWuGn8/YuuszlReVj8rf+3gNv5JU8Xoljyg==}
+
   '@iconify-json/charm@1.2.3':
     resolution: {integrity: sha512-Hsq/EvAQWHvZDeTqmfa9fyER/6Ivf6C0iA1PWDPWn6Nuv1j+vHXgnYKiuazmZXY/q5247tzKhYrcLKW5jITKVQ==}
 
@@ -758,6 +776,9 @@ packages:
 
   '@iconify-json/mdi@1.2.3':
     resolution: {integrity: sha512-O3cLwbDOK7NNDf2ihaQOH5F9JglnulNDFV7WprU2dSoZu3h3cWH//h74uQAB87brHmvFVxIOkuBX2sZSzYhScg==}
+
+  '@iconify-json/oi@1.2.1':
+    resolution: {integrity: sha512-oYxvqeWXJHYbriBc++eFJeo5dW3vqWnm82S73hvOYq6XxGiw6xhNOmQtz8K/nnwDbBVIKDXefE5JeQEZxmTRRg==}
 
   '@iconify-json/ph@1.2.2':
     resolution: {integrity: sha512-PgkEZNtqa8hBGjHXQa4pMwZa93hmfu8FUSjs/nv4oUU6yLsgv+gh9nu28Kqi8Fz9CCVu4hj1MZs9/60J57IzFw==}
@@ -791,6 +812,16 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
+
+  '@lottiefiles/dotlottie-vue@0.11.27':
+    resolution: {integrity: sha512-3IdS5SCFeD/cCi0V2SljJ37dvXCmgyyHcTmp82Ev35WBgCk9vwf7Gu08eJonxOx8UBBgWxMgCzv/MvgGkPmFJg==}
+    engines: {node: '>=18.17.0', npm: '>=9.5.0'}
+    peerDependencies:
+      vue: ^3.3.4
+
+  '@lottiefiles/dotlottie-web@0.80.0':
+    resolution: {integrity: sha512-M00APgOJfP6xPZ3kAzZAUNATxluFiMU0wD3asp6HQSXDX8qLzSDh/Jmqbo0H7+WcqfpQkN8WYBu3aOzm2y/b4g==}
+    engines: {node: '>=18.17.0', npm: '>=9.5.0'}
 
   '@nodelib/fs.scandir@2.1.5':
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
@@ -3848,6 +3879,14 @@ snapshots:
 
   '@humanwhocodes/retry@0.4.3': {}
 
+  '@iconify-json/akar-icons@1.2.7':
+    dependencies:
+      '@iconify/types': 2.0.0
+
+  '@iconify-json/bi@1.2.7':
+    dependencies:
+      '@iconify/types': 2.0.0
+
   '@iconify-json/charm@1.2.3':
     dependencies:
       '@iconify/types': 2.0.0
@@ -3869,6 +3908,10 @@ snapshots:
       '@iconify/types': 2.0.0
 
   '@iconify-json/mdi@1.2.3':
+    dependencies:
+      '@iconify/types': 2.0.0
+
+  '@iconify-json/oi@1.2.1':
     dependencies:
       '@iconify/types': 2.0.0
 
@@ -3911,6 +3954,13 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
+
+  '@lottiefiles/dotlottie-vue@0.11.27(vue@3.5.25(typescript@5.9.3))':
+    dependencies:
+      '@lottiefiles/dotlottie-web': 0.80.0
+      vue: 3.5.25(typescript@5.9.3)
+
+  '@lottiefiles/dotlottie-web@0.80.0': {}
 
   '@nodelib/fs.scandir@2.1.5':
     dependencies:

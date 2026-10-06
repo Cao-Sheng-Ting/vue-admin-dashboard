@@ -21,24 +21,30 @@ const rules = {
   ]
 }
 
+const isSubmitting = ref<boolean>(false)
 const handleSubmit = async () => {
   if (!userInfo?.uid) {
     ElMessage.error('登入狀態已失效，請重新登入')
     return
   }
 
-  if (!ruleFormRef.value) return
+  if (!ruleFormRef.value || isSubmitting.value) return
   const isValid = await ruleFormRef.value.validate().catch(() => false)
   if (!isValid) {
     console.warn('用戶名稱不可為空')
     return
   }
+
+  isSubmitting.value = true
+
   try {
     await updateUserNicknameAPI(userInfo.uid, form.nickname)
     userInfo.nickname = form.nickname
     ElMessage.success('更新用戶名稱成功')
   } catch {
     ElMessage.error('更新用戶名稱失敗，請稍後再試')
+  } finally {
+    isSubmitting.value = false
   }
 }
 </script>
@@ -62,7 +68,7 @@ const handleSubmit = async () => {
         </el-form-item>
       </el-form>
       <div class="flex w-full pb-3 justify-end">
-        <el-button type="primary" @click="handleSubmit">儲存</el-button>
+        <el-button type="primary" @click="handleSubmit" :loading="isSubmitting">儲存</el-button>
       </div>
     </div>
   </div>

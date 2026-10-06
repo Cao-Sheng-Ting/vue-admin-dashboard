@@ -128,7 +128,7 @@ onMounted(async () => {
 
   <div class="tech-stack-tags flex gap-2 items-center m-2">
     <el-tag closable @close="handleTagClose(tag)" v-for="tag in projectStore.tagsFilter" :key="tag">{{ tag
-    }}</el-tag>
+      }}</el-tag>
   </div>
   <div class="main-box bg-white flex-1 rounded p-6 ">
 
@@ -166,6 +166,7 @@ onMounted(async () => {
       </el-col>
     </el-row>
 
+    <!-- 優化：description 來源應來自 store-->
     <BaseErrorState v-else-if="projectStore.isError || projectStore.isEmpty" :is-error="projectStore.isError"
       :is-empty="projectStore.isEmpty" error-description="載入專案失敗，請重新整理" empty-description="專案目前沒有內容"
       @retry="projectStore.fetchProjects" class="h-full">

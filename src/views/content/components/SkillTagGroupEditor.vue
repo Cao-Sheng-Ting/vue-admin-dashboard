@@ -20,6 +20,7 @@ const props = defineProps<{
 const isAddTagDialogVisible = ref<boolean>(false)
 const isEditMode = ref<boolean>(false)
 const isGroupDialogVisible = ref<boolean>(false)
+const isSubmitting = ref<boolean>(false)
 
 // 存放當前操作的分類資料，用於新增標籤時對 store 的資料操作
 const currentGroupKey = ref<string>('')
@@ -317,6 +318,9 @@ const handlePublicSubmit = async () => {
     ElMessage.error('目前無法儲存，請重新整理頁面後再試')
     return
   }
+  if (isSubmitting.value) return
+
+  isSubmitting.value = true
 
   try {
     const payload = {
@@ -327,6 +331,8 @@ const handlePublicSubmit = async () => {
     ElMessage.success('儲存成功！')
   } catch {
     ElMessage.error('發生預期外的錯誤，請重新整理頁面')
+  } finally {
+    isSubmitting.value = false
   }
 }
 
@@ -335,12 +341,17 @@ const handlePersonalSubmit = async (uid: string) => {
     ElMessage.error('目前無法儲存，請重新整理頁面後再試')
     return
   }
+  if (isSubmitting.value) return
+
+  isSubmitting.value = true
 
   try {
     await editUserSkillsAPI(skillStore.userSkills, uid)
     ElMessage.success('儲存成功！')
   } catch {
     ElMessage.error('發生預期外的錯誤，請重新整理頁面')
+  } finally {
+    isSubmitting.value = false
   }
 }
 
@@ -388,7 +399,7 @@ const handlePersonalSubmit = async (uid: string) => {
         <icon-ic:outline-edit-note v-else />
         <span>{{ isEditMode ? '取消' : '編輯' }}</span>
       </BaseButton>
-      <el-button type="primary" @click="handleSubmit">儲存</el-button>
+      <el-button type="primary" @click="handleSubmit" :loading="isSubmitting">儲存</el-button>
     </div>
     <el-space direction="vertical" fill class="w-full">
       <el-card v-for="(group, key) in props.skillGroups" :key="key">

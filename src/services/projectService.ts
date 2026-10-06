@@ -26,6 +26,7 @@ export const getProjectsAPI = async (): Promise<ProjectItem[]> => {
     return projectsList
   } catch (error) {
     //優化： 需整理後再拋出錯誤
+    console.error(error)
     throw error
   }
 }

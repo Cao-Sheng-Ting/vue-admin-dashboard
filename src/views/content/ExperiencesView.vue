@@ -19,6 +19,9 @@ const popoverVisibleMap = reactive<Record<string, boolean>>({})
 const isTimelineDialogVisible = ref<boolean>(false)
 const isEditMode = ref<boolean>(false)
 
+// 用於防禦連續點擊提交按鈕導致重複提交
+const isSubmitting = ref<boolean>(false)
+
 const getThemeClass = (type: Experience['type']) => {
   return type === 'portfolio' ?
     {
@@ -112,6 +115,7 @@ const rules = reactive({
   ]
 })
 
+// 功能：未來可以新增新的時間線
 // const addExperience = async () => {
 //   try {
 //     if (!userStore.userInfo) return
@@ -225,13 +229,15 @@ const handleRest = () => {
 }
 
 const handleSubmit = async () => {
-  if (!ruleFormRef.value) return
+  if (!ruleFormRef.value || isSubmitting.value) return
 
   const isValid = await ruleFormRef.value.validate()
   if (!isValid) {
     console.warn('表單驗證未通過')
     return
   }
+
+  isSubmitting.value = true
 
   try {
     if (currentTimeline.value) {
@@ -264,6 +270,7 @@ const handleSubmit = async () => {
     ElMessage.error('新增失敗，請稍後再試')
   } finally {
     isTimelineDialogVisible.value = false
+    isSubmitting.value = false
   }
 }
 
@@ -322,7 +329,7 @@ onMounted(async () => {
                 </div>
 
                 <p v-if="item.organization"><span class="font-semibold">服務單位：</span> <span>{{ item.organization
-                    }}</span></p>
+                }}</span></p>
                 <p><span class="font-semibold">使用技術：</span> <span>{{ item.skillTags.join(', ') }}</span></p>
                 <p v-if="timeline.type === 'career'"><span class="font-semibold">經歷時長：</span> <span>{{
                   formatDuration(item.durationYears,
@@ -424,7 +431,7 @@ onMounted(async () => {
       </el-form>
       <template #footer>
         <el-button @click="handleRest">取消</el-button>
-        <el-button @click="handleSubmit" type="primary">儲存</el-button>
+        <el-button @click="handleSubmit" type="primary" :loading="isSubmitting">儲存</el-button>
       </template>
     </el-dialog>
   </div>

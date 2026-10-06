@@ -48,6 +48,9 @@ const rules = reactive({
 // Local State (內部響應式狀態)
 // ============================================================================
 
+// 用於防禦連續點擊提交按鈕導致重複提交
+const isSubmitting = ref<boolean>(false)
+
 // 專案表單初始化狀態，status 暫時允許 string 以處理 UI 的空值狀態
 type InitialProject = Omit<AddProjectData, 'status'> & { status: string }
 
@@ -237,13 +240,16 @@ const handleEditProject = async (form: EditProjectData) => {
 }
 
 const handleSubmit = async () => {
-  if (!ruleFormRef.value) return
+  if (!ruleFormRef.value || isSubmitting.value) return
 
   const isValid = await ruleFormRef.value.validate().catch(() => false)
   if (!isValid) {
     console.warn('表單驗證未通過')
     return
   }
+
+  isSubmitting.value = true
+
   try {
     if (!isProjectEdit.value) {
       await handleAddProject(toAddAPIPayload(localForm.value))
@@ -256,6 +262,8 @@ const handleSubmit = async () => {
   } catch (error) {
     console.error(isProjectEdit.value ? '更新專案錯誤' : '新增專案錯誤', error)
     ElMessage.error(isProjectEdit.value ? '更新專案發生錯誤，請稍後再試' : '新增專案發生錯誤，請稍後再試')
+  } finally {
+    isSubmitting.value = false
   }
 }
 
@@ -334,7 +342,8 @@ const responsiveSize = computed(() => {
     <template #footer>
       <div class="flex w-full justify-end gap-4">
         <el-button size="large" @click="handleReset">重置</el-button>
-        <el-button :disabled="!isDirty" type="primary" size="large" @click="handleSubmit">儲存</el-button>
+        <el-button :disabled="!isDirty" type="primary" size="large" @click="handleSubmit"
+          :loading="isSubmitting">儲存</el-button>
       </div>
     </template>
   </el-drawer>
