@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { ProjectStatus, ProjectItem } from '@/types/project'
 import { getProjectsAPI } from '@/services/projectService'
-import { ElMessage } from 'element-plus'
+import { isOffline, handleFetchFailure } from '@/utils/fetchHelpers'
 
 export const useProjectStore = defineStore('projects', () => {
   //原始資料
@@ -48,12 +48,17 @@ export const useProjectStore = defineStore('projects', () => {
   const fetchProjects = async () => {
     isLoading.value = true
     isError.value = false //每次獲取時重置錯誤狀態，避免頁面卡在失敗畫面
+
+    if (isOffline()) {
+      handleFetchFailure({ isError, isLoading })
+      return
+    }
+
+    // 優化： 之後 fetch 可以寫成高階函式獨立出來讓每個 store 調用
     try {
       projectsList.value = await getProjectsAPI()
-    } catch (error) {
-      isError.value = true
-      ElMessage.error('載入專案資料失敗，請稍後再試')
-      console.error(error)
+    } catch {
+      handleFetchFailure({ isError, isLoading }, '載入專案資料失敗，請稍後再試')
     } finally {
       isLoading.value = false
     }

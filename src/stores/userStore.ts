@@ -4,6 +4,7 @@ import { loginAPI, registerAPI, logoutAPI } from '@/services/userService'
 import type { LoginParams, RegisterParams, UserInfo } from '@/types/user'
 import { useSkillStore } from './skillStore'
 import { getAllUsersAPI } from '@/services/userService'
+import { isOffline } from '@/utils/fetchHelpers'
 
 export const useUserStore = defineStore(
   'user',
@@ -55,6 +56,15 @@ export const useUserStore = defineStore(
     const fetchAllUsers = async () => {
       isLoading.userList = true
       isUserListError.value = false
+
+      //優化： 這裡用 reactive 管理 Loading 狀態，與 handleFetchFailure 接收參數不符，需再做調整
+      if (isOffline()) {
+        isLoading.userList = false
+        isUserListError.value = true
+        ElMessage.error('網路連線中斷，請檢查網路狀態')
+        userListErrorMessage.value = '使用者名單載入失敗，請重新整理'
+        return
+      }
 
       try {
         userList.value = await getAllUsersAPI()
