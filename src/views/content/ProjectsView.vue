@@ -137,7 +137,7 @@ onMounted(async () => {
 
   <div class="tech-stack-tags flex gap-2 items-center m-2">
     <el-tag closable @close="handleTagClose(tag)" v-for="tag in projectStore.tagsFilter" :key="tag">{{ tag
-      }}</el-tag>
+    }}</el-tag>
   </div>
   <div class="main-box bg-white flex-1 rounded p-6 ">
 
@@ -216,7 +216,8 @@ onMounted(async () => {
         </el-col>
       </el-row>
     </div>
-
+    <el-pagination v-model:current-page="projectStore.currentPage" v-model:page-size="projectStore.pageSize" background
+      layout="prev, pager, next, jumper" :total="projectStore.total"></el-pagination>
   </div>
   <SkillTagDialog v-model="isTagFilterVisible" :initial-tags="selectedTags" @confirm="handleTagsFilter">
   </SkillTagDialog>

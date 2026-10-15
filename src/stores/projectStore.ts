@@ -14,6 +14,8 @@ export const useProjectStore = defineStore('projects', () => {
   const searchQuery = ref<string>('')
   const tagsFilter = ref<string[]>([])
   const statusFilter = ref<ProjectStatus | 'all'>('all')
+  const currentPage = ref(1)
+  const pageSize = ref(8)
 
   //篩選後結果
   /**
@@ -43,6 +45,14 @@ export const useProjectStore = defineStore('projects', () => {
       return matchSearch && matchTags && matchStatus
     })
   })
+
+  const pagedProjects = computed(() => {
+    const start = (currentPage.value - 1) * pageSize.value
+    return filteredProjects.value.slice(start, start + pageSize.value)
+  })
+
+  const total = computed(() => filteredProjects.value.length)
+
   const isEmpty = computed(() => filteredProjects.value.length === 0)
 
   const fetchProjects = async () => {
@@ -68,11 +78,15 @@ export const useProjectStore = defineStore('projects', () => {
     projectsList,
     isLoading,
     isError,
-    isEmpty,
     searchQuery,
     tagsFilter,
     statusFilter,
+    currentPage,
+    pageSize,
     filteredProjects,
+    pagedProjects,
+    total,
+    isEmpty,
     fetchProjects,
   }
 })
