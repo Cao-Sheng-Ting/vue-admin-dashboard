@@ -41,7 +41,6 @@ export const loginAPI = async (loginParams: LoginParams): Promise<UserInfo> => {
     if (!userSnap.exists()) {
       throw new Error('此帳號驗證成功，但無法找到對應的用戶資料，請聯絡管理員')
     }
-    console.log('返回值：', userSnap.data())
     return transformUser(userSnap.data())
   } catch (error) {
     if (error instanceof Error && 'code' in error) {
@@ -102,11 +101,9 @@ export const registerAPI = async (registerParams: RegisterParams): Promise<UserI
 export const logoutAPI = async () => {
   try {
     await signOut(auth)
-    // 登出成功後，將你的 userInfo 清除或重導向到登入頁
-    ElMessage.success('登出成功')
   } catch (error) {
-    ElMessage.error('登出失敗，請稍後再試')
     console.error('登出失敗:', error)
+    throw error
   }
 }
 

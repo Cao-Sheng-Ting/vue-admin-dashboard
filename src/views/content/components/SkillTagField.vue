@@ -8,6 +8,7 @@ defineProps<{
 
 const modelValue = defineModel<string[]>({ default: [] })
 
+
 const isTagDialogVisible = ref<boolean>(false)
 
 const handleTagClose = (tag: string) => {
@@ -26,7 +27,7 @@ const handleTagsSelect = (tags: string[]) => {
     <div class="flex flex-row flex-wrap gap-2 min-h-6">
       <el-tag v-for="(tag, index) in modelValue" :key="index" closable @close="handleTagClose(tag)">{{
         tag
-        }}</el-tag>
+      }}</el-tag>
     </div>
 
     <SkillTagDialog v-model="isTagDialogVisible" :initial-tags="modelValue" @confirm="handleTagsSelect">

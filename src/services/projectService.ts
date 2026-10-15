@@ -115,7 +115,6 @@ export const addAll = async (data: AddProjectData[]) => {
   })
   try {
     await all.commit()
-    console.log('匯入成功')
   } catch (error) {
     console.log(error)
   }

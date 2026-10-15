@@ -1,15 +1,18 @@
 <script setup lang="ts">
 import { useExperienceStore } from '@/stores/experienceStore'
-import type { Experience, TimelineItem, AddTimelineItemData, AddExperienceData } from '@/types/experience.js'
+import { useSkillStore } from '@/stores/skillStore.ts'
+import { useUserStore } from '@/stores/userStore.ts'
+import type { Experience, TimelineItem, AddTimelineItemData } from '@/types/experience.js'
 import SkillTagField from './components/SkillTagField.vue'
 import { updateExperienceAPI } from '@/services/experienceService.ts'
 import { ElMessageBox } from 'element-plus'
 import BaseErrorState from '@/components/BaseErrorState.vue'
-// import { useUserStore } from '@/stores/userStore.ts'
-
-// const userStore = useUserStore(0)
+import { usePermission } from '@/composables/usePermission.ts'
 
 const experienceStore = useExperienceStore()
+const skillStore = useSkillStore()
+const userStore = useUserStore()
+const { guard, denyClass } = usePermission()
 
 const currentTimeline = ref<Experience | null>(null)
 const currentTimelineItem = ref<TimelineItem | null>(null)
@@ -136,7 +139,9 @@ const rules = reactive({
 //   }
 // }
 
-const openAddDialog = (timeline: Experience) => {
+const openAddDialog = async (timeline: Experience) => {
+  if (!await (guard('editor'))) return
+
   localForm.value = getInitialTimelineItem()
 
   isEditMode.value = false
@@ -148,8 +153,10 @@ const openAddDialog = (timeline: Experience) => {
   ruleFormRef.value?.clearValidate()
 }
 
-const openEditDialog = (timeline: Experience, item: TimelineItem) => {
-  localForm.value = structuredClone(toRaw(item))
+const openEditDialog = async (timeline: Experience, item: TimelineItem) => {
+  if (!await (guard('editor'))) return
+
+  localForm.value = JSON.parse(JSON.stringify(item))
 
   popoverVisibleMap[item.id] = false
   isEditMode.value = true
@@ -187,6 +194,8 @@ const addHighlight = () => {
 
 
 const handleDelete = async (timeline: Experience, id: TimelineItem['id']) => {
+  if (!await (guard('editor'))) return
+
   if (!experienceStore.timelineMap) {
     ElMessage.error('找不到要刪除的項目，請重新整理後再試')
     return
@@ -241,23 +250,38 @@ const handleSubmit = async () => {
 
   try {
     if (currentTimeline.value) {
-      const oldItems = currentTimeline.value?.items
+      const oldItems: TimelineItem[] = currentTimeline.value?.items
+      let updatedItems: TimelineItem[]
 
-      const newItem = {
-        id: crypto.randomUUID(),
-        ...localForm.value,
-        sortOrder: (oldItems?.length ?? 0) + 1
+      if (isEditMode.value) {
+        const editingId = localForm.value.id
+        if (!editingId) {
+          //理論上不會發生，發生代表編輯流程有 bug
+          ElMessage.error('系統異常，請重新整理頁面後再試')
+          return
+        }
+
+        const exists = oldItems.some(item => item.id === editingId)
+        if (!exists) {
+          ElMessage.warning('找不到要編輯的項目，資料可能已更新，請重新整理頁面')
+          return
+        }
+        //疑問：sortOrder 應該要是 item.sortOrder 還是 localForm.value.sortOrder ?
+        updatedItems = oldItems.map(item => item.id === editingId ? { ...localForm.value, id: editingId, sortOrder: item.sortOrder } : item)
+
+      } else {
+        const newItem = {
+          id: crypto.randomUUID(),
+          ...localForm.value,
+          sortOrder: (oldItems?.length ?? 0) + 1
+        }
+        updatedItems = [...oldItems, newItem]
       }
 
-      const updatedItems = [
-        ...(oldItems ?? []),
-        newItem
-      ]
+      const currentTimelineId = currentTimeline.value.id
+      const result = await updateExperienceAPI(currentTimelineId, updatedItems)
 
-      const currentId = currentTimeline.value.id
-      const result = await updateExperienceAPI(currentId, updatedItems)
-
-      const foundItem = experienceStore.timelineMap?.find(item => item.id === currentId)
+      const foundItem = experienceStore.timelineMap?.find(item => item.id === currentTimelineId)
 
       if (foundItem) {
         foundItem.items = result.items
@@ -276,6 +300,7 @@ const handleSubmit = async () => {
 
 onMounted(async () => {
   await experienceStore.fetchExperiences()
+  await skillStore.fetchSkills(userStore.userInfo?.uid)
 })
 </script>
 <template>
@@ -323,13 +348,15 @@ onMounted(async () => {
                 <div class="popover-top flex flex-row justify-between items-center pb-2">
                   <h4 class="text-xl">{{ item.title }}</h4>
                   <div>
-                    <el-button @click="openEditDialog(timeline, item)" plain type="primary">編輯</el-button>
-                    <el-button @click="handleDelete(timeline, item.id)" type="danger" plain>刪除</el-button>
+                    <el-button @click="openEditDialog(timeline, item)" plain type="primary"
+                      :class="denyClass('editor', 'button')">編輯</el-button>
+                    <el-button @click="handleDelete(timeline, item.id)" type="danger" plain
+                      :class="denyClass('editor', 'button')">刪除</el-button>
                   </div>
                 </div>
 
                 <p v-if="item.organization"><span class="font-semibold">服務單位：</span> <span>{{ item.organization
-                }}</span></p>
+                    }}</span></p>
                 <p><span class="font-semibold">使用技術：</span> <span>{{ item.skillTags.join(', ') }}</span></p>
                 <p v-if="timeline.type === 'career'"><span class="font-semibold">經歷時長：</span> <span>{{
                   formatDuration(item.durationYears,
@@ -344,10 +371,10 @@ onMounted(async () => {
             </el-popover>
           </div>
           <div class="h-1 w-14" :class="getThemeClass(timeline.type).bg"></div>
-          <icon-ph:plus-circle
-            class="text-xl text-slate-600 hover:text-2xl transition-all duration-200 ease-out cursor-pointer"
-            @click="openAddDialog(timeline)" />
+          <icon-ph:plus-circle class="text-xl text-slate-600 hover:text-2xl transition-all duration-200 ease-out"
+            :class="denyClass('editor')" @click="openAddDialog(timeline)" />
         </div>
+        <!-- 新增：時間線"創建時間"和"更新時間" -->
       </el-card>
     </div>
 

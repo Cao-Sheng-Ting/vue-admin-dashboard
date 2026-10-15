@@ -2,8 +2,9 @@
 import { STATUS_MAP } from '@/constants/project'
 import type { ProjectItem } from '@/types/project'
 import { deleteProjectAPI } from '@/services/projectService'
-import { useProjectStore } from '@/stores/projectStore';
+import { useProjectStore } from '@/stores/projectStore'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { usePermission } from '@/composables/usePermission'
 
 
 defineProps<{
@@ -13,6 +14,7 @@ defineProps<{
 }>()
 
 const projectStore = useProjectStore()
+const { can, denyClass } = usePermission()
 
 const isHovering = ref<boolean>(false)
 const isMenuOpen = ref<boolean>(false)
@@ -52,13 +54,13 @@ const handleDelete = async (id: string) => {
 </script>
 
 <template>
-  <div @mouseenter="isHovering = true" @mouseleave="isHovering = false" class="relative group cursor-pointer"
-    @click="$emit('edit', data)">
+  <div @mouseenter="isHovering = true" @mouseleave="isHovering = false" class="relative group"
+    :class="denyClass('editor')" @click="$emit('edit', data)">
     <el-checkbox v-show="isBatchEdit" size="large" :value="data.id" @click.stop
       class="project-checkbox absolute left-3 z-10"></el-checkbox>
     <el-tag class="absolute top-2 right-2 z-10" :type="STATUS_MAP[data.status].type">{{
       STATUS_MAP[data.status].name }}</el-tag>
-    <el-dropdown trigger="click" @visible-change="handleMenuVisible"
+    <el-dropdown v-if="can('editor')" trigger="click" @visible-change="handleMenuVisible"
       class="absolute top-8 right-3 z-10 text-2xl transition-opacity duration-200"
       :class="{ 'opacity-100': shouldShowMenu, ' opacity-0': !shouldShowMenu }">
       <span @click.stop>

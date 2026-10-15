@@ -24,12 +24,11 @@ watchEffect(() => {
 
 const route = useRoute()
 const router = useRouter()
+const userStore = useUserStore()
 
 const hasPermission = (requiredRole?: string[]) => {
-  const userRole = useUserStore().userInfo?.role || 'user'
+  const userRole = useUserStore().userInfo?.role || 'viewer'
   if (!requiredRole?.length) return true
-
-  if (userRole === 'admin') return true
 
   return requiredRole.includes(userRole)
 }
@@ -38,7 +37,10 @@ const filterByPermission = (items: RouteRecordRaw[]): RouteRecordRaw[] => {
   return items.filter((item) => {
     if (item.meta?.hidden) return false
 
-    const roles = item.meta?.roles as string[] | undefined
+    const isLoggedIn = computed(() => !!userStore.userInfo)
+    if (item.meta?.requiresAuth && !isLoggedIn) return false
+
+    const roles = item.meta?.requiredRole as string[] | undefined
     return hasPermission(roles)
   })
 }
@@ -63,11 +65,11 @@ const breadcrumbs = computed(() => {
   return matched
 })
 
-const userStore = useUserStore()
-
 const logout = async () => {
-  await userStore.userLogout()
-  router.push('/auth/login')
+  try {
+    await userStore.userLogout()
+    router.push('/dashboard')
+  } catch { }
 }
 </script>
 
@@ -148,10 +150,11 @@ const logout = async () => {
             </div>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item>偏好設定</el-dropdown-item>
-                <el-dropdown-item v-if="!userStore.userInfo">登入</el-dropdown-item>
-                <el-dropdown-item>
-                  <el-button link @click="logout">
+                <!-- 後續可加上畫面、系統上的樣式設定 -->
+                <!-- <el-dropdown-item>偏好設定</el-dropdown-item> -->
+                <el-dropdown-item v-if="!userStore.userInfo" @click="router.push('/auth/login')">登入</el-dropdown-item>
+                <el-dropdown-item v-if="userStore.userInfo" @click="logout">
+                  <el-button link>
                     <span v-if="!userStore.isLoading.logout">登出</span>
                     <span v-else class="flex flex-row gap-1 items-center">
                       <span>登出中</span>

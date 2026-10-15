@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import type { Experience } from '@/types/experience'
-import { ElMessage } from 'element-plus'
 import { getExperiencesAPI } from '@/services/experienceService'
 import { isOffline, handleFetchFailure } from '@/utils/fetchHelpers'
 

@@ -4,6 +4,7 @@ import LoginForm from '@/views/auth/components/LoginForm.vue'
 import RegisterForm from '@/views/auth/components/RegisterForm.vue'
 import Layout from '@/layouts/index.vue'
 import { getCurrentUser } from '@/services/userService'
+import { useUserStore } from '@/stores'
 
 const auth: RouteRecordRaw[] = [
   {
@@ -60,8 +61,8 @@ const contentChildren: RouteRecordRaw[] = [
     meta: {
       title: 'Projects',
       icon: 'tabler:git-fork',
-      requiresAuth: true,
-      keepAlive: true,
+      requiresAuth: false,
+      keepAlive: true, //尚未使用到 keepAlive，後續優化可加入
     },
   },
   {
@@ -71,7 +72,7 @@ const contentChildren: RouteRecordRaw[] = [
     meta: {
       title: 'Experiences',
       icon: 'tabler:timeline-event-text',
-      requiresAuth: true,
+      requiresAuth: false,
       keepAlive: true,
     },
   },
@@ -82,7 +83,7 @@ const contentChildren: RouteRecordRaw[] = [
     meta: {
       title: 'Skills',
       icon: 'tabler:tools',
-      requiresAuth: true,
+      requiresAuth: false,
       keepAlive: true,
     },
   },
@@ -108,6 +109,7 @@ const usersChildren: RouteRecordRaw[] = [
       title: 'Settings',
       icon: 'ic:outline-settings',
       requiresAuth: true,
+      requiredRole: ['admin'],
     },
   },
 ]
@@ -121,7 +123,7 @@ const routes: RouteRecordRaw[] = [
     meta: {
       title: 'Home',
       hidden: true,
-      requiresAuth: true,
+      requiresAuth: false,
       keepAlive: true,
     },
     children: [
@@ -132,17 +134,18 @@ const routes: RouteRecordRaw[] = [
         meta: {
           title: 'Dashboard',
           icon: 'tabler:chart-arrows-vertical',
-          requiresAuth: true,
+          requiresAuth: false,
         },
       },
       {
         path: 'content',
         name: 'content',
         component: RouterView,
+        redirect: 'content/projects',
         meta: {
           title: 'Content',
           icon: 'tabler:folders',
-          requiresAuth: true,
+          requiresAuth: false,
           keepAlive: true,
           isGroup: true,
         },
@@ -152,6 +155,7 @@ const routes: RouteRecordRaw[] = [
         path: 'users',
         name: 'users',
         component: RouterView,
+        redirect: 'users/users-list',
         meta: {
           title: 'Users',
           icon: 'tabler:user',
@@ -193,22 +197,37 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   // 取得當前 firebase 的登入狀態
   const currentUser = await getCurrentUser()
-
   //檢查目標路徑中（包括父子層級）是否有任何需要身份驗證的
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
+  //檢查目標路徑是否需要權限
+  const requiredRole = to.meta.requiredRole as string[] | undefined
 
-  // 未登入狀態且目標頁面需要權限
+  const userStore = useUserStore()
+
+  // 未登入狀態且目標頁面需要登入
   if (!currentUser && requiresAuth) {
-    next({
+    return next({
       path: '/auth/login',
       query: { redirect: to.fullPath },
     })
-    // 前往登入頁面但已是登入狀態
-  } else if (to.path === '/auth/login' && currentUser) {
-    next('/')
-  } else {
-    next()
   }
+
+  // 前往登入頁面但已是登入狀態
+  if (to.path === '/auth/login' && currentUser) {
+    return next('/')
+  }
+
+  //是否符合目標路徑要求權限
+  if (requiredRole && requiredRole.length) {
+    const role = userStore.userInfo?.role || 'viewer'
+    const hasPermission = requiredRole.includes(role)
+
+    if (!hasPermission) {
+      return next('/')
+    }
+  }
+
+  next()
 })
 
 export default router

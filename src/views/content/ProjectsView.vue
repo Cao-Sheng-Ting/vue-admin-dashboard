@@ -5,15 +5,21 @@ import ProjectEditDrawer from './components/ProjectEditDrawer.vue'
 import SkillTagDialog from './components/SkillTagDialog.vue'
 import { useDebounceSearch } from '@/composables/useDebounce'
 import { useProjectStore } from '@/stores/projectStore'
+import { useSkillStore } from '@/stores/skillStore.ts'
+import { useUserStore } from '@/stores/userStore.ts'
 import ProjectStatusSelect from './components/ProjectStatusSelect.vue'
 import type { ProjectStatus, ProjectItem } from '@/types/project'
 import { getProjectsAPI } from '@/services/projectService.ts'
 import { ElMessageBox } from 'element-plus'
 import { deleteProjectsBatchAPI } from '@/services/projectService.ts'
 import BaseButton from '@/components/BaseButton.vue'
-import BaseErrorState from '@/components/BaseErrorState.vue';
+import BaseErrorState from '@/components/BaseErrorState.vue'
+import { usePermission } from '@/composables/usePermission.ts'
 
 const projectStore = useProjectStore()
+const skillStore = useSkillStore()
+const userStore = useUserStore()
+const { guard, denyClass } = usePermission()
 
 //  --- 搜尋與篩選 ---
 const keyword = useDebounceSearch()
@@ -40,17 +46,19 @@ const isDrawerVisible = ref<boolean>(false)
 const isProjectEdit = ref<boolean>(false)
 const editCardData = ref<ProjectItem | null>(null)
 
-const openAddDrawer = () => {
+const openAddDrawer = async () => {
+  if (!await (guard('editor'))) return
   isProjectEdit.value = false
   editCardData.value = null
   isDrawerVisible.value = true
 }
 
-const openEditDrawer = (card: ProjectItem) => {
+const openEditDrawer = async (card: ProjectItem) => {
+  if (!await (guard('editor'))) return
+
   isProjectEdit.value = true
   editCardData.value = card
   isDrawerVisible.value = true
-  console.log(card)
 }
 
 // --- 專案 Drawer   ---
@@ -69,13 +77,14 @@ const handleUpdateProject = async (project: ProjectItem) => {
 }
 
 // --- 專案刪除  ---
-const handleEditAction = () => {
+const handleEditAction = async () => {
+  if (!await (guard('editor'))) return
+  console.log('觸發了')
   isBatchEdit.value = !isBatchEdit.value
   if (!isBatchEdit.value) projectCheckList.value = []
 }
 
 const handleBatchDelete = async (list: string[]) => {
-  console.log(projectCheckList.value)
   try {
     await ElMessageBox.confirm('確定刪除所選的專案嗎？',
       {
@@ -98,7 +107,6 @@ const handleBatchDelete = async (list: string[]) => {
   }
 }
 
-
 watch(selectedStatus, (newVal) => {
   projectStore.statusFilter = newVal
 })
@@ -106,6 +114,7 @@ watch(selectedStatus, (newVal) => {
 
 onMounted(async () => {
   await projectStore.fetchProjects()
+  await skillStore.fetchSkills(userStore.userInfo?.uid)
   selectedTags.value = projectStore.tagsFilter
   selectedStatus.value = projectStore.statusFilter
 })
@@ -175,11 +184,12 @@ onMounted(async () => {
     <div v-else>
       <el-row class="mb-5">
         <el-col :span="16">
-          <BaseButton @click="openAddDrawer">
+          <BaseButton @click="openAddDrawer" :class="denyClass('editor', 'button')">
             <icon-ph:plus-circle />
             <span>新增</span>
           </BaseButton>
-          <BaseButton @click="handleEditAction" type="info" :plain="isBatchEdit ? false : true">
+          <BaseButton @click="handleEditAction" type="info" :plain="isBatchEdit ? false : true"
+            :class="denyClass('editor', 'button')">
             <icon-ic:round-cancel-presentation v-if="isBatchEdit" />
             <icon-ic:outline-edit-note v-else />
             <span>{{ isBatchEdit ? '取消' : '編輯' }}</span>
@@ -196,7 +206,7 @@ onMounted(async () => {
         </el-col>
       </el-row>
       <el-row :gutter="20">
-        <el-col :xs="24" :sm="12" :md="8" :lg="6" v-for="item in projectStore.filteredProjects" :key="item.id"
+        <el-col :xs="24" :sm="12" :md="8" :lg="6" v-for="item in projectStore.pagedProjects" :key="item.id"
           class="mb-5">
           <el-checkbox-group v-model="projectCheckList">
             <ProjectsCard :data="item" :is-batch-edit="isBatchEdit" :is-project-edit="isProjectEdit"
@@ -206,6 +216,7 @@ onMounted(async () => {
         </el-col>
       </el-row>
     </div>
+
   </div>
   <SkillTagDialog v-model="isTagFilterVisible" :initial-tags="selectedTags" @confirm="handleTagsFilter">
   </SkillTagDialog>

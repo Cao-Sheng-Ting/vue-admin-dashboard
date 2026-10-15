@@ -31,7 +31,7 @@ service.interceptors.response.use(
   },
   (err: AxiosError<APIResponse<unknown>>) => {
     if (err.response?.status === 401) {
-      router.push('/login')
+      router.push('/auth/login')
     }
     ElMessage({
       message: err.response?.data?.message || '服務異常',

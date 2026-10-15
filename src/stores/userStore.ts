@@ -48,6 +48,9 @@ export const useUserStore = defineStore(
       try {
         await logoutAPI()
         userInfo.value = null
+        ElMessage.success('登出成功')
+      } catch {
+        ElMessage.error('登出失敗，請稍後再試')
       } finally {
         isLoading.logout = false
       }

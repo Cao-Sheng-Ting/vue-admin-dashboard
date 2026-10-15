@@ -3,6 +3,7 @@ import type { SkillsData, SkillsGroupMap, DisplayGroup, Tag } from '@/types/skil
 import { ref } from 'vue'
 import { getDefaultSkillsAPI, getUserSkillsAPI } from '@/services/skillService'
 import { useRouter } from 'vue-router'
+import { isOffline, handleFetchFailure } from '@/utils/fetchHelpers'
 
 export const useSkillStore = defineStore('skills', () => {
   //優化： 應在頁面 OnMounted 中執行
@@ -98,6 +99,12 @@ export const useSkillStore = defineStore('skills', () => {
       return
     }
 
+    if (isOffline()) {
+      //fix: errorMessage 應該在 handleFetchFailure 還是各個 store 賦值
+      handleFetchFailure({ isError, isLoading })
+      return
+    }
+
     isLoading.value = true
     isError.value = false //每次獲取時重置錯誤狀態，避免頁面卡在失敗畫面
     try {
@@ -106,8 +113,7 @@ export const useSkillStore = defineStore('skills', () => {
       skillOrder.value = defaults.order
       userSkills.value = await getUserSkillsAPI(uid)
     } catch {
-      isError.value = true
-      errorMessage.value = '標籤庫載入失敗，請重新整理'
+      handleFetchFailure({ isError, isLoading })
     } finally {
       isLoading.value = false
     }

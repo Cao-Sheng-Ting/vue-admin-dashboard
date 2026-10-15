@@ -6,9 +6,11 @@ import { useUserStore } from '@/stores'
 import { useSkillStore } from '@/stores/skillStore'
 import { ElMessageBox } from 'element-plus'
 import BaseErrorState from '@/components/BaseErrorState.vue'
+import { usePermission } from '@/composables/usePermission'
 
 const userStore = useUserStore()
 const skillStore = useSkillStore()
+const { guard, denyClass } = usePermission()
 
 
 const props = defineProps<{
@@ -42,7 +44,8 @@ const rules = reactive({
 
 
 
-const openAddTagDialog = (key: string) => {
+const openAddTagDialog = async (key: string) => {
+  if (!await (guard('editor'))) return
   isAddTagDialogVisible.value = true
   currentGroupKey.value = key
 }
@@ -90,6 +93,7 @@ const handlePublicAddTag = (trimmedName: string) => {
     ElMessage.error('資料狀態暫時異常，請重新整理頁')
     return false
   }
+
 
   // 防禦性檢查：忽略大小寫，確保同分類下沒有名稱重複的標籤
   const isExists = skillStore.publicSkillGroups[currentGroupKey.value]?.tags.some(tag => tag.name.toLowerCase() === trimmedName.toLowerCase())
@@ -210,7 +214,8 @@ const handleEditGroup = () => {
   return true
 }
 
-const toggleEditMode = () => {
+const toggleEditMode = async () => {
+  if (!await (guard('editor'))) return
   isEditMode.value = !isEditMode.value
 }
 
@@ -222,7 +227,8 @@ const isEditDisabled = computed(() => {
   } else return false
 })
 
-const handleTagClose = (key: string, name: string) => {
+const handleTagClose = async (key: string, name: string) => {
+  if (!await (guard('editor'))) return
   if (props.skillGroupType === 'public') handlePublicTagClose(key, name)
   else handlePersonalTagClose(key, name)
 }
@@ -297,13 +303,15 @@ const handelGroupDelete = async (key: string) => {
     ElMessage.success('分類刪除成功')
   } catch (error) {
     if (error === 'cancel') return
-    console.log(error)
+    console.error(error)
     ElMessage.error('刪除失敗，請稍候再試')
   }
 }
 
 //優化： 增刪改分類或標籤 submit 前要髒檢查
 const handleSubmit = async () => {
+  if (!await (guard('editor'))) return
+
   if (!userStore.userInfo) {
     ElMessage.error('登入狀態已失效，請重新登入')
     return
@@ -394,12 +402,14 @@ const handlePersonalSubmit = async (uid: string) => {
 
   <div v-else>
     <div class="action-bar flex justify-between pb-3 px-1">
-      <BaseButton @click="toggleEditMode" type="info" :plain="isEditMode ? false : true" :disabled="isEditDisabled">
+      <BaseButton @click="toggleEditMode" type="info" :plain="isEditMode ? false : true" :disabled="isEditDisabled"
+        :class="denyClass('editor', 'button')">
         <icon-ic:round-cancel-presentation v-if="isEditMode" />
         <icon-ic:outline-edit-note v-else />
         <span>{{ isEditMode ? '取消' : '編輯' }}</span>
       </BaseButton>
-      <el-button type="primary" @click="handleSubmit" :loading="isSubmitting">儲存</el-button>
+      <el-button type="primary" @click="handleSubmit" :loading="isSubmitting"
+        :class="denyClass('editor', 'button')">儲存</el-button>
     </div>
     <el-space direction="vertical" fill class="w-full">
       <el-card v-for="(group, key) in props.skillGroups" :key="key">
@@ -415,7 +425,7 @@ const handlePersonalSubmit = async (uid: string) => {
               <el-tag v-for="(tag, index) in group.tags" :key="index"
                 :closable="isEditMode && tag.type === skillGroupType" @close="handleTagClose(key, tag.name)">{{ tag.name
                 }}</el-tag>
-              <icon-ph:plus-circle v-if="!isEditMode" @click="openAddTagDialog(key)" class="cursor-pointer" />
+              <icon-ph:plus-circle v-if="!isEditMode" @click="openAddTagDialog(key)" :class="denyClass('editor')" />
             </div>
           </div>
           <!-- 優化： 點擊後 icon 變色 -->
