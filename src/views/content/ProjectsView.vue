@@ -79,7 +79,6 @@ const handleUpdateProject = async (project: ProjectItem) => {
 // --- 專案刪除  ---
 const handleEditAction = async () => {
   if (!await (guard('editor'))) return
-  console.log('觸發了')
   isBatchEdit.value = !isBatchEdit.value
   if (!isBatchEdit.value) projectCheckList.value = []
 }
@@ -114,7 +113,7 @@ watch(selectedStatus, (newVal) => {
 
 onMounted(async () => {
   await projectStore.fetchProjects()
-  await skillStore.fetchSkills(userStore.userInfo?.uid)
+  await skillStore.fetchSkills()
   selectedTags.value = projectStore.tagsFilter
   selectedStatus.value = projectStore.statusFilter
 })

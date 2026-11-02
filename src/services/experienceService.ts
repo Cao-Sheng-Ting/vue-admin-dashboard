@@ -1,5 +1,5 @@
 import { db } from '@/firebase'
-import type { TimelineItem, Experience, AddExperienceData } from '@/types/experience'
+import type { TimelineItem, Experience } from '@/types/experience'
 import {
   collection,
   query,
@@ -9,7 +9,6 @@ import {
   updateDoc,
   serverTimestamp,
   Timestamp,
-  addDoc,
 } from 'firebase/firestore'
 
 export const getExperiencesAPI = async (): Promise<Experience[]> => {
@@ -46,28 +45,29 @@ export const updateExperienceAPI = async (
   }
 }
 
-export const addExperienceAPI = async (experienceData: AddExperienceData): Promise<Experience> => {
-  try {
-    const experiencePayload = {
-      ...experienceData,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-    }
+// 功能：未來可以新增新的時間線
+// export const addExperienceAPI = async (experienceData: AddExperienceData): Promise<Experience> => {
+//   try {
+//     const experiencePayload = {
+//       ...experienceData,
+//       createdAt: serverTimestamp(),
+//       updatedAt: serverTimestamp(),
+//     }
 
-    const experienceRef = collection(db, 'experiences')
-    const newExperienceRef = await addDoc(experienceRef, experiencePayload)
+//     const experienceRef = collection(db, 'experiences')
+//     const newExperienceRef = await addDoc(experienceRef, experiencePayload)
 
-    if (!newExperienceRef.id) {
-      throw new Error('無法取得 Firebase ID')
-    }
-    return {
-      id: newExperienceRef.id,
-      ...experienceData,
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now(),
-    }
-  } catch (error) {
-    console.error('新增經歷失敗：', error)
-    throw error
-  }
-}
+//     if (!newExperienceRef.id) {
+//       throw new Error('無法取得 Firebase ID')
+//     }
+//     return {
+//       id: newExperienceRef.id,
+//       ...experienceData,
+//       createdAt: Timestamp.now(),
+//       updatedAt: Timestamp.now(),
+//     }
+//   } catch (error) {
+//     console.error('新增經歷失敗：', error)
+//     throw error
+//   }
+// }

@@ -1,12 +1,14 @@
-// Firestore 在離線狀態下，getDocs 不會拋出錯誤，而是回傳空結果（非 catch 可攔截的情境）
-// 故離線時 UI 會誤判為「無資料」而非「錯誤」，因此需在請求前額外用 navigator.onLine 判斷網路狀態
+import { getErrorMessage } from './error'
+
+// 在離線狀態下，getDocs 不報錯、返回本機快取（可能是空的）： UI誤判無資料，故請求前需擋
 export const isOffline = (): boolean => !navigator.onLine
 
+// fetch 失敗交由 store 存狀態和訊息，頁面不 catch，交給 BaseErrorState 顯示
 export const handleFetchFailure = (
-  options: { isError: Ref<boolean>; isLoading: Ref<boolean> },
-  errorMessage: string = '網路連線中斷，請檢查網路狀態',
+  options: { isError: Ref<boolean>; isLoading: Ref<boolean>; errorMessage: Ref<string> },
+  error: unknown,
 ): void => {
   options.isError.value = true
   options.isLoading.value = false
-  ElMessage.error(errorMessage)
+  options.errorMessage.value = getErrorMessage(error)
 }

@@ -5,6 +5,9 @@ import RegisterForm from '@/views/auth/components/RegisterForm.vue'
 import Layout from '@/layouts/index.vue'
 import { getCurrentUser } from '@/services/userService'
 import { useUserStore } from '@/stores'
+import type { User } from 'firebase/auth'
+import { hasPermission } from '@/utils/permission'
+import { AppError, showErrorMessage } from '@/utils/error'
 
 const auth: RouteRecordRaw[] = [
   {
@@ -109,7 +112,7 @@ const usersChildren: RouteRecordRaw[] = [
       title: 'Settings',
       icon: 'ic:outline-settings',
       requiresAuth: true,
-      requiredRole: ['admin'],
+      requiredRole: 'admin',
     },
   },
 ]
@@ -194,40 +197,79 @@ const router = createRouter({
  * @param to 導航目標
  */
 
-router.beforeEach(async (to, from, next) => {
-  // 取得當前 firebase 的登入狀態
-  const currentUser = await getCurrentUser()
-  //檢查目標路徑中（包括父子層級）是否有任何需要身份驗證的
+router.beforeEach(async (to, from) => {
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
-  //檢查目標路徑是否需要權限
-  const requiredRole = to.meta.requiredRole as string[] | undefined
+
+  const requiredRole = to.meta.requiredRole
 
   const userStore = useUserStore()
 
-  // 未登入狀態且目標頁面需要登入
-  if (!currentUser && requiresAuth) {
-    return next({
-      path: '/auth/login',
-      query: { redirect: to.fullPath },
-    })
+  let currentUser: User | null = null
+
+  try {
+    currentUser = await getCurrentUser()
+  } catch (error) {
+    console.error('路由守衛檢查登入狀態失敗：', error)
   }
 
-  // 前往登入頁面但已是登入狀態
-  if (to.path === '/auth/login' && currentUser) {
-    return next('/')
-  }
+  if (!currentUser) {
+    // persist 會從 localStorage 還原 userInfo，但 Firebase 的登入可能已經失效。
+    // 不清掉的話，不需要登入的頁面會用舊資料顯示成已登入
+    userStore.userInfo = null
 
-  //是否符合目標路徑要求權限
-  if (requiredRole && requiredRole.length) {
-    const role = userStore.userInfo?.role || 'viewer'
-    const hasPermission = requiredRole.includes(role)
+    if (requiresAuth) {
+      return {
+        path: '/auth/login',
+        query: { redirect: to.fullPath },
+      }
+    }
+  } else {
+    if (to.name === 'login' || to.name === 'register') return '/'
 
-    if (!hasPermission) {
-      return next('/')
+    const needsUserInfo = !userStore.userInfo || userStore.userInfo.uid !== currentUser.uid
+
+    if (needsUserInfo) {
+      try {
+        await userStore.fetchUserInfo(currentUser.uid)
+      } catch (error) {
+        console.error('載入使用者資料失敗:', error)
+        userStore.userInfo = null // 補載失敗，不要留著可能屬於別人的資料
+
+        // AppError： 帳號本身資料有問題（權限被拒、文件不存在、角色不合法等等），重試也不會好，所以登出
+        // 其他錯誤（斷網等）是暫時性的可重試，不登出
+        if (error instanceof AppError) {
+          showErrorMessage(error)
+          try {
+            await userStore.userLogout()
+          } catch {
+            // 登出失敗 Firebase還是登入狀態，跳轉到登入頁會被踢到'/'，
+            // '/'會再補載、再丟 AppError、再登出，所以留在原地以免無限重導
+            return false
+          }
+          return '/auth/login'
+        }
+
+        // 補載失敗且非帳號問題，一般頁面直接放行，
+        // 下面退路 '/'也是一般頁面，如果也擋，'/'又會觸發補載失敗，形成循環
+        if (!requiredRole) return true
+
+        showErrorMessage(error)
+        // from.matched 長度為 0 代表第一次載入網站，return false 會白屏，
+        // 所以改成導向 '/'
+        return from.matched.length ? false : '/'
+      }
+    }
+
+    if (requiredRole) {
+      const userRole = userStore.userInfo?.role
+      if (!userRole || !hasPermission(requiredRole, userRole)) {
+        ElMessage.error('您沒有權限存取此頁面')
+        return from.matched.length ? false : '/'
+      }
     }
   }
 
-  next()
+  return true
 })
 
 export default router

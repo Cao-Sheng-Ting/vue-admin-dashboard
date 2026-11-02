@@ -1,4 +1,5 @@
 import { Timestamp } from 'firebase/firestore'
+import { USER_SORT_ORDER } from '@/constants/auth'
 
 export interface LoginParams {
   email: string
@@ -14,7 +15,7 @@ export interface UserInfo {
   createdAt: Timestamp
 }
 
-export type UserRole = 'admin' | 'editor' | 'user'
+export type UserRole = (typeof USER_SORT_ORDER)[number]
 
 export interface RegisterParams {
   email: string

@@ -6,6 +6,8 @@ import { ROLE_OPTIONS, QUICK_AUTH_CONFIG } from '@/constants/auth'
 import type { AgreementType } from '../types'
 import type { UserRole } from '@/types/user'
 import { useUserStore } from '@/stores'
+import { showErrorMessage } from '@/utils/error'
+import { getSafeRedirect } from '@/utils/redirect'
 
 const route = useRoute()
 const router = useRouter()
@@ -131,32 +133,32 @@ const isSubmitDisabled = computed(() => {
 const register = async () => {
   if (isSubmitDisabled.value) return
 
-  if (ruleForm.value.role !== 'user') {
-    const expectedConfig = QUICK_AUTH_CONFIG[ruleForm.value.role]
-    if (!expectedConfig || ruleForm.value.authCode! == expectedConfig.code) {
-      ElMessage.error('角色與授權碼不匹配，請重新授權')
-    }
-  }
-
   const isValid = await ruleFormRef.value.validate().catch(() => false)
   if (!isValid) {
     console.warn('表單驗證未通過')
     return
   }
 
-  // 解構排除僅前端校驗用的 confirmPassword 與 authCode，確保送往後端的資料純淨
-  const { confirmPassword, authCode, ...cleanData }: RegisterParams & { confirmPassword: unknown, authCode: unknown } = ruleForm.value;
-  void confirmPassword;
-  void authCode;
+  // 前端驗證：用於即時反饋，真正把關在 Firestore 規則，授權碼為示範用公開
+  if (ruleForm.value.role !== 'user') {
+    const matched = Object.values(QUICK_AUTH_CONFIG).find((c) => c.code === ruleForm.value.authCode)
+    if (!matched || !matched.allowed.includes(ruleForm.value.role)) {
+      ElMessage.error('角色與授權碼不匹配，請重新授權')
+      return
+    }
+  }
+
+  // 解構排除僅前端校驗用的 confirmPassword，確保送往後端的資料純淨
+  // authCode 另以參數傳入，不混入 users 資料
+  const { confirmPassword: _c, authCode: _a, ...cleanData }: RegisterParams & { confirmPassword: unknown, authCode: unknown } = ruleForm.value;
 
   try {
-    await userStore.userRegister(cleanData)
-    const targetPath = route.query.redirect as string || '/'
+    await userStore.userRegister(cleanData, ruleForm.value.authCode)
+    const targetPath = route.query.redirect
     ElMessage.success('註冊成功')
-    router.push(targetPath)
+    router.push(getSafeRedirect(targetPath))
   } catch (error) {
-    const err = error as Error
-    ElMessage.error(err.message)
+    showErrorMessage(error)
   }
 }
 

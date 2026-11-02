@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { useUserStore } from '@/stores'
-import { sortByRoleOrder } from '@/utils/sort'
+import { sortByRoleOrder } from '@/utils/role'
 import { USER_SORT_ORDER } from '@/constants/auth'
 import { formatDateDisplay } from '@/utils/date'
 import type { UserRole, UserInfo } from '@/types/user'
 import { ROLE_OPTIONS } from '@/constants/auth'
-import { changeUserRoleAPI } from '@/services/userService'
 import BaseErrorState from '@/components/BaseErrorState.vue'
 import { ElMessageBox } from 'element-plus'
+import { showErrorMessage } from '@/utils/error'
 
 const userStore = useUserStore()
 const sortedUserList = computed(() => {
@@ -23,21 +23,17 @@ const handleRoleChange = async (row: UserInfo, newRole: UserRole) => {
       type: 'warning'
     })
 
-    await changeUserRoleAPI(row.uid, newRole)
-
-    const user = userStore.userList.find(user => user.uid === row.uid)
-    if (user) user.role = newRole
+    await userStore.userRoleChange(row.uid, newRole)
 
     ElMessage.success('更新權限成功')
   } catch (error) {
-    if (error === 'cancel') return
-    ElMessage.error((error as Error).message)
+    // confirm 取消/Esc/關閉都會 reject，屬使用者放棄，非錯誤
+    if (error === 'cancel' || error === 'close') return
+    showErrorMessage(error)
   }
 }
 
-onMounted(async () => {
-  await userStore.fetchAllUsers()
-})
+onMounted(async () => await userStore.fetchAllUsers())
 </script>
 
 <template>
@@ -58,6 +54,8 @@ onMounted(async () => {
         <el-table-column prop="nickname" label="用戶"></el-table-column>
         <el-table-column label="權限">
           <template #default="{ row }">
+            <!--TODO: 選擇寫:model-value + @change，寫下原因-->
+            <!-- disabled 為前端防禦，真正防線是 firebase rule（擋 SDK 直寫 -->
             <el-select v-if="userStore.userInfo?.role === 'admin'" :disabled="userStore.userInfo?.uid === row.uid"
               :model-value="row.role" @change="(newRole: UserRole) => handleRoleChange(row, newRole)">
               <el-option v-for="option in ROLE_OPTIONS" :key="option.role" :value="option.role"

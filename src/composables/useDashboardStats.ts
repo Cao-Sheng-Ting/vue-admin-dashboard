@@ -42,8 +42,12 @@ export const useDashboardStats = () => {
     developingProjects:
       projectStore.projectsList.filter((p) => p.status === 'developing').length || 0,
     totalSkills: countSkillTags(skillStore.mergedSkillGroups),
-    frontendSkills: skillStore.mergedSkillGroups?.['frontend']?.tags.length || 0,
-    backendSkills: skillStore.mergedSkillGroups?.['backend']?.tags.length || 0,
+    frontendSkills:
+      Object.values(skillStore.mergedSkillGroups ?? {}).find((group) => group.name === 'frontend')
+        ?.tags.length ?? 0,
+    backendSkills:
+      Object.values(skillStore.mergedSkillGroups ?? {}).find((group) => group.name === 'backend')
+        ?.name.length ?? 0,
     careerDuration: careerDurationStates.value,
   }))
 
@@ -78,7 +82,7 @@ export const useDashboardStats = () => {
   const fetchAll = async () => {
     await Promise.all([
       projectStore.fetchProjects(),
-      skillStore.fetchSkills(userStore.userInfo?.uid),
+      skillStore.fetchSkills(),
       experienceStore.fetchExperiences(),
     ])
   }

@@ -20,6 +20,11 @@
 - [ ] [app.vue] 寫 onMounted 來監測每次重新整理時是否還是登入狀態
 - [ ] [src/components/common/GlobalLoading.vue] 寫全站讀取，每個頁面導入，用v-if判斷是否拿到資料，拿到前顯示讀取，除了要使用骨架屏的頁面
 
+- [] 優化：檢查會用到 userInfo 的 createdAt，因為從firestore拿到的 Timestamp 不能直接用，看是否需要統一轉換好再放入 userInfo
+
+- [] localStorage 和 userStore.$reset() 的清空時機
+- [] layout 的 sideBar 高亮狀態問題：ex:在 skill 頁面登出後會跳轉到 首頁，但高量的地方還是 skills
+
 ### 💡 提升專案等級
 
 -[auth] [] 動態路由權限（RBAC）」或「自定義 Hook (Composition API) 封裝邏輯」
@@ -61,6 +66,8 @@
 - [ ] [RegisterForm.vue]欄位加上icon
 - [ ] [RegisterForm.vue] 註冊成功後跳轉到登入頁，並把email填入欄位
 - [ ] [RegisterForm.vue] 給 input 加上 <template #prefix> 給前綴位置加上 icon
+
+- [ ] 註冊授權碼止檔得住前端，擋不住別人直接寫SDK，所以註冊權限還要再用 firestore 安全規則優化
 
 ### 🏠 Layout
 

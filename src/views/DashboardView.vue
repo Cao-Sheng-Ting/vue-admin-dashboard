@@ -2,6 +2,9 @@
 import { DASHBOARD_CARDS_CONFIG, DASHBOARD_CHART_CONFIG } from '@/constants/dashboard'
 import { useDashboardStats } from '@/composables/useDashboardStats'
 import BaseErrorState from '@/components/BaseErrorState.vue'
+import { useSkillStore } from '@/stores/skillStore'
+
+const skillStore = useSkillStore()
 
 const { cardStatsMap, chartStatsMap, isLoading, isError, fetchAll } = useDashboardStats()
 const statuses = DASHBOARD_CHART_CONFIG.find(item => item.key === 'projectStatus')

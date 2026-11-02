@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import type { DisplayGroup, Tag } from '@/types/skill'
 import BaseButton from '@/components/BaseButton.vue'
-import { editUserSkillsAPI, editDefaultSkillsAPI } from '@/services/skillService'
 import { useUserStore } from '@/stores'
 import { useSkillStore } from '@/stores/skillStore'
 import { ElMessageBox } from 'element-plus'
 import BaseErrorState from '@/components/BaseErrorState.vue'
 import { usePermission } from '@/composables/usePermission'
+import { showErrorMessage } from '@/utils/error'
+import type { UserRole } from '@/types/user'
 
 const userStore = useUserStore()
 const skillStore = useSkillStore()
@@ -17,6 +18,9 @@ const props = defineProps<{
   skillGroupType: Tag['type']
   skillGroups: Record<string, DisplayGroup>
 }>()
+
+// 對齊 Firestore rules：公共庫僅 admin 可改，個人庫登入即可以改自己的
+const requiredRole = computed<UserRole>(() => (props.skillGroupType === 'public' ? 'admin' : 'user'))
 
 // UI 狀態控制
 const isAddTagDialogVisible = ref<boolean>(false)
@@ -45,7 +49,7 @@ const rules = reactive({
 
 
 const openAddTagDialog = async (key: string) => {
-  if (!await (guard('editor'))) return
+  if (!await (guard(requiredRole.value, isBlocked.value))) return
   isAddTagDialogVisible.value = true
   currentGroupKey.value = key
 }
@@ -90,7 +94,7 @@ const handleAddTag = () => {
 
 const handlePublicAddTag = (trimmedName: string) => {
   if (!skillStore.defaultSkills) {
-    ElMessage.error('資料狀態暫時異常，請重新整理頁')
+    ElMessage.error('資料狀態暫時異常，請重新整理頁面')
     return false
   }
 
@@ -125,14 +129,14 @@ const handlePersonalAddTag = (trimmedName: string) => {
   }
 
   if (!skillStore.defaultSkills) {
-    ElMessage.error('資料狀態暫時異常，請重新整理頁')
+    ElMessage.error('資料狀態暫時異常，請重新整理頁面')
     return false
   }
 
   const defaultGroup = skillStore.defaultSkills[currentGroupKey.value]
 
   if (!defaultGroup) {
-    ElMessage.error('資料狀態暫時異常，請重新整理頁')
+    ElMessage.error('資料狀態暫時異常，請重新整理頁面')
     return false
   }
 
@@ -215,20 +219,29 @@ const handleEditGroup = () => {
 }
 
 const toggleEditMode = async () => {
-  if (!await (guard('editor'))) return
+  if (!await (guard(requiredRole.value, isBlocked.value))) return
   isEditMode.value = !isEditMode.value
 }
 
-// 在 mode 為 personal 時，資料源不存在或沒有內容時編輯鍵禁用
+// 已登入且資料載入成功卻沒有內容時才禁用，
+// 未登入和個人技能庫讀取失敗時要能點擊才能跳出 guard 提示
 const isEditDisabled = computed(() => {
   if (props.skillGroupType === 'personal') {
-    const userSkills = skillStore.userSkills
-    return !userSkills || Object.keys(userSkills).length === 0
-  } else return false
+    return !!userStore.userInfo &&
+      !isBlocked.value &&
+      Object.keys(skillStore.userSkills ?? {}).length === 0
+  } else {
+    return !!userStore.userInfo &&
+      Object.keys(skillStore.defaultSkills ?? {}).length === 0
+  }
 })
 
+// 在 personal 模式時，個人技能庫讀取失敗時，點擊編輯鍵或區域要跳出警告訊息
+// public 模式時，個人技能庫的錯誤不受影響
+const isBlocked = computed(() => props.skillGroupType === 'personal' && skillStore.isUserSkillsError)
+
 const handleTagClose = async (key: string, name: string) => {
-  if (!await (guard('editor'))) return
+  if (!await (guard(requiredRole.value, isBlocked.value))) return
   if (props.skillGroupType === 'public') handlePublicTagClose(key, name)
   else handlePersonalTagClose(key, name)
 }
@@ -245,7 +258,6 @@ const handlePublicTagClose = (key: string, name: string) => {
     return
   }
   skillStore.defaultSkills[key].tags.splice(index, 1)
-
 }
 
 const handlePersonalTagClose = (key: string, name: string) => {
@@ -270,7 +282,9 @@ const handlePersonalTagClose = (key: string, name: string) => {
   }
 }
 
-const handelGroupDelete = async (key: string) => {
+const handleGroupDelete = async (key: string) => {
+  if (!await (guard(requiredRole.value, isBlocked.value))) return
+
   try {
     await ElMessageBox.confirm('確定刪除整個分類嗎？',
       {
@@ -280,84 +294,45 @@ const handelGroupDelete = async (key: string) => {
       }
     )
 
-    if (!skillStore.defaultSkills || !skillStore.skillOrder) {
-      ElMessage.error('資料異常，請重新整理頁面後再試')
-      return
-    }
-    delete skillStore.defaultSkills[key]
-
-    const index = skillStore.skillOrder.indexOf(key)
-    if (index === -1) {
-      ElMessage.error('資料異常，請重新整理頁面後再試')
-      return
-    }
-    skillStore.skillOrder.splice(index, 1)
-
-
-    const payload = {
-      order: skillStore.skillOrder,
-      skills: skillStore.defaultSkills
-    }
-
-    await editDefaultSkillsAPI(payload)
+    await skillStore.skillGroupDelete(key)
     ElMessage.success('分類刪除成功')
   } catch (error) {
-    if (error === 'cancel') return
-    console.error(error)
-    ElMessage.error('刪除失敗，請稍候再試')
+    if (error === 'cancel' || error === 'close') return
+    showErrorMessage(error)
   }
 }
 
-//優化： 增刪改分類或標籤 submit 前要髒檢查
+//TODO： 增刪改分類或標籤 submit 前要髒檢查
 const handleSubmit = async () => {
-  if (!await (guard('editor'))) return
-
-  if (!userStore.userInfo) {
-    ElMessage.error('登入狀態已失效，請重新登入')
-    return
-  }
+  if (!await (guard(requiredRole.value, isBlocked.value))) return
 
   if (props.skillGroupType === 'public') await handlePublicSubmit()
-  else await handlePersonalSubmit(userStore.userInfo.uid)
+  else await handlePersonalSubmit()
 }
 
 const handlePublicSubmit = async () => {
-  if (!skillStore.defaultSkills || !skillStore.skillOrder) {
-    ElMessage.error('目前無法儲存，請重新整理頁面後再試')
-    return
-  }
   if (isSubmitting.value) return
-
   isSubmitting.value = true
 
   try {
-    const payload = {
-      order: skillStore.skillOrder,
-      skills: skillStore.defaultSkills
-    }
-    await editDefaultSkillsAPI(payload)
+    await skillStore.defaultSkillsSubmit()
     ElMessage.success('儲存成功！')
-  } catch {
-    ElMessage.error('發生預期外的錯誤，請重新整理頁面')
+  } catch (error) {
+    showErrorMessage(error)
   } finally {
     isSubmitting.value = false
   }
 }
 
-const handlePersonalSubmit = async (uid: string) => {
-  if (!skillStore.userSkills) {
-    ElMessage.error('目前無法儲存，請重新整理頁面後再試')
-    return
-  }
+const handlePersonalSubmit = async () => {
   if (isSubmitting.value) return
-
   isSubmitting.value = true
 
   try {
-    await editUserSkillsAPI(skillStore.userSkills, uid)
+    await skillStore.editUserSkills()
     ElMessage.success('儲存成功！')
-  } catch {
-    ElMessage.error('發生預期外的錯誤，請重新整理頁面')
+  } catch (error) {
+    showErrorMessage(error)
   } finally {
     isSubmitting.value = false
   }
@@ -396,20 +371,20 @@ const handlePersonalSubmit = async (uid: string) => {
   </div>
 
   <BaseErrorState v-else-if="skillStore.isError" :is-error="true" :error-description="skillStore.errorMessage"
-    @retry="skillStore.fetchSkills(userStore.userInfo?.uid)">
+    @retry="skillStore.fetchSkills()">
   </BaseErrorState>
 
 
   <div v-else>
     <div class="action-bar flex justify-between pb-3 px-1">
       <BaseButton @click="toggleEditMode" type="info" :plain="isEditMode ? false : true" :disabled="isEditDisabled"
-        :class="denyClass('editor', 'button')">
+        :class="denyClass(requiredRole, 'button', isBlocked)">
         <icon-ic:round-cancel-presentation v-if="isEditMode" />
         <icon-ic:outline-edit-note v-else />
         <span>{{ isEditMode ? '取消' : '編輯' }}</span>
       </BaseButton>
       <el-button type="primary" @click="handleSubmit" :loading="isSubmitting"
-        :class="denyClass('editor', 'button')">儲存</el-button>
+        :class="denyClass(requiredRole, 'button', isBlocked)">儲存</el-button>
     </div>
     <el-space direction="vertical" fill class="w-full">
       <el-card v-for="(group, key) in props.skillGroups" :key="key">
@@ -417,7 +392,7 @@ const handlePersonalSubmit = async (uid: string) => {
           <div class="flex gap-3">
             <div class="tech-stack-label w-24 shrink-0 flex items-center whitespace-nowrap ">
               <span class="font-bold text-sky-800">{{ group.label }}</span>
-              <!-- 優化： icon 加上 hover 後放大的效果 -->
+              <!-- TODO： icon 加上 hover 後放大的效果 -->
               <span v-if="props.skillGroupType === 'public' && isEditMode" @click="openGroupDialog(group, key)"
                 class="text-sm cursor-pointer"><icon-charm:pencil /></span>
             </div>
@@ -425,11 +400,12 @@ const handlePersonalSubmit = async (uid: string) => {
               <el-tag v-for="(tag, index) in group.tags" :key="index"
                 :closable="isEditMode && tag.type === skillGroupType" @close="handleTagClose(key, tag.name)">{{ tag.name
                 }}</el-tag>
-              <icon-ph:plus-circle v-if="!isEditMode" @click="openAddTagDialog(key)" :class="denyClass('editor')" />
+              <icon-ph:plus-circle v-if="!isEditMode" @click="openAddTagDialog(key)"
+                :class="denyClass(requiredRole, 'area', isBlocked)" />
             </div>
           </div>
-          <!-- 優化： 點擊後 icon 變色 -->
-          <div v-if="props.skillGroupType === 'public' && isEditMode" @click="handelGroupDelete(key)"
+          <!-- TODO： 點擊後 icon 變色 -->
+          <div v-if="props.skillGroupType === 'public' && isEditMode" @click="handleGroupDelete(key)"
             class=" cursor-pointer"><icon-material-symbols:delete />
           </div>
         </div>
@@ -453,7 +429,7 @@ const handlePersonalSubmit = async (uid: string) => {
     <div class="flex flex-col gap-2">
       <el-form ref="ruleFormRef" :model="groupFormModel" :rules="rules">
         <el-form-item prop="name">
-          <el-input v-model="groupFormModel.name" placeholder="分類代號(如：fronted)"></el-input>
+          <el-input v-model="groupFormModel.name" placeholder="分類代號(如：frontend)"></el-input>
         </el-form-item>
         <el-form-item prop="label">
           <el-input v-model="groupFormModel.label" placeholder="分類名稱(如：前端技術)"></el-input>

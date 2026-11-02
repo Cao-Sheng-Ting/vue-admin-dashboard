@@ -1,12 +1,25 @@
 import { db } from '@/firebase'
-import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'
+import {
+  arrayRemove,
+  deleteField,
+  doc,
+  FieldPath,
+  getDoc,
+  setDoc,
+  updateDoc,
+} from 'firebase/firestore'
 import type { SkillsData, SkillsGroupMap } from '@/types/skill'
+import { AppError, isFirestorePermissionError, PermissionDeniedError } from '@/utils/error'
+import { isOffline } from '@/utils/fetchHelpers'
 
 /**
  * 取得共用標籤庫（所有使用者共享的預設分類和標籤）
- * 找不到文件視為資料異常，拋出錯誤讓上層（store）統一處理
+ * 文件不存在時回傳空庫，不當成錯誤
  */
 export const getDefaultSkillsAPI = async (): Promise<SkillsData> => {
+  if (isOffline()) {
+    throw new AppError('網路連線中斷，請檢查網路狀態')
+  }
   try {
     const skillsRef = doc(db, 'skills', 'default')
     const defaultSkills = await getDoc(skillsRef)
@@ -25,15 +38,19 @@ export const getDefaultSkillsAPI = async (): Promise<SkillsData> => {
     }
   } catch (error) {
     console.error('獲取共用標籤庫失敗', error)
-    throw error
+    throw new AppError('獲取共用標籤庫失敗，請稍後重試')
   }
 }
 
 /**
  * 取得使用者個人標籤庫
- * 回傳 null 代表「使用者存在但尚未新增任何個人化標籤」，屬於正常情況非錯誤
+ * 回傳 null：使用者文件不存在或尚無個人標籤，皆非錯誤
  */
 export const getUserSkillsAPI = async (uid: string): Promise<SkillsGroupMap | null> => {
+  if (isOffline()) {
+    throw new AppError('網路連線中斷，請檢查網路狀態')
+  }
+
   try {
     const usersRef = doc(db, 'users', uid)
     const user = await getDoc(usersRef)
@@ -48,28 +65,71 @@ export const getUserSkillsAPI = async (uid: string): Promise<SkillsGroupMap | nu
     return null
   } catch (error) {
     console.error('獲取個人標籤庫失敗', error)
-    throw error
+
+    if (isFirestorePermissionError(error)) {
+      throw new PermissionDeniedError('無法讀取個人標籤庫，請登出後重新登入，或聯絡管理員')
+    }
+
+    throw new AppError('獲取個人標籤庫失敗，請稍後重試')
   }
 }
 
 export const editUserSkillsAPI = async (data: SkillsGroupMap, uid: string): Promise<void> => {
+  if (isOffline()) {
+    throw new AppError('網路連線中斷，請檢查網路狀態')
+  }
+
   try {
     const skillRef = doc(db, 'users', uid)
     await updateDoc(skillRef, {
       skills: data,
     })
   } catch (error) {
-    console.error('更新技能標籤失敗', error)
-    throw error
+    console.error('更新個人技能庫失敗', error)
+    if (isFirestorePermissionError(error)) {
+      throw new PermissionDeniedError()
+    }
+    throw new AppError('更新技能標籤失敗，請稍後再試')
+  }
+}
+
+export const deleteSkillGroupAPI = async (key: string): Promise<void> => {
+  if (isOffline()) {
+    throw new AppError('網路連線中斷，請檢查網路狀態')
+  }
+
+  try {
+    const skillRef = doc(db, 'skills', 'default')
+    // 只動該分類欄位，不用 setDoc 寫入編輯模式下未儲存的修改
+    await updateDoc(
+      skillRef,
+      new FieldPath('skills', key),
+      deleteField(),
+      'order',
+      arrayRemove(key),
+    )
+  } catch (error) {
+    console.error('刪除技能分類失敗', error)
+    if (isFirestorePermissionError(error)) {
+      throw new PermissionDeniedError()
+    }
+    throw new AppError('刪除技能分類失敗，請稍後再試')
   }
 }
 
 export const editDefaultSkillsAPI = async (data: SkillsData): Promise<void> => {
+  if (isOffline()) {
+    throw new AppError('網路連線中斷，請檢查網路狀態')
+  }
+
   try {
     const skillRef = doc(db, 'skills', 'default')
     await setDoc(skillRef, data)
   } catch (error) {
     console.error('更新技能標籤失敗', error)
-    throw error
+    if (isFirestorePermissionError(error)) {
+      throw new PermissionDeniedError()
+    }
+    throw new AppError('更新技能標籤失敗，請稍後再試')
   }
 }

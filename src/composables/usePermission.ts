@@ -12,12 +12,20 @@ export const usePermission = () => {
 
   const can = (requiredRole: UserRole) => hasPermission(requiredRole, userStore.userInfo?.role)
 
-  const denyClass = (requiredRole: UserRole, variant: 'button' | 'block' = 'block') => {
-    if (can(requiredRole)) return variant === 'button' ? '' : 'cursor-pointer'
+  const denyClass = (
+    requiredRole: UserRole,
+    variant: 'button' | 'area' = 'area',
+    isBlocked: boolean = false,
+  ) => {
+    const allowed = can(requiredRole) && !isBlocked
+    if (allowed) {
+      return variant === 'button' ? '' : 'cursor-pointer'
+    }
+
     return variant === 'button' ? 'cursor-not-allowed opacity-60' : 'cursor-not-allowed'
   }
 
-  const guard = async (requiredRole: UserRole): Promise<boolean> => {
+  const guard = async (requiredRole: UserRole, isBlocked: boolean = false): Promise<boolean> => {
     if (!userStore.userInfo) {
       const message =
         requiredRole === 'user'
@@ -30,7 +38,7 @@ export const usePermission = () => {
         })
         router.push({ path: '/auth/login', query: { redirect: route.fullPath } })
       } catch {
-        // 使用者按取消，不處理
+        // 取消屬預期分支，非錯誤
       }
       return false
     }
@@ -39,6 +47,12 @@ export const usePermission = () => {
       ElMessage.warning(`此功能需要${ROLE_LABEL[requiredRole]}權限`)
       return false
     }
+
+    if (isBlocked) {
+      ElMessage.warning('個人技能庫尚未載入成功，無法編輯，請重新整理後再試')
+      return false
+    }
+
     return true
   }
 

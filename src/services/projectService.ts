@@ -98,24 +98,3 @@ export const deleteProjectsBatchAPI = async (projectIds: string[]): Promise<stri
     throw error
   }
 }
-
-export const addAll = async (data: AddProjectData[]) => {
-  const all = writeBatch(db)
-
-  data.forEach((d) => {
-    const collRef = collection(db, 'projects')
-    const docRef = doc(collRef)
-    const projectWithId = {
-      id: docRef.id,
-      ...d,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-    }
-    all.set(docRef, projectWithId)
-  })
-  try {
-    await all.commit()
-  } catch (error) {
-    console.log(error)
-  }
-}

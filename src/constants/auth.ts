@@ -16,7 +16,7 @@ export const ROLE_OPTIONS: RoleOption[] = [
   },
 ]
 
-export const QUICK_AUTH_CONFIG: Partial<Record<UserRole, AuthConfigItem>> = {
+export const QUICK_AUTH_CONFIG: Record<Exclude<UserRole, 'user'>, AuthConfigItem> = {
   admin: {
     role: 'admin',
     code: 'ADMIN-2026',
@@ -29,4 +29,4 @@ export const QUICK_AUTH_CONFIG: Partial<Record<UserRole, AuthConfigItem>> = {
   },
 }
 
-export const USER_SORT_ORDER: UserRole[] = ['admin', 'editor', 'user']
+export const USER_SORT_ORDER = ['admin', 'editor', 'user'] as const

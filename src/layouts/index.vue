@@ -5,6 +5,7 @@ import { useUserStore } from '../stores/userStore'
 import type { RouteRecordRaw } from 'vue-router'
 import { Icon } from '@iconify/vue'
 import { useWindowSize } from '@vueuse/core'
+import { showErrorMessage } from '@/utils/error'
 
 defineOptions({
   name: 'MainLayout',
@@ -37,7 +38,7 @@ const filterByPermission = (items: RouteRecordRaw[]): RouteRecordRaw[] => {
   return items.filter((item) => {
     if (item.meta?.hidden) return false
 
-    const isLoggedIn = computed(() => !!userStore.userInfo)
+    const isLoggedIn = !!userStore.userInfo
     if (item.meta?.requiresAuth && !isLoggedIn) return false
 
     const roles = item.meta?.requiredRole as string[] | undefined
@@ -65,11 +66,16 @@ const breadcrumbs = computed(() => {
   return matched
 })
 
+console.log('使用者資料：', userStore.userInfo)
+
 const logout = async () => {
   try {
     await userStore.userLogout()
+    ElMessage.success('登出成功')
     router.push('/dashboard')
-  } catch { }
+  } catch (error) {
+    showErrorMessage(error)
+  }
 }
 </script>
 
@@ -173,7 +179,9 @@ const logout = async () => {
           <el-tag>Tag 1</el-tag>
         </el-scrollbar>
       </div> -->
-      <el-main tag="main" class="h-[calc(100vh-80px] bg-gray-200"><router-view></router-view></el-main>
+      <el-main tag="main" class="h-[calc(100vh-80px] bg-gray-200"><router-view></router-view>
+      </el-main>
+
       <el-footer height="30px" class="flex justify-center items-center">© 2026 Cao | Vue 3 Admin Dashboard</el-footer>
     </el-container>
   </el-container>

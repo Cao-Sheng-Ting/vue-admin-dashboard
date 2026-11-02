@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useExperienceStore } from '@/stores/experienceStore'
 import { useSkillStore } from '@/stores/skillStore.ts'
-import { useUserStore } from '@/stores/userStore.ts'
 import type { Experience, TimelineItem, AddTimelineItemData } from '@/types/experience.js'
 import SkillTagField from './components/SkillTagField.vue'
 import { updateExperienceAPI } from '@/services/experienceService.ts'
@@ -11,7 +10,6 @@ import { usePermission } from '@/composables/usePermission.ts'
 
 const experienceStore = useExperienceStore()
 const skillStore = useSkillStore()
-const userStore = useUserStore()
 const { guard, denyClass } = usePermission()
 
 const currentTimeline = ref<Experience | null>(null)
@@ -300,7 +298,7 @@ const handleSubmit = async () => {
 
 onMounted(async () => {
   await experienceStore.fetchExperiences()
-  await skillStore.fetchSkills(userStore.userInfo?.uid)
+  await skillStore.fetchSkills()
 })
 </script>
 <template>
@@ -356,7 +354,7 @@ onMounted(async () => {
                 </div>
 
                 <p v-if="item.organization"><span class="font-semibold">服務單位：</span> <span>{{ item.organization
-                    }}</span></p>
+                }}</span></p>
                 <p><span class="font-semibold">使用技術：</span> <span>{{ item.skillTags.join(', ') }}</span></p>
                 <p v-if="timeline.type === 'career'"><span class="font-semibold">經歷時長：</span> <span>{{
                   formatDuration(item.durationYears,
@@ -378,7 +376,9 @@ onMounted(async () => {
       </el-card>
     </div>
 
-    <el-dialog v-model="isTimelineDialogVisible" :title="`新增${currentTimeline?.timelineName}`" class="min-w-[600px]">
+    <el-dialog v-model="isTimelineDialogVisible"
+      :title="isEditMode ? `編輯${currentTimeline?.timelineName}` : `新增${currentTimeline?.timelineName}`"
+      class="min-w-[600px]">
       <el-form ref="ruleFormRef" :model="localForm" :rules="rules">
         <el-row>
 

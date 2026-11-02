@@ -3,6 +3,8 @@ import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/stores'
 import { ElMessage } from 'element-plus'
 import { ref, reactive } from 'vue'
+import { showErrorMessage } from '@/utils/error'
+import { getSafeRedirect } from '@/utils/redirect'
 
 const route = useRoute()
 const router = useRouter()
@@ -38,13 +40,11 @@ const login = async () => {
 
   try {
     await userStore.userLogin(ruleForm.value)
-    const targetPath = route.query.redirect as string || '/'
+    const targetPath = route.query.redirect
     ElMessage.success('登入成功')
-    router.push(targetPath)
+    router.push(getSafeRedirect(targetPath))
   } catch (error) {
-    if (error instanceof Error) {
-      ElMessage.error(error.message || '登入時發生錯誤')
-    }
+    showErrorMessage(error)
   }
 }
 

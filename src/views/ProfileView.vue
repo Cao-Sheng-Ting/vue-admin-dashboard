@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { useUserStore } from '@/stores'
 import { formatDate, formatDateDisplay } from '@/utils/date'
-import { updateUserNicknameAPI } from '@/services/userService'
+import { showErrorMessage } from '@/utils/error'
 
-const userInfo = useUserStore().userInfo
+const userStore = useUserStore()
+const userInfo = userStore.userInfo
 
 const form = reactive({
   nickname: userInfo?.nickname ?? ''
@@ -23,12 +24,11 @@ const rules = {
 
 const isSubmitting = ref<boolean>(false)
 const handleSubmit = async () => {
-  if (!userInfo?.uid) {
-    ElMessage.error('登入狀態已失效，請重新登入')
-    return
-  }
+
 
   if (!ruleFormRef.value || isSubmitting.value) return
+
+  // validate 失敗是 rejection，轉 false 才能用 if 判斷，不與 API 錯誤一起混進同一個 catch
   const isValid = await ruleFormRef.value.validate().catch(() => false)
   if (!isValid) {
     console.warn('用戶名稱不可為空')
@@ -38,11 +38,10 @@ const handleSubmit = async () => {
   isSubmitting.value = true
 
   try {
-    await updateUserNicknameAPI(userInfo.uid, form.nickname)
-    userInfo.nickname = form.nickname
+    await userStore.userUpdateUserNickname(form.nickname)
     ElMessage.success('更新用戶名稱成功')
-  } catch {
-    ElMessage.error('更新用戶名稱失敗，請稍後再試')
+  } catch (error) {
+    showErrorMessage(error)
   } finally {
     isSubmitting.value = false
   }
