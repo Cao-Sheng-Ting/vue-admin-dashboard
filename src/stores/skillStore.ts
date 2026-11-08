@@ -160,6 +160,16 @@ export const useSkillStore = defineStore('skills', () => {
     await editDefaultSkillsAPI(payload)
   }
 
+  watch(
+    () => userStore.userInfo?.uid,
+    (uid) => {
+      if (!uid) {
+        userSkills.value = null
+        isUserSkillsError.value = false
+      }
+    },
+  )
+
   return {
     defaultSkills,
     userSkills,

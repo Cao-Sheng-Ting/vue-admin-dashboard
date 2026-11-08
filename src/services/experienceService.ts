@@ -10,19 +10,26 @@ import {
   serverTimestamp,
   Timestamp,
 } from 'firebase/firestore'
+import { AppError, isFirestorePermissionError, PermissionDeniedError } from '@/utils/error'
+import { isOffline } from '@/utils/fetchHelpers'
 
 export const getExperiencesAPI = async (): Promise<Experience[]> => {
+  if (isOffline()) {
+    throw new AppError('網路連線中斷，請檢查網路狀態')
+  }
+
   try {
     const experienceQuery = query(collection(db, 'experiences'), orderBy('createdAt', 'desc'))
     const snapshot = await getDocs(experienceQuery)
 
-    const experiencesList: Experience[] = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...(doc.data() as Omit<Experience, 'id'>),
+    const experiencesList: Experience[] = snapshot.docs.map((d) => ({
+      id: d.id,
+      ...(d.data() as Omit<Experience, 'id'>),
     }))
     return experiencesList
   } catch (error) {
-    throw error
+    console.error('獲取經歷資料失敗：', error)
+    throw new AppError('獲取經歷資料失敗，請稍後再試')
   }
 }
 
@@ -30,6 +37,10 @@ export const updateExperienceAPI = async (
   experienceId: Experience['id'],
   timelineItems: TimelineItem[],
 ): Promise<{ items: TimelineItem[]; updatedAt: Timestamp }> => {
+  if (isOffline()) {
+    throw new AppError('網路連線中斷，請檢查網路狀態')
+  }
+
   try {
     const experiencePayload = { items: timelineItems, updatedAt: serverTimestamp() }
 
@@ -41,7 +52,10 @@ export const updateExperienceAPI = async (
       updatedAt: Timestamp.now(),
     }
   } catch (error) {
-    throw error
+    console.error('更新時間線失敗：', error)
+    if (isFirestorePermissionError(error)) throw new PermissionDeniedError()
+
+    throw new AppError('更新時間線失敗，請稍後再試')
   }
 }
 

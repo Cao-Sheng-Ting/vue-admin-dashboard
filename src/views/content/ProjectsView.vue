@@ -6,19 +6,16 @@ import SkillTagDialog from './components/SkillTagDialog.vue'
 import { useDebounceSearch } from '@/composables/useDebounce'
 import { useProjectStore } from '@/stores/projectStore'
 import { useSkillStore } from '@/stores/skillStore.ts'
-import { useUserStore } from '@/stores/userStore.ts'
 import ProjectStatusSelect from './components/ProjectStatusSelect.vue'
 import type { ProjectStatus, ProjectItem } from '@/types/project'
-import { getProjectsAPI } from '@/services/projectService.ts'
 import { ElMessageBox } from 'element-plus'
-import { deleteProjectsBatchAPI } from '@/services/projectService.ts'
 import BaseButton from '@/components/BaseButton.vue'
 import BaseErrorState from '@/components/BaseErrorState.vue'
 import { usePermission } from '@/composables/usePermission.ts'
+import { showErrorMessage } from '@/utils/error.ts'
 
 const projectStore = useProjectStore()
 const skillStore = useSkillStore()
-const userStore = useUserStore()
 const { guard, denyClass } = usePermission()
 
 //  --- 搜尋與篩選 ---
@@ -27,6 +24,7 @@ const isTagFilterVisible = ref<boolean>(false)
 const selectedTags = ref<string[]>([])
 const selectedStatus = ref<ProjectStatus | 'all'>('all')
 
+// TODO：改由在 projectStore 內操作
 const handleTagClose = (tag: string) => {
   projectStore.tagsFilter = projectStore.tagsFilter.filter(t => t !== tag)
   selectedTags.value = projectStore.tagsFilter
@@ -61,21 +59,6 @@ const openEditDrawer = async (card: ProjectItem) => {
   isDrawerVisible.value = true
 }
 
-// --- 專案 Drawer   ---
-const handleAddProject = (project: ProjectItem) => {
-  projectStore.projectsList.unshift(project)
-}
-
-const handleUpdateProject = async (project: ProjectItem) => {
-  const index = projectStore.projectsList.findIndex(p => p.id === project.id)
-
-  if (index !== -1) {
-    projectStore.projectsList[index] = project
-  } else {
-    projectStore.projectsList = await getProjectsAPI()
-  }
-}
-
 // --- 專案刪除  ---
 const handleEditAction = async () => {
   if (!await (guard('editor'))) return
@@ -84,6 +67,8 @@ const handleEditAction = async () => {
 }
 
 const handleBatchDelete = async (list: string[]) => {
+  if (!await (guard('editor')) || list.length === 0) return
+
   try {
     await ElMessageBox.confirm('確定刪除所選的專案嗎？',
       {
@@ -92,17 +77,12 @@ const handleBatchDelete = async (list: string[]) => {
         type: 'warning'
       }
     )
-    await deleteProjectsBatchAPI(list)
+    await projectStore.deleteProjectsBatch(list)
     ElMessage.success('專案刪除成功')
-    const remainingProjects = projectStore.projectsList.filter((p) => {
-      return !projectCheckList.value.includes(p.id)
-    })
-    projectStore.projectsList = remainingProjects
     projectCheckList.value = []
   } catch (error) {
-    if (error === 'cancel') return
-    console.log(error)
-    ElMessage.error('刪除失敗，請稍候再試')
+    if (error === 'cancel' || error === 'close') return
+    showErrorMessage(error)
   }
 }
 
@@ -112,8 +92,11 @@ watch(selectedStatus, (newVal) => {
 
 
 onMounted(async () => {
-  await projectStore.fetchProjects()
-  await skillStore.fetchSkills()
+  await Promise.all([
+    projectStore.fetchProjects(),
+    // TODO：技能庫載入失敗時，專案頁面跳 message
+    skillStore.fetchSkills()
+  ])
   selectedTags.value = projectStore.tagsFilter
   selectedStatus.value = projectStore.statusFilter
 })
@@ -156,7 +139,7 @@ onMounted(async () => {
           <template #template>
             <div class="border pt-7 pb-3 px-5 rounded-lg">
               <div class="flex flex-col gap-3 items-center">
-                <el-skeleton-item variant="h2" style="width: 70%"></el-skeleton-item>
+                <el-skeleton-item variant="h3" style="width: 70%"></el-skeleton-item>
                 <el-skeleton-item variant="image" style="width: 100% ; height: 200px" />
               </div>
               <div class="pt-1">
@@ -174,9 +157,8 @@ onMounted(async () => {
       </el-col>
     </el-row>
 
-    <!-- 優化：description 來源應來自 store-->
     <BaseErrorState v-else-if="projectStore.isError || projectStore.isEmpty" :is-error="projectStore.isError"
-      :is-empty="projectStore.isEmpty" error-description="載入專案失敗，請重新整理" empty-description="專案目前沒有內容"
+      :is-empty="projectStore.isEmpty" :error-description="projectStore.errorMessage" empty-description="專案目前沒有內容"
       @retry="projectStore.fetchProjects" class="h-full">
     </BaseErrorState>
 
@@ -195,10 +177,10 @@ onMounted(async () => {
           </BaseButton>
         </el-col>
         <el-col :span="8" class="flex justify-end">
-          <el-button type="danger" v-if="isBatchEdit" :disabled="projectCheckList.length === 0 ? true : false"
+          <el-button type="danger" v-if="isBatchEdit" :disabled="projectCheckList.length === 0"
             @click="handleBatchDelete(projectCheckList)">
             <div class="flex items-center gap-1">
-              <icon-ic:outline-edit-note />
+              <icon-material-symbols:delete />
               <span>刪除</span>
             </div>
           </el-button>
@@ -208,8 +190,7 @@ onMounted(async () => {
         <el-col :xs="24" :sm="12" :md="8" :lg="6" v-for="item in projectStore.pagedProjects" :key="item.id"
           class="mb-5">
           <el-checkbox-group v-model="projectCheckList">
-            <ProjectsCard :data="item" :is-batch-edit="isBatchEdit" :is-project-edit="isProjectEdit"
-              @edit="openEditDrawer">
+            <ProjectsCard :data="item" :is-batch-edit="isBatchEdit" @edit="openEditDrawer">
             </ProjectsCard>
           </el-checkbox-group>
         </el-col>
@@ -221,7 +202,7 @@ onMounted(async () => {
   <SkillTagDialog v-model="isTagFilterVisible" :initial-tags="selectedTags" @confirm="handleTagsFilter">
   </SkillTagDialog>
   <ProjectEditDrawer v-model:visible="isDrawerVisible" v-model:edit-mode="isProjectEdit"
-    v-model:card-data="editCardData" @project-added="handleAddProject" @project-updated="handleUpdateProject">
+    v-model:card-data="editCardData">
   </ProjectEditDrawer>
 </template>
 

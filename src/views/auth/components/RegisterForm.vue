@@ -8,12 +8,13 @@ import type { UserRole } from '@/types/user'
 import { useUserStore } from '@/stores'
 import { showErrorMessage } from '@/utils/error'
 import { getSafeRedirect } from '@/utils/redirect'
+import type { FormInstance } from 'element-plus'
 
 const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
 
-const ruleFormRef = ref()
+const ruleFormRef = ref<FormInstance>()
 const ruleForm = ref<RegisterForm>({
   email: '',
   password: '',
@@ -131,13 +132,10 @@ const isSubmitDisabled = computed(() => {
 })
 
 const register = async () => {
-  if (isSubmitDisabled.value) return
+  if (isSubmitDisabled.value || !ruleFormRef.value) return
 
   const isValid = await ruleFormRef.value.validate().catch(() => false)
-  if (!isValid) {
-    console.warn('表單驗證未通過')
-    return
-  }
+  if (!isValid) return
 
   // 前端驗證：用於即時反饋，真正把關在 Firestore 規則，授權碼為示範用公開
   if (ruleForm.value.role !== 'user') {

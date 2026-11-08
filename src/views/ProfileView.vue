@@ -2,43 +2,39 @@
 import { useUserStore } from '@/stores'
 import { formatDate, formatDateDisplay } from '@/utils/date'
 import { showErrorMessage } from '@/utils/error'
+import type { FormInstance } from 'element-plus'
 
 const userStore = useUserStore()
-const userInfo = userStore.userInfo
+const userInfo = computed(() => userStore.userInfo)
 
 const form = reactive({
-  nickname: userInfo?.nickname ?? ''
+  nickname: userInfo.value?.nickname.trim() ?? ''
 })
 
 const createdAt = computed(() => {
-  return formatDateDisplay(formatDate(userInfo?.createdAt))
+  return formatDateDisplay(formatDate(userInfo.value?.createdAt))
 })
 
-const ruleFormRef = ref()
+const ruleFormRef = ref<FormInstance>()
 
 const rules = {
   nickname: [
-    { required: true, message: '請輸入用戶名稱', trigger: 'blur' }
+    { required: true, whitespace: true, message: '請輸入用戶名稱', trigger: 'blur' }
   ]
 }
 
 const isSubmitting = ref<boolean>(false)
 const handleSubmit = async () => {
-
-
   if (!ruleFormRef.value || isSubmitting.value) return
 
   // validate 失敗是 rejection，轉 false 才能用 if 判斷，不與 API 錯誤一起混進同一個 catch
   const isValid = await ruleFormRef.value.validate().catch(() => false)
-  if (!isValid) {
-    console.warn('用戶名稱不可為空')
-    return
-  }
+  if (!isValid) return
 
   isSubmitting.value = true
 
   try {
-    await userStore.userUpdateUserNickname(form.nickname)
+    await userStore.userUpdateUserNickname(form.nickname.trim())
     ElMessage.success('更新用戶名稱成功')
   } catch (error) {
     showErrorMessage(error)
@@ -51,7 +47,7 @@ const handleSubmit = async () => {
 <template>
   <div class="main-box bg-white flex-1 rounded p-6 flex flex-col">
     <div class="flex flex-col max-w-xl mx-auto w-full pt-8 border-black">
-      <h2 class="text-2xl font-bold mb-6 ">個人資料</h2>
+      <h2 class="text-2xl font-bold mb-6">個人資料</h2>
       <el-form ref="ruleFormRef" :model="form" :rules="rules" hide-required-asterisk label-position="top">
         <el-form-item label="名稱：" prop="nickname">
           <el-input v-model="form.nickname" clearable></el-input>

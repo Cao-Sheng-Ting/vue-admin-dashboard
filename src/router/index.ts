@@ -43,17 +43,6 @@ const auth: RouteRecordRaw[] = [
       },
     ],
   },
-
-  {
-    path: '/forgot-password',
-    name: 'forgot-password',
-    component: () => import('@/views/auth/ForgotPasswordView.vue'),
-    meta: {
-      title: 'ForgotPassword',
-      hidden: true,
-      requiresAuth: false,
-    },
-  },
 ]
 
 const contentChildren: RouteRecordRaw[] = [
@@ -195,8 +184,8 @@ const router = createRouter({
 /**
  * 全局前置守衛：處理頁面訪問權限
  * @param to 導航目標
+ * @param from 來源路由
  */
-
 router.beforeEach(async (to, from) => {
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
 
@@ -213,8 +202,8 @@ router.beforeEach(async (to, from) => {
   }
 
   if (!currentUser) {
-    // persist 會從 localStorage 還原 userInfo，但 Firebase 的登入可能已經失效。
-    // 不清掉的話，不需要登入的頁面會用舊資料顯示成已登入
+    // 未登入或 Firebase 登入失效，清掉 store 殘留資料，
+    // 否則會影響不需登入的頁面判斷
     userStore.userInfo = null
 
     if (requiresAuth) {
@@ -249,9 +238,8 @@ router.beforeEach(async (to, from) => {
           return '/auth/login'
         }
 
-        // 補載失敗且非帳號問題，一般頁面直接放行，
-        // 下面退路 '/'也是一般頁面，如果也擋，'/'又會觸發補載失敗，形成循環
-        if (!requiredRole) return true
+        // 不需要登入的頁面（含下方退路 '/'）沒有 userInfo 也能顯示， 直接放行
+        if (!requiresAuth) return true
 
         showErrorMessage(error)
         // from.matched 長度為 0 代表第一次載入網站，return false 會白屏，

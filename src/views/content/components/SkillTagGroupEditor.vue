@@ -8,6 +8,7 @@ import BaseErrorState from '@/components/BaseErrorState.vue'
 import { usePermission } from '@/composables/usePermission'
 import { showErrorMessage } from '@/utils/error'
 import type { UserRole } from '@/types/user'
+import type { FormInstance } from 'element-plus'
 
 const userStore = useUserStore()
 const skillStore = useSkillStore()
@@ -36,7 +37,7 @@ const groupFormModel = reactive({
   label: ''
 })
 
-const ruleFormRef = ref()
+const ruleFormRef = ref<FormInstance>()
 const rules = reactive({
   name: [
     { required: true, message: '請輸入技術代號', trigger: 'blur' }
@@ -156,10 +157,7 @@ const handlePersonalAddTag = (trimmedName: string) => {
 const handleGroupDialogSubmit = async () => {
   if (!ruleFormRef.value) return
   const isValid = await ruleFormRef.value.validate().catch(() => false)
-  if (!isValid) {
-    console.warn('表單尚未完成')
-    return
-  }
+  if (!isValid) return
 
   const success = isEditMode.value ? handleEditGroup() : handleAddGroup()
 
@@ -377,6 +375,7 @@ const handlePersonalSubmit = async () => {
 
   <div v-else>
     <div class="action-bar flex justify-between pb-3 px-1">
+      <!-- TODO：公共標籤庫在編輯模式下刪光最後一個分類，isEditDisabled 變 true，但按鈕此時顯示「取消」，被禁用就退不出編輯模式 -->
       <BaseButton @click="toggleEditMode" type="info" :plain="isEditMode ? false : true" :disabled="isEditDisabled"
         :class="denyClass(requiredRole, 'button', isBlocked)">
         <icon-ic:round-cancel-presentation v-if="isEditMode" />

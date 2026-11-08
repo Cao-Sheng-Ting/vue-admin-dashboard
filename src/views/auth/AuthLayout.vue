@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { DotLottieVue } from '@lottiefiles/dotlottie-vue'
+import waveAnimation from '@/assets/wave-lines-animation.lottie?url'
 
 const route = useRoute()
 
@@ -9,19 +10,10 @@ const isRegister = computed(() => route.path === '/auth/register')
 <template>
   <div class="login-container h-screen w-screen flex items-center justify-center bg-cover ">
 
-    <!-- <DotLottieVue class="absolute inset-0 w-full h-full object-cover pointer-events-none bg-blue-900" autoplay loop
-      src="/src/assets/Wave Animation.lottie">
-    </DotLottieVue> -->
-
-    <!-- <DotLottieVue class="absolute inset-0 w-full h-full object-cover pointer-events-none bg-blue-900" autoplay loop
-      src="/src/assets/Abstract blue and yellow.lottie">
-    </DotLottieVue> -->
-
     <DotLottieVue class="absolute inset-0 w-full h-full object-cover pointer-events-none bg-blue-100" autoplay loop
-      src="/src/assets/Wave Lines Animation.lottie">
+      :src="waveAnimation">
     </DotLottieVue>
 
-    <!-- <Vue3Lottie :animationData="Backfround" class="absolute inset-0 z-0" /> -->
     <div
       class="login-mask z-10 box-border relative flex w-[75%] h-[90%] px-[50px] rounded-[10px] bg-white/60 blur-sm pointer-events-auto">
     </div>

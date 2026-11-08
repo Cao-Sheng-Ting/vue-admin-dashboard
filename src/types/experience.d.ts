@@ -1,5 +1,5 @@
 import type { UserInfo } from '@/types/user'
-import { Timestamp } from 'firebase/firestore'
+import type { Timestamp } from 'firebase/firestore'
 
 type UserMemberInfo = { uid: UserInfo['uid']; nickname: UserInfo['nickname'] }
 
@@ -11,6 +11,7 @@ export interface TimelineItem {
   durationMonths?: number | null
   highlights: string[]
   skillTags: string[]
+  // TODO: 後續可以加上團隊成員
   // members?: UserMemberInfo[]
   sortOrder: number
 }

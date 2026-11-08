@@ -5,12 +5,13 @@ import { ElMessage } from 'element-plus'
 import { ref, reactive } from 'vue'
 import { showErrorMessage } from '@/utils/error'
 import { getSafeRedirect } from '@/utils/redirect'
+import type { FormInstance } from 'element-plus'
 
 const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
 
-const ruleFormRef = ref()
+const ruleFormRef = ref<FormInstance>()
 const ruleForm = ref({
   email: '',
   password: '',
@@ -32,11 +33,10 @@ const rules = reactive({
 })
 
 const login = async () => {
+  if (!ruleFormRef.value) return
+
   const isValid = await ruleFormRef.value.validate().catch(() => false)
-  if (!isValid) {
-    console.warn('表單驗證未通過')
-    return
-  }
+  if (!isValid) return
 
   try {
     await userStore.userLogin(ruleForm.value)
@@ -53,9 +53,17 @@ const demoAccount = async () => {
     email: 'admin@example.com',
     password: 'AAA12345',
   }
-  await new Promise((resolve) => setTimeout(resolve, 200))
+  // 等待 200ms，讓使用者看到帳密被填入後再送出
+  await new Promise((resolve) =>
+    setTimeout(resolve, 200)
+  )
   await login()
 }
+
+const viewerMode = () => {
+  router.push('/')
+}
+
 </script>
 
 <template>
@@ -87,9 +95,15 @@ const demoAccount = async () => {
         <el-button round size="large" class="w-36" @click="router.push({ name: 'register' })">註冊</el-button>
       </div>
     </el-form-item>
-    <div class="flex flex-col items-end mb-5 ">
-      <el-button type="success" @click="demoAccount">Demo Account</el-button>
-      <div class="text-s text-gray-500">點擊後快速登入</div>
+    <div class="flex flex-col items-end gap-3">
+      <div class="flex flex-col">
+        <el-button type="success" @click="demoAccount">Demo Account</el-button>
+        <div class="text-sky-900">一鍵解鎖管理員權限</div>
+      </div>
+      <div class="flex flex-col">
+        <el-button type="info" @click="viewerMode">訪客模式</el-button>
+        <div class="text-xs text-gray-500">未登入狀態瀏覽</div>
+      </div>
     </div>
   </el-form>
 </template>

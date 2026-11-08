@@ -2,13 +2,12 @@
 import { DASHBOARD_CARDS_CONFIG, DASHBOARD_CHART_CONFIG } from '@/constants/dashboard'
 import { useDashboardStats } from '@/composables/useDashboardStats'
 import BaseErrorState from '@/components/BaseErrorState.vue'
-import { useSkillStore } from '@/stores/skillStore'
-
-const skillStore = useSkillStore()
+import { useUserStore } from '@/stores'
 
 const { cardStatsMap, chartStatsMap, isLoading, isError, fetchAll } = useDashboardStats()
 const statuses = DASHBOARD_CHART_CONFIG.find(item => item.key === 'projectStatus')
 const skills = DASHBOARD_CHART_CONFIG.find(item => item.key === 'projectSkills')
+const userStore = useUserStore()
 
 const dashboardCards = computed(() => {
   return DASHBOARD_CARDS_CONFIG.map(card => ({
@@ -44,16 +43,14 @@ const dashboardCharts = computed(() => {
     }))
   } : null
 
-  console.log('statusChart:', statusChart)
-  console.log('skillsChart:', skillsChart)
-
   return { statusChart, skillsChart }
 })
+
+watch(() => userStore.userInfo?.uid, () => fetchAll())
 
 onMounted(async () => {
   await fetchAll()
 })
-
 
 </script>
 

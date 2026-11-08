@@ -17,7 +17,7 @@
 
 ### 🌍 全局設定
 
-- [ ] [app.vue] 寫 onMounted 來監測每次重新整理時是否還是登入狀態
+- [ ] [main.ts] 在 utils 裡寫一個 AuthListener，用來全局監聽登入失效，並在 main.ts 調用
 - [ ] [src/components/common/GlobalLoading.vue] 寫全站讀取，每個頁面導入，用v-if判斷是否拿到資料，拿到前顯示讀取，除了要使用骨架屏的頁面
 
 - [] 優化：檢查會用到 userInfo 的 createdAt，因為從firestore拿到的 Timestamp 不能直接用，看是否需要統一轉換好再放入 userInfo

@@ -1,20 +1,20 @@
 <script setup lang="ts">
 import { STATUS_MAP } from '@/constants/project'
 import type { ProjectItem } from '@/types/project'
-import { deleteProjectAPI } from '@/services/projectService'
 import { useProjectStore } from '@/stores/projectStore'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { usePermission } from '@/composables/usePermission'
-
+import { showErrorMessage } from '@/utils/error'
 
 defineProps<{
   data: ProjectItem,
   isBatchEdit: boolean
-  isProjectEdit: boolean
 }>()
 
+const emit = defineEmits<{ edit: [project: ProjectItem] }>()
+
 const projectStore = useProjectStore()
-const { can, denyClass } = usePermission()
+const { can, denyClass, guard } = usePermission()
 
 const isHovering = ref<boolean>(false)
 const isMenuOpen = ref<boolean>(false)
@@ -26,11 +26,14 @@ const handleMenuVisible = (visible: boolean) => {
   isMenuOpen.value = visible
 }
 
-const openLink = (url: string) => {
-  if (url) window.open(url, '_blank')
+const openLink = (url?: string) => {
+  if (!url) return
+  window.open(url, '_blank', 'noopener,noreferrer')
 }
 
 const handleDelete = async (id: string) => {
+  if (!await (guard('editor'))) return
+
   try {
     await ElMessageBox.confirm(
       '確定要刪除這個專案嗎？',
@@ -39,23 +42,18 @@ const handleDelete = async (id: string) => {
         cancelButtonText: '取消',
         type: 'warning'
       })
-    await deleteProjectAPI(id)
-    const index = projectStore.projectsList.findIndex(p => p.id === id)
-    if (index !== -1) {
-      projectStore.projectsList.splice(index, 1)
-    }
+    await projectStore.deleteProject(id)
     ElMessage.success('專案刪除成功')
   } catch (error) {
-    if (error === 'cancel') return
-    console.error(error)
-    ElMessage.error('刪除失敗，請稍候再試')
+    if (error === 'cancel' || error === 'close') return
+    showErrorMessage(error)
   }
 }
 </script>
 
 <template>
   <div @mouseenter="isHovering = true" @mouseleave="isHovering = false" class="relative group"
-    :class="denyClass('editor')" @click="$emit('edit', data)">
+    :class="denyClass('editor')" @click="emit('edit', data)">
     <el-checkbox v-show="isBatchEdit" size="large" :value="data.id" @click.stop
       class="project-checkbox absolute left-3 z-10"></el-checkbox>
     <el-tag class="absolute top-2 right-2 z-10" :type="STATUS_MAP[data.status].type">{{
@@ -95,8 +93,8 @@ const handleDelete = async (id: string) => {
         <p class="text-sm text-gray-500 line-clamp-2 min-h-[2.5rem] mb-6">{{ data.description }}</p>
       </div>
       <div class="flex flex-row justify-center">
-        <el-button type="primary" @click.stop="openLink(data.demoUrl)">線上預覽</el-button>
-        <el-button plain @click.stop="openLink(data.githubUrl)">查看原始碼</el-button>
+        <el-button type="primary" @click.stop="openLink(data.demoUrl)" :disabled="!data.demoUrl">線上預覽</el-button>
+        <el-button plain @click.stop="openLink(data.githubUrl)" :disabled="!data.githubUrl">查看原始碼</el-button>
       </div>
       <template #footer>
         <div class="flex flex-col">

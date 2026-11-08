@@ -1,4 +1,3 @@
-import { useUserStore } from '@/stores'
 import { useProjectStore } from '@/stores/projectStore'
 import { useSkillStore } from '@/stores/skillStore'
 import { useExperienceStore } from '@/stores/experienceStore'
@@ -13,7 +12,6 @@ import {
 import type { ProjectStatus } from '@/types/project'
 
 export const useDashboardStats = () => {
-  const userStore = useUserStore()
   const projectStore = useProjectStore()
   const skillStore = useSkillStore()
   const experienceStore = useExperienceStore()
@@ -22,8 +20,8 @@ export const useDashboardStats = () => {
     let totalDurationYears = 0
     let totalDurationMonths = 0
 
-    if (experienceStore.timelineMap) {
-      const career = experienceStore.timelineMap.find((t) => t.type === 'career')
+    if (experienceStore.timelines) {
+      const career = experienceStore.timelines.find((t) => t.type === 'career')
       if (career) {
         for (let i = 0; i < career.items.length; i++) {
           totalDurationYears += career.items[i]?.durationYears || 0

@@ -1,14 +1,21 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import type { ProjectStatus, ProjectItem } from '@/types/project'
-import { getProjectsAPI } from '@/services/projectService'
-import { isOffline, handleFetchFailure } from '@/utils/fetchHelpers'
+import type { ProjectStatus, ProjectItem, AddProjectData, EditProjectData } from '@/types/project'
+import {
+  getProjectsAPI,
+  addProjectAPI,
+  editProjectAPI,
+  deleteProjectAPI,
+  deleteProjectsBatchAPI,
+} from '@/services/projectService'
+import { handleFetchFailure } from '@/utils/fetchHelpers'
 
 export const useProjectStore = defineStore('projects', () => {
   //原始資料
   const projectsList = ref<ProjectItem[]>([])
   const isLoading = ref<boolean>(false)
   const isError = ref<boolean>(false)
+  const errorMessage = ref<string>('')
 
   //篩選狀態
   const searchQuery = ref<string>('')
@@ -19,7 +26,7 @@ export const useProjectStore = defineStore('projects', () => {
 
   //篩選後結果
   /**
-   * 結合搜尋匡輸入字串、技術標籤和專案狀態進行多層過濾
+   * 結合搜尋框輸入字串、技術標籤和專案狀態進行多層過濾
    * 使用 computed 確保資料連動與緩存
    */
   const filteredProjects = computed(() => {
@@ -55,20 +62,50 @@ export const useProjectStore = defineStore('projects', () => {
 
   const isEmpty = computed(() => filteredProjects.value.length === 0)
 
+  const addProject = async (data: AddProjectData) => {
+    const project = await addProjectAPI(data)
+    projectsList.value.unshift(project)
+  }
+
+  const editProject = async (data: EditProjectData) => {
+    const updatedAt = await editProjectAPI(data)
+    const index = projectsList.value.findIndex((p) => p.id === data.id)
+    const old = projectsList.value[index]
+
+    // 找不到代表資料已過期，重新抓取以免畫面和資料庫不一致
+    if (!old) {
+      await fetchProjects()
+      return
+    }
+    // createdAt 沿用舊值；updatedAt 暫時用本機時間，重新整理後同步伺服器時間
+    projectsList.value[index] = { ...old, ...data, updatedAt }
+  }
+
+  const deleteProject = async (id: ProjectItem['id']) => {
+    await deleteProjectAPI(id)
+    const index = projectsList.value.findIndex((p) => p.id === id)
+    if (index !== -1) {
+      projectsList.value.splice(index, 1)
+    }
+  }
+
+  const deleteProjectsBatch = async (list: ProjectItem['id'][]) => {
+    await deleteProjectsBatchAPI(list)
+    const remainingProjects = projectsList.value.filter((p) => {
+      return !list.includes(p.id)
+    })
+    projectsList.value = remainingProjects
+  }
+
   const fetchProjects = async () => {
     isLoading.value = true
     isError.value = false //每次獲取時重置錯誤狀態，避免頁面卡在失敗畫面
 
-    if (isOffline()) {
-      handleFetchFailure({ isError, isLoading })
-      return
-    }
-
-    // 優化： 之後 fetch 可以寫成高階函式獨立出來讓每個 store 調用
+    // TODO： 之後考慮將 fetch 寫成高階函式獨立出來讓每個 store 調用
     try {
       projectsList.value = await getProjectsAPI()
-    } catch {
-      handleFetchFailure({ isError, isLoading }, '載入專案資料失敗，請稍後再試')
+    } catch (error) {
+      handleFetchFailure({ isError, isLoading, errorMessage }, error)
     } finally {
       isLoading.value = false
     }
@@ -78,6 +115,7 @@ export const useProjectStore = defineStore('projects', () => {
     projectsList,
     isLoading,
     isError,
+    errorMessage,
     searchQuery,
     tagsFilter,
     statusFilter,
@@ -87,6 +125,10 @@ export const useProjectStore = defineStore('projects', () => {
     pagedProjects,
     total,
     isEmpty,
+    addProject,
+    editProject,
+    deleteProject,
+    deleteProjectsBatch,
     fetchProjects,
   }
 })

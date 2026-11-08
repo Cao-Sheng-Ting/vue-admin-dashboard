@@ -1,38 +1,33 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useUserStore } from '../stores/userStore'
+import { useUserStore } from '@/stores'
 import type { RouteRecordRaw } from 'vue-router'
 import { Icon } from '@iconify/vue'
 import { useWindowSize } from '@vueuse/core'
 import { showErrorMessage } from '@/utils/error'
+import { hasPermission } from '@/utils/permission'
+import type { UserRole } from '@/types/user'
 
 defineOptions({
   name: 'MainLayout',
 })
 const isCollapse = ref(false)
-const isMobilScreen = ref(false)
+const isMobileScreen = ref(false)
 const { width } = useWindowSize()
 
 watchEffect(() => {
   if (width.value <= 650) {
     isCollapse.value = true
-    isMobilScreen.value = true
+    isMobileScreen.value = true
   } else {
-    isMobilScreen.value = false
+    isMobileScreen.value = false
   }
 })
 
 const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
-
-const hasPermission = (requiredRole?: string[]) => {
-  const userRole = useUserStore().userInfo?.role || 'viewer'
-  if (!requiredRole?.length) return true
-
-  return requiredRole.includes(userRole)
-}
 
 const filterByPermission = (items: RouteRecordRaw[]): RouteRecordRaw[] => {
   return items.filter((item) => {
@@ -41,8 +36,8 @@ const filterByPermission = (items: RouteRecordRaw[]): RouteRecordRaw[] => {
     const isLoggedIn = !!userStore.userInfo
     if (item.meta?.requiresAuth && !isLoggedIn) return false
 
-    const roles = item.meta?.requiredRole as string[] | undefined
-    return hasPermission(roles)
+    const role = item.meta?.requiredRole as UserRole | undefined
+    return !role || hasPermission(role, userStore.userInfo?.role)
   })
 }
 
@@ -65,8 +60,6 @@ const breadcrumbs = computed(() => {
 
   return matched
 })
-
-console.log('使用者資料：', userStore.userInfo)
 
 const logout = async () => {
   try {
@@ -91,8 +84,8 @@ const logout = async () => {
           後台管理系統
         </h1>
       </div>
-      <el-menu router :collapse="isCollapse" :collapse-transition="false" background-color="#3341559" text-color="#fff"
-        class="flex flex-col h-full gap-4 pt-3">
+      <el-menu router :collapse="isCollapse" :collapse-transition="false" text-color="#fff"
+        class="flex flex-col h-full bg-blue-950 gap-4 pt-3">
         <template v-for="menu in menuList" :key="menu.name || menu.path">
           <el-sub-menu v-if="menu.children" :index="menu.name">
             <template #title>
@@ -121,7 +114,7 @@ const logout = async () => {
     <el-container>
       <el-header tag="header" height="55px" class="flex items-center justify-between pr-4 pl-0 bg-gray-100">
         <div class="header-left flex flex-row h-full items-center">
-          <div v-if="!isMobilScreen" @click="isCollapse = !isCollapse"
+          <div v-if="!isMobileScreen" @click="isCollapse = !isCollapse"
             class="h-full aspect-square flex items-center justify-center cursor-pointer hover:bg-black/10 transition-colors">
             <el-icon size="30" class="!text-zinc-700">
               <icon-bi:list v-if="isCollapse" />
@@ -129,7 +122,7 @@ const logout = async () => {
             </el-icon>
           </div>
           <el-breadcrumb separator=">" class="flex items-center gap-0.5 h-full text-base"
-            :class="isMobilScreen ? 'pl-3' : ''">
+            :class="isMobileScreen ? 'pl-3' : ''">
             <el-breadcrumb-item :to="{ name: 'home' }" class="cursor-pointer">
               <div class="flex items-center">
                 <el-icon size="30"><icon-mdi:home class="text-sky-800" /></el-icon>
@@ -173,13 +166,13 @@ const logout = async () => {
           </el-dropdown>
         </div>
       </el-header>
-      <!-- 未來考慮加上分頁功能 -->
+      <!-- TODO:未來考慮加上分頁功能 -->
       <!-- <div class="tags-view-container h-10 bg-gray-100 border-y border-gray-200">
         <el-scrollbar>
           <el-tag>Tag 1</el-tag>
         </el-scrollbar>
       </div> -->
-      <el-main tag="main" class="h-[calc(100vh-80px] bg-gray-200"><router-view></router-view>
+      <el-main tag="main" class="bg-gray-200"><router-view></router-view>
       </el-main>
 
       <el-footer height="30px" class="flex justify-center items-center">© 2026 Cao | Vue 3 Admin Dashboard</el-footer>
@@ -190,20 +183,16 @@ const logout = async () => {
 <style scoped lang="scss">
 @import '@/styles/index.scss';
 
-/* 移除 el-menu 預設的右邊框 */
 .el-aside {
   &::-webkit-scrollbar {
     width: 0px !important;
   }
 }
 
+/* 移除 el-menu 預設的右邊框 */
 .el-menu {
   border-right: none !important;
 }
-
-// .el-menu--vertical {
-//   height: 200px;
-// }
 
 :deep(.el-breadcrumb__item .el-breadcrumb__inner) {
   color: #303033;

@@ -1,5 +1,13 @@
 import type { ProjectStatus } from '@/types/project'
 
+export const PROJECT_STATUSES = [
+  'completed',
+  'developing',
+  'testing',
+  'maintenance',
+  'planning',
+] as const
+
 export interface StatusConfig {
   name: string
   type: 'success' | 'primary' | 'warning' | 'info'
