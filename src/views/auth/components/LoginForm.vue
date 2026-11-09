@@ -54,9 +54,9 @@ const demoAccount = async () => {
     password: 'AAA12345',
   }
   // 等待 200ms，讓使用者看到帳密被填入後再送出
-  await new Promise((resolve) =>
-    setTimeout(resolve, 200)
-  )
+  await new Promise<void>((resolve) => {
+    setTimeout(() => resolve(), 200)
+  })
   await login()
 }
 
