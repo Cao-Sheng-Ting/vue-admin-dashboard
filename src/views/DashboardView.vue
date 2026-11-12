@@ -22,20 +22,20 @@ const dashboardCards = computed(() => {
 const dashboardCharts = computed(() => {
   const { statusStats, skillStats } = chartStatsMap.value
 
-  const statusChart = statuses && statusStats ? {
+  const statusChart = statuses && statusStats.length ? {
     ...statuses,
     items: statuses.items.map(item => {
       const stats = statusStats.find(i => i.name === item.status)
 
       return {
         ...item,
-        total: stats?.total,
-        percentage: stats?.percentage
+        total: stats?.total ?? 0,
+        percentage: stats?.percentage ?? 0
       }
     })
   } : null
 
-  const skillsChart = skills && skillStats ? {
+  const skillsChart = skills && skillStats.length ? {
     label: skills.label,
     items: skillStats.map((current, index) => ({
       ...current,
@@ -59,16 +59,16 @@ onMounted(async () => {
 
     <div v-if="isLoading">
       <el-row :gutter="20" class="mb-10">
-        <el-col :xs="12" :sm="8" :md="8" v-for="item in 4" :key="item">
-          <el-card class=" mb-3">
+        <el-col :xs="12" :sm="8" :md="8" v-for="m in 3" :key="m">
+          <el-card class="mb-3">
             <el-skeleton animated :rows="2"></el-skeleton>
           </el-card>
         </el-col>
       </el-row>
 
       <el-row :gutter="20">
-        <el-col :xs="24" :md="12" v-for="item in 2" :key="item">
-          <el-card class=" mb-3">
+        <el-col :xs="24" :md="12" v-for="n in 2" :key="n">
+          <el-card class="mb-3">
             <el-skeleton animated :rows="3"></el-skeleton>
           </el-card>
         </el-col>
@@ -83,7 +83,7 @@ onMounted(async () => {
     <div v-else>
       <el-row :gutter="20" class="mb-10">
         <el-col :xs="12" :sm="8" :md="8" v-for="card in dashboardCards" :key="card.group">
-          <el-card class=" mb-3">
+          <el-card class="mb-3">
             <h3 class="card-title text-lg font-bold pb-4">{{ card.groupLabel }}</h3>
             <div class="card-contents grid gap-3"
               :class="card.items.length > 1 ? 'grid-cols-3 justify-between' : 'justify-center'">
@@ -109,11 +109,12 @@ onMounted(async () => {
                 </div>
               </div>
             </div>
+            <el-empty v-else description="目前沒有專案資料"></el-empty>
           </el-card>
         </el-col>
         <el-col :xs="24" :md="12">
           <el-card class="mb-4">
-            <div v-if="dashboardCharts.statusChart" class="max-w-2xl  flex flex-col gap-1">
+            <div v-if="dashboardCharts.statusChart" class="max-w-2xl flex flex-col gap-1">
               <h4 class="pb-2 text-lg">{{ dashboardCharts.statusChart.label }}</h4>
               <div class="flex h-7 rounded-full overflow-hidden">
                 <div v-for="item in dashboardCharts.statusChart.items" :key="item.status"
@@ -128,6 +129,7 @@ onMounted(async () => {
                 </div>
               </div>
             </div>
+            <el-empty v-else description="目前沒有專案資料"></el-empty>
           </el-card>
         </el-col>
 

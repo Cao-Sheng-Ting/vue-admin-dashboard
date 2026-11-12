@@ -81,10 +81,11 @@ const lastProgress = ref<number>(localForm.value.progress)
 // 用於強制重新渲染表單的唯一識別 Key
 const formKey = ref<number>(0)
 
-// 專案轉成表單用：深拷貝，並移除不可編輯的 createdAt/updatedAt（需要時再從 cardData 取）
+// 專案轉成表單用：移除不可編輯的 createdAt/updatedAt（需要時再從 cardData 取），
+// skillTags 另外複製，避免表單與 store 共用同一陣列
 const toFormState = (project: ProjectItem): ProjectFormState => {
-  const { createdAt: _c, updatedAt: _u, ...form } = structuredClone(toRaw(project))
-  return form
+  const { createdAt: _c, updatedAt: _u, skillTags, ...form } = project
+  return { ...form, skillTags: [...skillTags] }
 }
 
 // ============================================================================

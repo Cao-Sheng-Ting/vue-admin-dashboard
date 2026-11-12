@@ -16,7 +16,7 @@ export const useDashboardStats = () => {
   const skillStore = useSkillStore()
   const experienceStore = useExperienceStore()
 
-  const careerDurationStates = computed(() => {
+  const careerDurationStats = computed(() => {
     let totalDurationYears = 0
     let totalDurationMonths = 0
 
@@ -34,19 +34,17 @@ export const useDashboardStats = () => {
   })
 
   const cardStatsMap = computed(() => ({
-    totalProjects: projectStore.projectsList.length || 0,
-    completedProjects:
-      projectStore.projectsList.filter((p) => p.status === 'completed').length || 0,
-    developingProjects:
-      projectStore.projectsList.filter((p) => p.status === 'developing').length || 0,
+    totalProjects: projectStore.projectsList.length,
+    completedProjects: projectStore.projectsList.filter((p) => p.status === 'completed').length,
+    developingProjects: projectStore.projectsList.filter((p) => p.status === 'developing').length,
     totalSkills: countSkillTags(skillStore.mergedSkillGroups),
     frontendSkills:
       Object.values(skillStore.mergedSkillGroups ?? {}).find((group) => group.name === 'frontend')
         ?.tags.length ?? 0,
     backendSkills:
       Object.values(skillStore.mergedSkillGroups ?? {}).find((group) => group.name === 'backend')
-        ?.name.length ?? 0,
-    careerDuration: careerDurationStates.value,
+        ?.tags.length ?? 0,
+    careerDuration: careerDurationStats.value,
   }))
 
   const chartStatsMap = computed(() => {
@@ -61,10 +59,10 @@ export const useDashboardStats = () => {
     const statusMap = countOccurrences(statuses)
 
     const skillMap = countOccurrences(skillTags)
-    const Top5Skills = getTopOccurrences(skillMap)
+    const top5Skills = getTopOccurrences(skillMap)
 
     const statusStats = calcPercentageByTotal(statusMap)
-    const skillStats = calcPercentageByMax(Top5Skills)
+    const skillStats = calcPercentageByMax(top5Skills)
 
     return { statusStats, skillStats }
   })

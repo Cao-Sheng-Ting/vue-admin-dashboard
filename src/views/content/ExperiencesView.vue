@@ -362,7 +362,7 @@ onMounted(async () => {
                 </div>
 
                 <p v-if="item.organization"><span class="font-semibold">服務單位：</span> <span>{{ item.organization
-                }}</span></p>
+                    }}</span></p>
                 <p><span class="font-semibold">使用技術：</span> <span>{{ item.skillTags.join(', ') }}</span></p>
                 <p v-if="timeline.type === 'career'"><span class="font-semibold">經歷時長：</span> <span>{{
                   formatDuration(item.durationYears,
@@ -385,7 +385,7 @@ onMounted(async () => {
 
     <el-dialog v-model="isTimelineDialogVisible"
       :title="isEditMode ? `編輯${currentTimeline?.timelineName}` : `新增${currentTimeline?.timelineName}`"
-      class="min-w-[600px]">
+      width="min(92%, 600px)">
       <el-form ref="ruleFormRef" :model="localForm" :rules="rules">
         <el-row>
 
