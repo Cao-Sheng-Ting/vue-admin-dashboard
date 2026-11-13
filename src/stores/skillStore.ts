@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import type { SkillsData, SkillsGroupMap, DisplayGroup, Tag } from '@/types/skill'
-import { ref } from 'vue'
 import {
   getDefaultSkillsAPI,
   getUserSkillsAPI,

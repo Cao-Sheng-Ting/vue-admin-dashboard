@@ -1,5 +1,4 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
 import type { ProjectStatus, ProjectItem, AddProjectData, EditProjectData } from '@/types/project'
 import {
   getProjectsAPI,
@@ -110,6 +109,10 @@ export const useProjectStore = defineStore('projects', () => {
       isLoading.value = false
     }
   }
+
+  watch([searchQuery, tagsFilter, statusFilter], () => {
+    currentPage.value = 1
+  })
 
   return {
     projectsList,

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-
 withDefaults(defineProps<{
   isError: boolean
   isEmpty?: boolean
@@ -7,24 +6,22 @@ withDefaults(defineProps<{
   emptyDescription?: string
 }>(), {
   isEmpty: false
-}
-)
+})
 
 const emit = defineEmits<{
   retry: []
 }>()
-
-
 </script>
+
 <template>
   <div v-if="isError" class="flex flex-col h-full w-full items-center justify-center gap-3">
-    <el-button size="large" @click="emit('retry')" class="border-none text-2xl">
+    <el-button size="large" aria-label="重新載入" @click="emit('retry')" class="border-none text-2xl">
       <icon-tabler:refresh />
     </el-button>
     <div class="text-lg text-gray-600">{{ errorDescription || '重新整理' }}</div>
   </div>
 
-  <div v-else-if="isEmpty" class="flex w-full h-full items-center justify-center pb-32">
+  <div v-else-if="isEmpty" class="flex w-full h-full items-center justify-center">
     <el-empty :description="emptyDescription || '目前沒有內容'" />
   </div>
 </template>

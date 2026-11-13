@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { ref, reactive, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import type { RegisterForm, RegisterParams, } from '@/types/user'
 import { ROLE_OPTIONS, QUICK_AUTH_CONFIG } from '@/constants/auth'

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import ProjectsCard from './components/ProjectsCard.vue'
 import ProjectEditDrawer from './components/ProjectEditDrawer.vue'
 import SkillTagDialog from './components/SkillTagDialog.vue'
@@ -18,7 +17,7 @@ const projectStore = useProjectStore()
 const skillStore = useSkillStore()
 const { guard, denyClass } = usePermission()
 
-//  --- 搜尋與篩選 ---
+// --- 搜尋與篩選 ---
 const keyword = useDebounceSearch()
 const isTagFilterVisible = ref<boolean>(false)
 const selectedTags = ref<string[]>([])
@@ -35,11 +34,11 @@ const handleTagsFilter = (tags: string[]) => {
   projectStore.tagsFilter = tags
 }
 
-//  --- 批量操作 ---
+// --- 批量操作 ---
 const isBatchEdit = ref<boolean>(false)
 const projectCheckList = ref<string[]>([])
 
-// --- 專案 Drawer 彈出  ---
+// --- 專案 Drawer 彈出 ---
 const isDrawerVisible = ref<boolean>(false)
 const isProjectEdit = ref<boolean>(false)
 const editCardData = ref<ProjectItem | null>(null)
@@ -59,7 +58,7 @@ const openEditDrawer = async (card: ProjectItem) => {
   isDrawerVisible.value = true
 }
 
-// --- 專案刪除  ---
+// --- 專案刪除 ---
 const handleEditAction = async () => {
   if (!await (guard('editor'))) return
   isBatchEdit.value = !isBatchEdit.value
@@ -80,6 +79,7 @@ const handleBatchDelete = async (list: string[]) => {
     await projectStore.deleteProjectsBatch(list)
     ElMessage.success('專案刪除成功')
     projectCheckList.value = []
+    isBatchEdit.value = false
   } catch (error) {
     if (error === 'cancel' || error === 'close') return
     showErrorMessage(error)
@@ -121,7 +121,31 @@ onMounted(async () => {
     <el-tag closable @close="handleTagClose(tag)" v-for="tag in projectStore.tagsFilter" :key="tag">{{ tag
       }}</el-tag>
   </div>
-  <div class="main-box bg-white flex-1 rounded p-6 ">
+  <div class="main-box bg-white flex-1 rounded p-6">
+
+    <el-row v-if="!projectStore.isLoading && !projectStore.isError" class="mb-5">
+      <el-col :span="16">
+        <BaseButton @click="openAddDrawer" :class="denyClass('editor', 'button')">
+          <icon-ph:plus-circle />
+          <span>新增</span>
+        </BaseButton>
+        <BaseButton v-if="!projectStore.isEmpty" @click="handleEditAction" type="info"
+          :plain="isBatchEdit ? false : true" :class="denyClass('editor', 'button')">
+          <icon-ic:round-cancel-presentation v-if="isBatchEdit" />
+          <icon-ic:outline-edit-note v-else />
+          <span>{{ isBatchEdit ? '取消' : '編輯' }}</span>
+        </BaseButton>
+      </el-col>
+      <el-col :span="8" class="flex justify-end">
+        <el-button type="danger" v-if="isBatchEdit" :disabled="projectCheckList.length === 0"
+          @click="handleBatchDelete(projectCheckList)">
+          <div class="flex items-center gap-1">
+            <icon-material-symbols:delete />
+            <span>刪除</span>
+          </div>
+        </el-button>
+      </el-col>
+    </el-row>
 
     <el-row :gutter="20" v-if="projectStore.isLoading">
       <el-col>
@@ -162,43 +186,21 @@ onMounted(async () => {
       @retry="projectStore.fetchProjects" class="h-full">
     </BaseErrorState>
 
-    <div v-else>
-      <el-row class="mb-5">
-        <el-col :span="16">
-          <BaseButton @click="openAddDrawer" :class="denyClass('editor', 'button')">
-            <icon-ph:plus-circle />
-            <span>新增</span>
-          </BaseButton>
-          <BaseButton @click="handleEditAction" type="info" :plain="isBatchEdit ? false : true"
-            :class="denyClass('editor', 'button')">
-            <icon-ic:round-cancel-presentation v-if="isBatchEdit" />
-            <icon-ic:outline-edit-note v-else />
-            <span>{{ isBatchEdit ? '取消' : '編輯' }}</span>
-          </BaseButton>
-        </el-col>
-        <el-col :span="8" class="flex justify-end">
-          <el-button type="danger" v-if="isBatchEdit" :disabled="projectCheckList.length === 0"
-            @click="handleBatchDelete(projectCheckList)">
-            <div class="flex items-center gap-1">
-              <icon-material-symbols:delete />
-              <span>刪除</span>
-            </div>
-          </el-button>
-        </el-col>
-      </el-row>
-      <el-row :gutter="20">
-        <el-col :xs="24" :sm="12" :md="8" :lg="6" v-for="item in projectStore.pagedProjects" :key="item.id"
-          class="mb-5">
-          <el-checkbox-group v-model="projectCheckList">
-            <ProjectsCard :data="item" :is-batch-edit="isBatchEdit" @edit="openEditDrawer">
-            </ProjectsCard>
-          </el-checkbox-group>
-        </el-col>
-      </el-row>
-    </div>
-    <el-pagination v-model:current-page="projectStore.currentPage" v-model:page-size="projectStore.pageSize" background
+    <el-row v-else :gutter="20">
+      <el-col :xs="24" :sm="12" :md="8" :lg="6" v-for="item in projectStore.pagedProjects" :key="item.id" class="mb-5">
+        <el-checkbox-group v-model="projectCheckList">
+          <ProjectsCard :data="item" :is-batch-edit="isBatchEdit" @edit="openEditDrawer">
+          </ProjectsCard>
+        </el-checkbox-group>
+      </el-col>
+    </el-row>
+
+    <el-pagination v-if="!projectStore.isEmpty && !projectStore.isError && !projectStore.isLoading"
+      v-model:current-page="projectStore.currentPage" v-model:page-size="projectStore.pageSize" background
       layout="prev, pager, next, jumper" :total="projectStore.total"></el-pagination>
+
   </div>
+
   <SkillTagDialog v-model="isTagFilterVisible" :initial-tags="selectedTags" @confirm="handleTagsFilter">
   </SkillTagDialog>
   <ProjectEditDrawer v-model:visible="isDrawerVisible" v-model:edit-mode="isProjectEdit"
