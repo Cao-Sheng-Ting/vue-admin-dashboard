@@ -1,0 +1,91 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function hasRole(role){
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == role;
+    } 
+
+    function isAdmin(){ return hasRole('admin')}
+ 
+    function isAdminOrEditor(){return hasRole('editor') || hasRole('admin')}
+
+    // authRequests 是同一批次寫入，get 只能讀取寫前已存在的資料，故用 getAfter
+    function submittedCode(uid) {
+      return getAfter(/databases/$(database)/documents/authRequests/$(uid)).data.code;
+}
+
+    function authCodes(){
+    return get(/databases/$(database)/documents/config/authCodes).data
+  }
+
+    // 使用者權限驗證
+    match /authRequests/{uid} {
+      allow create: if request.auth.uid == uid
+      && request.resource.data.keys().hasOnly(['code'])
+    }
+
+   // 權限授權碼
+    match /config/authCodes {
+      // 僅供規則 get()讀取，前端一律拒絕
+      allow read, write: if false
+    }
+
+    // 使用者資料
+    match /users/{userId} {
+      allow create: if request.auth.uid == userId
+      && request.resource.data.keys().hasOnly(['uid','email','nickname','role','createdAt','skills'])
+      // 授權碼對應權限，向下可選，碼是示範用公開
+      && (
+      request.resource.data.role == 'user'
+      ||(
+        request.resource.data.role == 'editor'
+        &&(
+          submittedCode(userId) == authCodes().editor
+          ||
+          submittedCode(userId) == authCodes().admin
+          )
+        )
+      ||(
+        request.resource.data.role == 'admin'
+        &&
+        submittedCode(userId) == authCodes().admin
+        )
+      )
+      allow read: if request.auth != null
+      allow update: if 
+      // 白名單：其餘欄位（含 role）一律不可自改
+      (request.auth.uid == userId 
+      && 
+       request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nickname','skills']))
+      ||
+      // admin 禁改自己：防自降權後無人可還原
+      (isAdmin()
+      && request.auth.uid != userId
+      && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['role'])
+      )
+    }
+
+    // 技術庫資料
+    match /skills/default {
+      allow read: if true
+      allow update: if isAdmin()
+    }
+
+    // 專案資料
+    match /projects/{projectId} {
+      allow read: if true
+      allow write: if isAdminOrEditor()
+    }
+
+    // 經歷資料
+    match /experiences/{experienceId} {
+      allow read: if true
+      allow create: if isAdmin()
+      allow update: if isAdminOrEditor()
+    }
+
+    
+  }
+}
