@@ -13,9 +13,7 @@
     "build-only": "vite build",
     "type-check": "vue-tsc --build",
     "lint": "eslint . --fix --cache",
-    "format": "prettier --write --experimental-cli src/",
-    "backend": "json-server-auth db.json",
-    "start": "concurrently \"pnpm run dev\" \"pnpm run backend\""
+    "format": "prettier --write --experimental-cli src/"
   },
   "dependencies": {
     "@iconify/vue": "^5.0.0",
@@ -24,7 +22,6 @@
     "axios": "^1.13.2",
     "element-plus": "^2.11.8",
     "firebase": "^12.11.0",
-    "json-server": "0.17.4",
     "pinia": "^3.0.4",
     "pinia-plugin-persistedstate": "^4.7.1",
     "vue": "^3.5.25",
@@ -50,12 +47,10 @@
     "@vue/eslint-config-typescript": "^14.6.0",
     "@vue/tsconfig": "^0.8.1",
     "autoprefixer": "^10.4.22",
-    "concurrently": "^9.2.1",
     "embedded": "^1.1.0",
     "eslint": "^9.39.1",
     "eslint-plugin-vue": "~10.5.1",
     "jiti": "^2.6.1",
-    "json-server-auth": "^2.1.0",
     "npm-run-all2": "^8.0.4",
     "postcss": "^8.5.6",
     "prettier": "3.6.2",
