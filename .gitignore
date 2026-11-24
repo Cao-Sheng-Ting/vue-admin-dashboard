@@ -37,3 +37,8 @@ __screenshots__/
 
 # Firebase
 .firebase/
+
+# Environment variables
+.env
+.env.*
+!.env.example
