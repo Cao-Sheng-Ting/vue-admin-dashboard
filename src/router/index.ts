@@ -54,7 +54,6 @@ const contentChildren: RouteRecordRaw[] = [
       title: 'Projects',
       icon: 'tabler:git-fork',
       requiresAuth: false,
-      keepAlive: true, //尚未使用到 keepAlive，後續優化可加入
     },
   },
   {
@@ -65,7 +64,6 @@ const contentChildren: RouteRecordRaw[] = [
       title: 'Experiences',
       icon: 'tabler:timeline-event-text',
       requiresAuth: false,
-      keepAlive: true,
     },
   },
   {
@@ -76,7 +74,6 @@ const contentChildren: RouteRecordRaw[] = [
       title: 'Skills',
       icon: 'tabler:tools',
       requiresAuth: false,
-      keepAlive: true,
     },
   },
 ]
@@ -90,7 +87,6 @@ const usersChildren: RouteRecordRaw[] = [
       title: 'User List',
       icon: 'tabler:users',
       requiresAuth: true,
-      keepAlive: true,
     },
   },
   {
@@ -116,7 +112,6 @@ const routes: RouteRecordRaw[] = [
       title: 'Home',
       hidden: true,
       requiresAuth: false,
-      keepAlive: true,
     },
     children: [
       {
@@ -138,7 +133,6 @@ const routes: RouteRecordRaw[] = [
           title: 'Content',
           icon: 'tabler:folders',
           requiresAuth: false,
-          keepAlive: true,
           isGroup: true,
         },
         children: [...contentChildren],
@@ -152,7 +146,6 @@ const routes: RouteRecordRaw[] = [
           title: 'Users',
           icon: 'tabler:user',
           requiresAuth: true,
-          keepAlive: true,
           isGroup: true,
         },
         children: [...usersChildren],
