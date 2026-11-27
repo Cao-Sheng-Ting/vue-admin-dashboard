@@ -37,7 +37,7 @@ watch(isVisible, (newVal) => {
 })
 </script>
 <template>
-  <el-dialog v-model="isVisible" title="技術棧篩選" width="500">
+  <el-dialog v-model="isVisible" title="選擇技術棧" width="500">
     <el-space direction="vertical" fill class="w-full">
       <el-card v-for="item in skillStore.mergedSkillGroups" :key="item.label">
         <div class="flex">

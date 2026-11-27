@@ -170,7 +170,7 @@ const register = async () => {
         <icon-ic:baseline-arrow-back-ios />
       </el-icon>
     </div>
-    <h2 class="text-5xl mb-11 text-center">建立管理員帳號</h2>
+    <h2 class="text-5xl mb-11 text-center">建立帳號</h2>
     <el-form ref="ruleFormRef" :model="ruleForm" :rules="rules">
       <el-row>
         <el-col :span="24">
