@@ -61,8 +61,11 @@ const closeAddTagDialog = () => {
   newTagName.value = ''
 }
 
+// TODO: 新增與編輯共用一個函示，又只靠頁面切換 isEditMode 分辨，編輯模式下按新增 button 就會走錯分之；
+// 目前先在編輯模式下停用新增按鈕，長期做法應把新增和編輯拆開。
 const openGroupDialog = (group?: DisplayGroup, key?: string) => {
-  if (isEditMode.value && group && key) {
+  if (isEditMode.value) {
+    if (!group || !key) return
     groupFormModel.label = group.label
     groupFormModel.name = group.name
     currentGroupKey.value = key
@@ -166,7 +169,7 @@ const handleGroupDialogSubmit = async () => {
 
 
 const handleAddGroup = () => {
-  if (!skillStore.defaultSkills) {
+  if (!skillStore.defaultSkills || !skillStore.skillOrder) {
     ElMessage.error('系統狀態暫時異常，請重新整理頁面')
     return false
   }
@@ -187,11 +190,6 @@ const handleAddGroup = () => {
     name: groupFormModel.name.trim(),
     label: groupFormModel.label.trim(),
     tags: []
-  }
-
-  if (!skillStore.skillOrder) {
-    ElMessage.error('資料加載異常，請重新整理頁面')
-    return false
   }
 
   skillStore.skillOrder.push(currentGroupKey.value)
@@ -294,6 +292,7 @@ const handleGroupDelete = async (key: string) => {
 
     await skillStore.skillGroupDelete(key)
     ElMessage.success('分類刪除成功')
+    if (Object.keys(skillStore.defaultSkills ?? {}).length === 0) isEditMode.value = false
   } catch (error) {
     if (error === 'cancel' || error === 'close') return
     showErrorMessage(error)
@@ -375,7 +374,6 @@ const handlePersonalSubmit = async () => {
 
   <div v-else>
     <div class="action-bar flex justify-between pb-3 px-1">
-      <!-- TODO：公共標籤庫在編輯模式下刪光最後一個分類，isEditDisabled 變 true，但按鈕此時顯示「取消」，被禁用就退不出編輯模式 -->
       <BaseButton @click="toggleEditMode" type="info" :plain="isEditMode ? false : true" :disabled="isEditDisabled"
         :class="denyClass(requiredRole, 'button', isBlocked)">
         <icon-ic:round-cancel-presentation v-if="isEditMode" />
@@ -409,7 +407,8 @@ const handlePersonalSubmit = async () => {
           </div>
         </div>
       </el-card>
-      <el-button v-if="props.skillGroupType === 'public'" @click="openGroupDialog" class="text-xl p-5 mt-3">
+      <el-button v-if="props.skillGroupType === 'public'" :disabled="isEditMode" @click="openGroupDialog()"
+        class="text-xl p-5 mt-3">
         <icon-ph:plus-circle />
       </el-button>
     </el-space>
